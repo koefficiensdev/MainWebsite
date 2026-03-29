@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professzionális Weboldal Készítés | Web Fejlesztő</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">WebPro</a>
+            <ul class="nav-links">
+                <li><a href="#hero">Főoldal</a></li>
+                <li><a href="#services">Csomagok</a></li>
+                <li><a href="#contact">Kapcsolat</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <h1>Professzionális Weboldal a Vállalkozásodnak</h1>
+            <p>Modern, SEO-optimalizált weboldalak, amelyek eredményeket hoznak. Segítek a digitális jelenlétedben, hogy több ügyfelet érj el.</p>
+            <a href="#services" class="cta-button">Csomagok megtekintése</a>
+        </div>
+    </section>
+
+    <!-- Miert minket -->
+    <section class="why-choose-us">
+        <div class="container">
+            <h2>Miért válassz minket?</h2>
+            <div class="slider-wrapper">
+                <div class="slider-track" id="featureSlider">
+                    <div class="feature-item active" data-index="0">
+                        <h3>Professzionális Tervezés</h3>
+                        <p>Modern és egyedi weboldalakat készítünk, amelyek tükrözik a vállalkozásod egyediségét.</p>
+                    </div>
+                    <div class="feature-item" data-index="1">
+                        <h3>SEO Optimalizálás</h3>
+                        <p>Weboldalaink SEO-barátak, hogy előrébb kerülj a keresőmotorok találati listáján.</p>
+                    </div>
+                    <div class="feature-item" data-index="2">
+                        <h3>Gyors Betöltési Idő</h3>
+                        <p>Optimalizált kód és képek biztosítják, hogy weboldalad gyorsan betöltődjön minden eszközön.</p>
+                    </div>
+                    <div class="feature-item" data-index="3">
+                        <h3>Kiváló Ügyfélszolgálat</h3>
+                        <p>Mindig elérhetőek vagyunk, hogy segítsünk és válaszoljunk a kérdéseidre.</p>
+                    </div>
+                </div>
+                <div class="slider-dots">
+                    <span class="dot active" data-index="0"></span>
+                    <span class="dot" data-index="1"></span>
+                    <span class="dot" data-index="2"></span>
+                    <span class="dot" data-index="3"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services/Pricing -->
+    <section id="services">
+        <div class="container">
+            <div class="section-header">
+                <h2>Válassz a Csomagok Közül</h2>
+                <p>Minden csomag tartalmazza a professzionális tervezést és az Ön igényeire szabott megoldásokat</p>
+            </div>
+            
+            <div class="pricing-grid">
+                <!-- Basic Package -->
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Alapcsomag</h3>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="price-amount">100,000</span>
+                        <span class="price-currency">Ft</span>
+                        <span class="price-period">Egyszeri díj</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>Reszponzív weboldal</li>
+                        <li>5 aloldal</li>
+                        <li>SEO optimalizálás</li>
+                        <li>Gyors betöltési idő</li>
+                        <li>Mobilbarát dizájn</li>
+                        <li>SSL tanúsítvány</li>
+                        <li>Kapcsolati űrlap</li>
+                    </ul>
+                    <button class="pricing-button" onclick="selectPackage('Alapcsomag')">Választom</button>
+                </div>
+
+                <!-- Premium Package -->
+                <div class="pricing-card featured">
+                    <span class="pricing-badge">Népszerű</span>
+                    <div class="pricing-header">
+                        <h3>Prémium Csomag</h3>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="price-amount">150,000</span>
+                        <span class="price-currency">Ft</span>
+                        <span class="price-period">+ 15,000 Ft/hó karbantartás</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>Komplex, egyedi weboldal</li>
+                        <li>Korlátlan aloldal</li>
+                        <li>Haladó SEO optimalizálás</li>
+                        <li>Havi rendszeres karbantartás</li>
+                        <li>Tartalom frissítés</li>
+                        <li>Teljesítmény monitoring</li>
+                        <li>Biztonsági frissítések</li>
+                        <li>Havi analitika riport</li>
+                    </ul>
+                    <button class="pricing-button" onclick="selectPackage('Prémium Csomag')">Választom</button>
+                </div>
+
+                <!-- Business Package -->
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Üzleti Csomag</h3>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="price-amount">300,000</span>
+                        <span class="price-currency">Ft</span>
+                        <span class="price-period">+ 50,000 Ft/hó kezelés</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>Teljes körű weboldal</li>
+                        <li>Közösségi média kezelés</li>
+                        <li>Facebook & Instagram profil</li>
+                        <li>Heti rendszeres posztolás</li>
+                        <li>Hirdetések futtatása</li>
+                        <li>Tartalom készítés</li>
+                        <li>Márkaépítés</li>
+                        <li>Online marketing stratégia</li>
+                        <li>Teljes analitika</li>
+                    </ul>
+                    <button class="pricing-button" onclick="selectPackage('Üzleti Csomag')">Választom</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2>Vedd fel a Kapcsolatot</h2>
+                <p>Töltsd ki az űrlapot és hamarosan felveszem veled a kapcsolatot</p>
+            </div>
+            
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="name">Név *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email cím *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Telefonszám</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                
+                <div class="form-group">
+                    <label for="package">Választott csomag *</label>
+                    <select id="package" name="package" required>
+                        <option value="">Válassz csomagot...</option>
+                        <option value="Alapcsomag">Alapcsomag - 100,000 Ft</option>
+                        <option value="Prémium Csomag">Prémium Csomag - 150,000 Ft + 15,000 Ft/hó</option>
+                        <option value="Üzleti Csomag">Üzleti Csomag - 300,000 Ft + 50,000 Ft/hó</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Üzenet / Részletek *</label>
+                    <textarea id="message" name="message" required placeholder="Írj pár szót a projektedről..."></textarea>
+                </div>
+                
+                <button type="submit" class="submit-button">Üzenet küldése</button>
+            </form>
+        </div>
+    </section>
+    <!-- Plusz info -->
+    <section class="info-section" id="info-section">
+        <div class="container">
+            <h2>Ingyenes Konzultáció</h2>
+            <p class="info-subtitle">Nem vagy biztos benne, melyik csomag illik hozzád? Semmi gond! Foglalj egy ingyenes, kötelezettségmentes konzultációt, és közösen megtaláljuk a legjobb megoldást a vállalkozásodnak.</p>
+
+            <div class="info-cards">
+                <a href="mailto:sandorturai98@gmail.com" class="info-card">
+                    <span class="info-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    </span>
+                    <span class="info-card-label">Email</span>
+                    <span class="info-card-value">sandorturai98@gmail.com</span>
+                </a>
+                <a href="tel:+36301234567" class="info-card">
+                    <span class="info-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </span>
+                    <span class="info-card-label">Telefon</span>
+                    <span class="info-card-value">+36 30 123 4567</span>
+                </a>
+            </div>
+
+            <p class="info-note">Általában 24 órán belül válaszolok. Hétvégén is elérhető vagyok!</p>
+        </div>
+    </section>
+
+    <a class="floating-consultation-button" href="#info-section" aria-label="Free consultation section">
+        Ingyenes konzultáció
+    </a>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 WebPro. Minden jog fenntartva.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

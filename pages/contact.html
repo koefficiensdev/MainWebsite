@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kapcsolat - Magyar Web Szolgáltatások</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Kapcsolat</h1>
+        <p>Kérjük, töltse ki az alábbi űrlapot, hogy kapcsolatba léphessünk Önnel.</p>
+    </header>
+    <main>
+        <form id="contact-form" action="#" method="POST">
+            <label for="name">Név:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="package">Választott csomag:</label>
+            <select id="package" name="package" required>
+                <option value="simple">100,000 HUF - Egyszerű weboldal SEO-val</option>
+                <option value="complex">150,000 HUF + 15,000 HUF havonta - Komplex weboldal karbantartással</option>
+                <option value="social-media">300,000 HUF + 50,000 HUF havonta - Komplex weboldal közösségi média kezeléssel</option>
+            </select>
+
+            <label for="details">További részletek:</label>
+            <textarea id="details" name="details" rows="4"></textarea>
+
+            <button type="submit">Küldés</button>
+        </form>
+    </main>
+    <script src="../js/contact-form.js"></script>
+</body>
+</html>
