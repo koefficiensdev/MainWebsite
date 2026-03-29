@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isValidReviewCreate() {
+      return request.resource.data.keys().hasOnly([
+          'name',
+          'message',
+          'rating',
+          'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.message is string
+        && request.resource.data.rating is int
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.message.size() >= 10
+        && request.resource.data.message.size() <= 320
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.createdAt == request.time;
+    }
+
+    function isValidContactCreate() {
+      return request.resource.data.keys().hasOnly([
+          'name',
+          'email',
+          'phone',
+          'package',
+          'message',
+          'source',
+          'status',
+          'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.phone is string
+        && request.resource.data.package is string
+        && request.resource.data.message is string
+        && request.resource.data.source is string
+        && request.resource.data.status is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 160
+        && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && request.resource.data.phone.size() <= 32
+        && request.resource.data.package.size() >= 3
+        && request.resource.data.package.size() <= 80
+        && request.resource.data.message.size() >= 10
+        && request.resource.data.message.size() <= 1200
+        && request.resource.data.source == 'website_contact_form'
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt == request.time;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isValidReviewCreate();
+      allow update, delete: if false;
+    }
+
+    match /contact_requests/{requestId} {
+      allow create: if isValidContactCreate();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

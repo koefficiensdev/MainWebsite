@@ -5,26 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professzionális Weboldal Készítés | Web Fejlesztő</title>
     <link rel="stylesheet" href="styles.css">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript">
-        
-    </script>
 </head>
 <body>
     <!-- Navigation -->
     <nav id="navbar">
         <div class="nav-container">
-            <a href="#" class="logo">WebPro</a>
+            <a href="#" class="logo">OVEXI</a>
             <ul class="nav-links">
                 <li><a href="#hero">Főoldal</a></li>
                 <li><a href="#services">Csomagok</a></li>
                 <li><a href="#contact">Kapcsolat</a></li>
+                <li><button type="button" class="nav-review-button" id="openReviewModalBtn">Vélemény</button></li>
             </ul>
         </div>
     </nav>
 
     <!-- Hero -->
     <section class="hero" id="hero">
+        <div class="review-bubbles" id="reviewBubbles" aria-hidden="true"></div>
         <div class="hero-content">
             <h1>Professzionális Weboldal a Vállalkozásodnak</h1>
             <p>Modern, SEO-optimalizált weboldalak, amelyek eredményeket hoznak. Segítek a digitális jelenlétedben, hogy több ügyfelet érj el.</p>
@@ -65,6 +63,41 @@
         </div>
     </section>
 
+    <section class="partners-section" id="partners">
+        <div class="container">
+            <div class="section-header partners-header">
+                <h2>Partnereink</h2>
+                <p>Olyan online projektek mellett dolgozunk, amelyek stabil jelenlétet, jobb láthatóságot és erősebb bizalmat építenek.</p>
+            </div>
+
+            <div class="partners-grid">
+                <div class="partner-card">
+                    <span class="partner-mark">AAM</span>
+                    <span class="partner-name">AllAccessMap.com</span>
+                    <span class="partner-tag">Nemzetközi online platform</span>
+                </div>
+
+                <div class="partner-card">
+                    <span class="partner-mark">AAB</span>
+                    <span class="partner-name">AllAccessBudapest.hu</span>
+                    <span class="partner-tag">Budapest fókuszú digitális jelenlét</span>
+                </div>
+
+                <div class="partner-card">
+                    <span class="partner-mark">BHI</span>
+                    <span class="partner-name">budapesthungary.info</span>
+                    <span class="partner-tag">Turisztikai és információs portál</span>
+                </div>
+
+                <div class="partner-card partner-card-muted" aria-hidden="true">
+                    <span class="partner-mark">...</span>
+                    <span class="partner-name">etc..</span>
+                    <span class="partner-tag">További együttműködések</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Services/Pricing -->
     <section id="services">
         <div class="container">
@@ -93,7 +126,10 @@
                         <li>SSL tanúsítvány</li>
                         <li>Kapcsolati űrlap</li>
                     </ul>
-                    <button class="pricing-button" onclick="selectPackage('Alapcsomag')">Választom</button>
+                    <div class="pricing-actions">
+                        <button type="button" class="package-info-button" data-package-info="Alapcsomag">Reszletes informacio</button>
+                        <button class="pricing-button" onclick="selectPackage('Alapcsomag')">Választom</button>
+                    </div>
                 </div>
 
                 <!-- Premium Package -->
@@ -117,7 +153,10 @@
                         <li>Biztonsági frissítések</li>
                         <li>Havi analitika riport</li>
                     </ul>
-                    <button class="pricing-button" onclick="selectPackage('Prémium Csomag')">Választom</button>
+                    <div class="pricing-actions">
+                        <button type="button" class="package-info-button" data-package-info="Prémium Csomag">Reszletes informacio</button>
+                        <button class="pricing-button" onclick="selectPackage('Prémium Csomag')">Választom</button>
+                    </div>
                 </div>
 
                 <!-- Business Package -->
@@ -141,7 +180,10 @@
                         <li>Online marketing stratégia</li>
                         <li>Teljes analitika</li>
                     </ul>
-                    <button class="pricing-button" onclick="selectPackage('Üzleti Csomag')">Választom</button>
+                    <div class="pricing-actions">
+                        <button type="button" class="package-info-button" data-package-info="Üzleti Csomag">Reszletes informacio</button>
+                        <button class="pricing-button" onclick="selectPackage('Üzleti Csomag')">Választom</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -185,6 +227,11 @@
                     <label for="message">Üzenet / Részletek *</label>
                     <textarea id="message" name="message" required placeholder="Írj pár szót a projektedről..."></textarea>
                 </div>
+
+                <div class="bot-trap" aria-hidden="true">
+                    <label for="website">Website</label>
+                    <input type="text" id="website" name="website" autocomplete="off" tabindex="-1">
+                </div>
                 
                 <button type="submit" class="submit-button">Üzenet küldése</button>
             </form>
@@ -224,10 +271,55 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <p>&copy; 2026 WebPro. Minden jog fenntartva.</p>
+            <p>&copy; 2026 OVEXI. Minden jog fenntartva.</p>
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <div class="package-modal-backdrop" id="packageModal" aria-hidden="true">
+        <div class="package-modal" role="dialog" aria-modal="true" aria-labelledby="packageModalTitle">
+            <button type="button" class="package-modal-close" id="closePackageModalBtn" aria-label="Csomag információ bezárása">&times;</button>
+            <h2 id="packageModalTitle">Csomag részletek</h2>
+            <div class="package-modal-price" id="packageModalPrice"></div>
+            <p class="package-modal-description" id="packageModalDescription"></p>
+            <ul class="package-modal-features" id="packageModalFeatures"></ul>
+        </div>
+    </div>
+
+    <div class="review-modal-backdrop" id="reviewModal" aria-hidden="true">
+        <div class="review-modal" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+            <button type="button" class="review-modal-close" id="closeReviewModalBtn" aria-label="Vélemény popup bezárása">&times;</button>
+            <h2 id="reviewModalTitle">Írj véleményt</h2>
+            <p>Oszd meg a tapasztalatod. A jó véleményed felhőként megjelenik a főoldalon.</p>
+            <form id="reviewForm" class="review-form" novalidate>
+                <div class="form-group review-form-group">
+                    <label for="reviewName">Név *</label>
+                    <input type="text" id="reviewName" name="reviewName" required maxlength="60" placeholder="Pl. Kiss Anna">
+                </div>
+                <div class="form-group review-form-group">
+                    <label for="reviewRating">Értékelés *</label>
+                    <select id="reviewRating" name="reviewRating" required>
+                        <option value="">Válassz...</option>
+                        <option value="5">5 - Kiváló</option>
+                        <option value="4">4 - Nagyon jó</option>
+                        <option value="3">3 - Jó</option>
+                        <option value="2">2 - Közepes</option>
+                        <option value="1">1 - Fejlesztendő</option>
+                    </select>
+                </div>
+                <div class="form-group review-form-group">
+                    <label for="reviewMessage">Vélemény *</label>
+                    <textarea id="reviewMessage" name="reviewMessage" minlength="10" maxlength="320" required placeholder="Mit értékeltél a közös munkában?"></textarea>
+                </div>
+                <div class="bot-trap" aria-hidden="true">
+                    <label for="reviewWebsite">Website</label>
+                    <input type="text" id="reviewWebsite" name="reviewWebsite" autocomplete="off" tabindex="-1">
+                </div>
+                <p class="review-feedback" id="reviewFeedback" aria-live="polite"></p>
+                <button type="submit" class="submit-button" id="submitReviewBtn">Vélemény mentése</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
