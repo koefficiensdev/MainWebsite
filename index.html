@@ -3,24 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professzionális Weboldal Készítés | Web Fejlesztő</title>
+    <title>OVEXI - Weboldal fejlesztés</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav id="navbar">
         <div class="nav-container">
             <a href="#" class="logo">OVEXI</a>
-            <ul class="nav-links">
+            <ul class="nav-links" id="navLinks">
                 <li><a href="#hero">Főoldal</a></li>
                 <li><a href="#services">Csomagok</a></li>
                 <li><a href="#contact">Kapcsolat</a></li>
                 <li><button type="button" class="nav-review-button" id="openReviewModalBtn">Vélemény</button></li>
+                <li class="lang-nav-item">
+                    <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Language selector">
+                        <button type="button" class="lang-pill is-active" data-lang="hu" aria-pressed="true">HU</button>
+                        <button type="button" class="lang-pill" data-lang="en" aria-pressed="false">EN</button>
+                    </div>
+                </li>
             </ul>
+            <button class="nav-hamburger" id="navHamburger" aria-label="Menü megnyitása" aria-expanded="false" aria-controls="navLinks">
+                <span></span><span></span><span></span>
+            </button>
         </div>
+        <div class="navbar-progress" id="navbarProgress" aria-hidden="true"></div>
     </nav>
 
-    <!-- Hero -->
     <section class="hero" id="hero">
         <div class="review-bubbles" id="reviewBubbles" aria-hidden="true"></div>
         <div class="hero-content">
@@ -30,7 +38,6 @@
         </div>
     </section>
 
-    <!-- Miert minket -->
     <section class="why-choose-us">
         <div class="container">
             <h2>Miért válassz minket?</h2>
@@ -73,19 +80,19 @@
             <div class="partners-grid">
                 <div class="partner-card">
                     <span class="partner-mark">AAM</span>
-                    <span class="partner-name">AllAccessMap.com</span>
-                    <span class="partner-tag">Nemzetközi online platform</span>
+                    <span class="partner-name">AllAccessMap</span>
+                    <span class="partner-tag">Weboldal helyi ettermek kereséséhez</span>
                 </div>
 
                 <div class="partner-card">
                     <span class="partner-mark">AAB</span>
-                    <span class="partner-name">AllAccessBudapest.hu</span>
-                    <span class="partner-tag">Budapest fókuszú digitális jelenlét</span>
+                    <span class="partner-name">AllAccessBudapest</span>
+                    <span class="partner-tag">Marketing lehetoseg ettermeknek es extra jovedelem lakaskiadoknak</span>
                 </div>
 
                 <div class="partner-card">
                     <span class="partner-mark">BHI</span>
-                    <span class="partner-name">budapesthungary.info</span>
+                    <span class="partner-name">BudapestHungary</span>
                     <span class="partner-tag">Turisztikai és információs portál</span>
                 </div>
 
@@ -98,7 +105,6 @@
         </div>
     </section>
 
-    <!-- Services/Pricing -->
     <section id="services">
         <div class="container">
             <div class="section-header">
@@ -107,7 +113,6 @@
             </div>
             
             <div class="pricing-grid">
-                <!-- Basic Package -->
                 <div class="pricing-card">
                     <div class="pricing-header">
                         <h3>Alapcsomag</h3>
@@ -132,7 +137,6 @@
                     </div>
                 </div>
 
-                <!-- Premium Package -->
                 <div class="pricing-card featured">
                     <span class="pricing-badge">Népszerű</span>
                     <div class="pricing-header">
@@ -159,7 +163,6 @@
                     </div>
                 </div>
 
-                <!-- Business Package -->
                 <div class="pricing-card">
                     <div class="pricing-header">
                         <h3>Üzleti Csomag</h3>
@@ -185,11 +188,127 @@
                         <button class="pricing-button" onclick="selectPackage('Üzleti Csomag')">Választom</button>
                     </div>
                 </div>
+
+                <div class="pricing-card custom-package-card">
+                    <div class="pricing-header">
+                        <h3>Saját Csomag</h3>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="price-amount">?</span>
+                        <span class="price-currency">Ft</span>
+                        <span class="price-period">Testreszabott</span>
+                    </div>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; margin: 1rem 0;">
+                        <p style="color: var(--text-dark); text-align: center; font-size: 0.95rem;">
+                            Nem tudsz dönteni? Állítsd össze magadnak!
+                        </p>
+                    </div>
+                    <div class="pricing-actions">
+                        <button type="button" class="pricing-button" id="openCustomPackageBuilder">Tervezz Most</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Contact Form -->
+    <div class="custom-package-modal-backdrop" id="customPackageModalBackdrop" aria-hidden="true">
+        <div class="custom-package-modal" id="customPackageModal">
+            <button type="button" class="custom-package-modal-close" id="closeCustomPackageBuilder" aria-label="Bezárás">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+
+            <div class="custom-package-modal-content">
+                <div class="custom-builder-step" id="customBuilderStep1" style="display: block;">
+                    <h2>Weboldalad Konfigurálása</h2>
+                    <p class="custom-builder-subtitle">Válaszd ki, hány oldalra van szükséged és az alapvető funkciók közül.</p>
+
+                    <div class="custom-builder-section">
+                        <label class="custom-builder-label">Oldalak száma: <span id="pageCountDisplay">5</span></label>
+                        <input type="range" id="pageCount" min="1" max="20" value="5" class="custom-builder-range">
+                        <div class="custom-range-labels">
+                            <span>1</span>
+                            <span>20</span>
+                        </div>
+                    </div>
+
+                    <div class="custom-builder-section">
+                        <label class="custom-builder-label">Funkciók (válassz ki az szükségeseket):</label>
+                        <div class="custom-features-list">
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="seo" data-cost="12000"> SEO Optimalizálás (+12,000 Ft)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="maintenance-basic" data-cost="8000"> Alap Havi Karbantartás (+8,000 Ft/hó)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="maintenance-premium" data-cost="15000"> Prémium Havi Karbantartás (+15,000 Ft/hó)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="social" data-cost="20000"> Social Media Integráció (+20,000 Ft)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="social-management" data-cost="25000"> Social Media Kezelés & Posztolás (+25,000 Ft/hó)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="analytics" data-cost="8000"> Teljes Analitika & Riporting (+8,000 Ft)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="content-creation" data-cost="30000"> Havi Tartalomkészítés & Frissítés (+30,000 Ft/hó)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="ecommerce" data-cost="35000"> E-commerce & Online Fizetési Rendszer (+35,000 Ft)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="marketing" data-cost="40000"> Online Marketing Kampányok & Hirdetések (+40,000 Ft/hó)
+                            </label>
+                            <label class="custom-feature-checkbox">
+                                <input type="checkbox" name="feature" value="branding" data-cost="25000"> Márkaépítés & Brand Design (+25,000 Ft)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="custom-builder-price-preview">
+                        <p>Becsült ár: <strong id="pricePreview">50,000 Ft</strong></p>
+                    </div>
+
+                    <button type="button" class="custom-builder-button" id="customBuilderNextBtn">Következő</button>
+                </div>
+
+                <div class="custom-builder-step" id="customBuilderStep2" style="display: none;">
+                    <h2>Elérhetőséged</h2>
+                    <p class="custom-builder-subtitle">Add meg az adataidat, hogy felvehessek veled a kapcsolatot az ajánlattal.</p>
+
+                    <form class="custom-package-form">
+                        <div class="form-group">
+                            <label for="customName">Név *</label>
+                            <input type="text" id="customName" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customEmail">Email cím *</label>
+                            <input type="email" id="customEmail" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customPhone">Telefonszám</label>
+                            <input type="tel" id="customPhone" name="phone">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customDetails">Projekt Leírása</label>
+                            <textarea id="customDetails" name="details" placeholder="Röviden írj a projektedről, célaidról..."></textarea>
+                        </div>
+
+                        <div class="custom-builder-buttons">
+                            <button type="button" class="custom-builder-button custom-builder-button-secondary" id="customBuilderBackBtn">Vissza</button>
+                            <button type="submit" class="custom-builder-button">Küldés</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <section class="contact-section" id="contact">
         <div class="container">
             <div class="section-header">
@@ -237,7 +356,6 @@
             </form>
         </div>
     </section>
-    <!-- Plusz info -->
     <section class="info-section" id="info-section">
         <div class="container">
             <h2>Ingyenes Konzultáció</h2>
@@ -268,7 +386,6 @@
         Ingyenes konzultáció
     </a>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
             <p>&copy; 2026 OVEXI. Minden jog fenntartva.</p>
@@ -282,6 +399,14 @@
             <div class="package-modal-price" id="packageModalPrice"></div>
             <p class="package-modal-description" id="packageModalDescription"></p>
             <ul class="package-modal-features" id="packageModalFeatures"></ul>
+        </div>
+    </div>
+
+    <div class="all-reviews-modal-backdrop" id="allReviewsModal" aria-hidden="true">
+        <div class="all-reviews-modal" role="dialog" aria-modal="true" aria-labelledby="allReviewsTitle">
+            <button type="button" class="all-reviews-modal-close" id="closeAllReviewsModal" aria-label="Bezárás">&times;</button>
+            <h2 id="allReviewsTitle">Vélemények</h2>
+            <ul class="all-reviews-list" id="allReviewsList"></ul>
         </div>
     </div>
 
@@ -320,6 +445,7 @@
         </div>
     </div>
 
+    <script src="js/lang.js" defer></script>
     <script type="module" src="script.js"></script>
 </body>
 </html>

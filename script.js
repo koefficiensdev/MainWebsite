@@ -10,7 +10,7 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-// Public Firebase config is expected in frontend apps. Protect data with strict Firestore rules.
+// Firebase config — safe to expose in frontend; protect data with Firestore rules
 const firebaseConfig = {
   apiKey: "AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",
   authDomain: "ovexi-6ef38.firebaseapp.com",
@@ -36,12 +36,51 @@ function isValidEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+(function () {
+    const hamburger = document.getElementById("navHamburger");
+    const navbar = document.getElementById("navbar");
+    const navLinks = document.getElementById("navLinks");
+    if (!hamburger || !navbar || !navLinks) return;
+
+    hamburger.addEventListener("click", () => {
+        const isOpen = navbar.classList.toggle("nav-open");
+        hamburger.setAttribute("aria-expanded", isOpen);
+    });
+
+    navLinks.querySelectorAll("a, button").forEach((el) => {
+        if (el.classList.contains("lang-pill")) return;
+        el.addEventListener("click", () => {
+            navbar.classList.remove("nav-open");
+            hamburger.setAttribute("aria-expanded", "false");
+        });
+    });
+
+    document.addEventListener("click", (e) => {
+        if (navbar.classList.contains("nav-open") && !navbar.contains(e.target)) {
+            navbar.classList.remove("nav-open");
+            hamburger.setAttribute("aria-expanded", "false");
+        }
+    });
+})();
+
 window.addEventListener("scroll", () => {
     const navbar = document.getElementById("navbar");
+    if (navbar.classList.contains("nav-open")) {
+        navbar.classList.remove("nav-open");
+        const hamburger = document.getElementById("navHamburger");
+        if (hamburger) hamburger.setAttribute("aria-expanded", "false");
+    }
     if (window.scrollY > 50) {
         navbar.classList.add("scrolled");
     } else {
         navbar.classList.remove("scrolled");
+    }
+    // Update progress bar
+    const navbarProgress = document.getElementById("navbarProgress");
+    if (navbarProgress) {
+        const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = windowHeight > 0 ? (window.scrollY / windowHeight) * 100 : 0;
+        navbarProgress.style.width = scrolled + "%";
     }
 });
 
@@ -394,6 +433,216 @@ window.selectPackage = selectPackage;
     });
 })();
 
+// Custom package builder
+(function() {
+    const openCustomPackageBtn = document.getElementById("openCustomPackageBuilder");
+    const closeCustomPackageBtn = document.getElementById("closeCustomPackageBuilder");
+    const customPackageBackdrop = document.getElementById("customPackageModalBackdrop");
+    const customPackageModal = document.getElementById("customPackageModal");
+    const pageCountInput = document.getElementById("pageCount");
+    const pageCountDisplay = document.getElementById("pageCountDisplay");
+    const featuresCheckboxes = document.querySelectorAll('input[name="feature"]');
+    const pricePreview = document.getElementById("pricePreview");
+    const customBuilderNextBtn = document.getElementById("customBuilderNextBtn");
+    const customBuilderBackBtn = document.getElementById("customBuilderBackBtn");
+    const customBuilderStep1 = document.getElementById("customBuilderStep1");
+    const customBuilderStep2 = document.getElementById("customBuilderStep2");
+    const customPackageForm = document.querySelector(".custom-package-form");
+
+    if (!openCustomPackageBtn || !customPackageBackdrop || !customPackageModal) {
+        return;
+    }
+
+    const customPackagesCollection = collection(db, "custom_packages");
+    const customLocalKey = "webpro_last_custom_submit_at";
+    const customFormLoadedAt = Date.now();
+    const CUSTOM_SUBMIT_COOLDOWN_MS = 2 * 60 * 1000;
+
+    let currentStepData = {
+        pages: 5,
+        features: [],
+        price: 50000
+    };
+
+    function calculatePrice() {
+        const pagesCount = parseInt(pageCountInput.value, 10) || 1;
+        
+        // Tiered pricing
+        const pagePricingTiers = {
+            1: 50000,
+            2: 65000,
+            3: 70000,
+            4: 70000,
+            5: 80000,
+            6: 85000,
+            7: 90000,
+            8: 95000,
+            9: 100000,
+            10: 110000,
+            11: 115000,
+            12: 120000,
+            13: 125000,
+            14: 130000,
+            15: 140000,
+            16: 145000,
+            17: 150000,
+            18: 155000,
+            19: 160000,
+            20: 170000
+        };
+
+        const basePrice = pagePricingTiers[pagesCount] || 50000;
+
+        let featuresPrice = 0;
+        const selectedFeatures = [];
+
+        featuresCheckboxes.forEach((checkbox) => {
+            if (checkbox.checked) {
+                const cost = parseInt(checkbox.dataset.cost, 10) || 0;
+                featuresPrice += cost;
+                selectedFeatures.push(checkbox.value);
+            }
+        });
+
+        const total = basePrice + featuresPrice;
+        currentStepData.pages = pagesCount;
+        currentStepData.features = selectedFeatures;
+        currentStepData.price = total;
+
+        return total;
+    }
+
+    function formatPrice(price) {
+        return price.toLocaleString("hu-HU") + " Ft";
+    }
+
+    function updatePricePreview() {
+        const price = calculatePrice();
+        pricePreview.textContent = formatPrice(price);
+    }
+
+    function openModal() {
+        customPackageBackdrop.classList.add("is-open");
+        customPackageBackdrop.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+        customPackageBackdrop.classList.remove("is-open");
+        customPackageBackdrop.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        showStep(1);
+    }
+
+    function showStep(step) {
+        if (step === 1) {
+            customBuilderStep1.style.display = "block";
+            customBuilderStep2.style.display = "none";
+        } else if (step === 2) {
+            customBuilderStep1.style.display = "none";
+            customBuilderStep2.style.display = "block";
+        }
+    }
+    // Event listeners
+    openCustomPackageBtn.addEventListener("click", openModal);
+    closeCustomPackageBtn.addEventListener("click", closeModal);
+
+    customPackageBackdrop.addEventListener("click", (event) => {
+        if (event.target === customPackageBackdrop) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && customPackageBackdrop.classList.contains("is-open")) {
+            closeModal();
+        }
+    });
+
+    pageCountInput.addEventListener("input", () => {
+        pageCountDisplay.textContent = pageCountInput.value;
+        updatePricePreview();
+    });
+
+    featuresCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", updatePricePreview);
+    });
+
+    customBuilderNextBtn.addEventListener("click", () => {
+        showStep(2);
+    });
+
+    customBuilderBackBtn.addEventListener("click", () => {
+        showStep(1);
+    });
+
+    customPackageForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const name = normalizeText(document.getElementById("customName")?.value);
+        const email = normalizeText(document.getElementById("customEmail")?.value).toLowerCase();
+        const phone = normalizeText(document.getElementById("customPhone")?.value);
+        const details = normalizeText(document.getElementById("customDetails")?.value);
+
+        if (!name || !email) {
+            alert("Kérlek add meg a nevet és az email címet.");
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            alert("Érvénytelen email cím.");
+            return;
+        }
+
+        if (Date.now() - customFormLoadedAt < MIN_FORM_FILL_MS) {
+            alert("Túl gyors küldés. Kérlek ellenőrizd az adatokat.");
+            return;
+        }
+
+        const lastCustomSubmit = Number(localStorage.getItem(customLocalKey) || 0);
+        if (Date.now() - lastCustomSubmit < CUSTOM_SUBMIT_COOLDOWN_MS) {
+            alert("Kérlek várj legalább 2 percet a következő küldésig.");
+            return;
+        }
+
+        const submitBtn = customPackageForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Küldés...";
+        }
+
+        try {
+            await addDoc(customPackagesCollection, {
+                name: name.slice(0, 60),
+                email: email.slice(0, 100),
+                phone: phone.slice(0, 32),
+                details: details.slice(0, 1200),
+                pages: currentStepData.pages,
+                features: currentStepData.features,
+                price: currentStepData.price,
+                createdAt: serverTimestamp(),
+                source: "website_custom_package",
+                status: "new"
+            });
+
+            localStorage.setItem(customLocalKey, String(Date.now()));
+            alert("Az ajánlat sikeresen elmentve! Hamarosan felveszem veled a kapcsolatot.");
+            customPackageForm.reset();
+            closeModal();
+        } catch (error) {
+            console.error("Custom package save error:", error);
+            alert("Hiba történt az ajánlat mentésekor. Kérlek próbáld újra később.");
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Küldés";
+            }
+        }
+    });
+
+    updatePricePreview();
+})();
+
 const contactRequestsCollection = collection(db, "contact_requests");
 const contactLocalKey = "webpro_last_contact_submit_at";
 const contactFormLoadedAt = Date.now();
@@ -531,6 +780,7 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     let reviewsCache = [];
     let bubbleIntervalId = null;
     let nextReviewCursor = 0;
+    let bubbleDragState = null;
 
     function setFeedback(message, isError = false) {
         if (!reviewFeedback) {
@@ -572,7 +822,7 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         const navRect = navbar.getBoundingClientRect();
         const heroRect = heroSection.getBoundingClientRect();
 
-        // Keep bubbles below the portion of hero that is visually covered by the fixed navbar.
+    // Keep bubbles below the navbar
         const blockedPx = navRect.bottom - heroRect.top + 8;
         if (blockedPx <= 0) {
             return 0;
@@ -729,7 +979,7 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         const minTopPct = Math.max(safeMarginY, navbarBlockedTopPct);
         const maxLeftPct = Math.max(minLeftPct, 100 - widthPct - safeMarginX);
 
-        // Limit bubbles to the currently visible portion of the hero to avoid too-low placement.
+    // Limit bubbles to visible portion of hero
         let visibleBottomPct = 100;
         if (heroSection) {
             const heroRect = heroSection.getBoundingClientRect();
@@ -745,8 +995,11 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
 
         const zones = window.innerWidth < 768
             ? [
-                { xMin: 6, xMax: 84, yMin: 6, yMax: 18 },
-                { xMin: 8, xMax: 82, yMin: 56, yMax: 68 }
+                // Mobile: corners only
+                { xMin: 3, xMax: 18, yMin: 18, yMax: 40 },
+                { xMin: 72, xMax: 95, yMin: 18, yMax: 40 },
+                { xMin: 3, xMax: 18, yMin: 62, yMax: 82 },
+                { xMin: 72, xMax: 95, yMin: 62, yMax: 82 }
             ]
             : [
                 { xMin: 2, xMax: 18, yMin: 16, yMax: 68 },
@@ -818,27 +1071,155 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         return null;
     }
 
+    function findBubbleAtPoint(clientX, clientY) {
+        const bubbles = Array.from(reviewBubbles.querySelectorAll(".review-bubble")).reverse();
+
+        for (const bubble of bubbles) {
+            const rect = bubble.getBoundingClientRect();
+            if (
+                clientX >= rect.left &&
+                clientX <= rect.right &&
+                clientY >= rect.top &&
+                clientY <= rect.bottom
+            ) {
+                return bubble;
+            }
+        }
+
+        return null;
+    }
+
+    function startBubbleDrag(bubble, event) {
+        const bubbleRect = bubble.getBoundingClientRect();
+        const containerRect = reviewBubbles.getBoundingClientRect();
+
+        bubbleDragState = {
+            pointerId: event.pointerId,
+            bubble,
+            offsetX: event.clientX - bubbleRect.left,
+            offsetY: event.clientY - bubbleRect.top,
+            width: bubbleRect.width,
+            height: bubbleRect.height,
+            startClientX: event.clientX,
+            startClientY: event.clientY,
+            hasMoved: false
+        };
+
+        bubble.classList.add("is-dragging");
+        bubbleLayouts.set(
+            bubble,
+            toRect(
+                bubbleRect.left - containerRect.left,
+                bubbleRect.top - containerRect.top,
+                bubbleRect.width,
+                bubbleRect.height
+            )
+        );
+    }
+
+    function moveBubbleDrag(event) {
+        if (!bubbleDragState || event.pointerId !== bubbleDragState.pointerId) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const dx = event.clientX - bubbleDragState.startClientX;
+        const dy = event.clientY - bubbleDragState.startClientY;
+        if (!bubbleDragState.hasMoved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+            bubbleDragState.hasMoved = true;
+        }
+
+        const { bubble, offsetX, offsetY, width, height } = bubbleDragState;
+        if (!bubble.isConnected) {
+            bubbleDragState = null;
+            return;
+        }
+
+        const containerRect = reviewBubbles.getBoundingClientRect();
+        const maxLeft = Math.max(0, containerRect.width - width);
+        const maxTop = Math.max(0, containerRect.height - height);
+
+        const nextLeftPx = Math.min(
+            maxLeft,
+            Math.max(0, event.clientX - containerRect.left - offsetX)
+        );
+        const nextTopPx = Math.min(
+            maxTop,
+            Math.max(0, event.clientY - containerRect.top - offsetY)
+        );
+
+        const leftPct = containerRect.width ? (nextLeftPx / containerRect.width) * 100 : 0;
+        const topPct = containerRect.height ? (nextTopPx / containerRect.height) * 100 : 0;
+
+        bubble.style.left = `${leftPct}%`;
+        bubble.style.top = `${topPct}%`;
+        bubbleLayouts.set(bubble, toRect(nextLeftPx, nextTopPx, width, height));
+    }
+
+    function endBubbleDrag(event) {
+        if (!bubbleDragState || event.pointerId !== bubbleDragState.pointerId) {
+            return;
+        }
+
+        const wasTap = !bubbleDragState.hasMoved;
+
+        if (bubbleDragState.bubble?.isConnected) {
+            bubbleDragState.bubble.classList.remove("is-dragging");
+        }
+
+        bubbleDragState = null;
+
+        if (wasTap) {
+            openAllReviewsModal();
+        }
+    }
+
+    function makeBubbleDraggable(bubble) {
+        bubble.addEventListener("pointerdown", (event) => {
+            if (bubbleDragState) {
+                return;
+            }
+
+            if (event.pointerType === "mouse" && event.button !== 0) {
+                return;
+            }
+
+            startBubbleDrag(bubble, event);
+            event.preventDefault();
+        });
+    }
+
+    const heroSectionForDrag = document.getElementById("hero");
+    if (heroSectionForDrag) {
+        heroSectionForDrag.addEventListener("pointerdown", (event) => {
+            if (bubbleDragState) {
+                return;
+            }
+
+            if (event.pointerType === "mouse" && event.button !== 0) {
+                return;
+            }
+
+            const bubble = findBubbleAtPoint(event.clientX, event.clientY);
+            if (!bubble) {
+                return;
+            }
+
+            startBubbleDrag(bubble, event);
+            event.preventDefault();
+        }, true);
+    }
+
+    window.addEventListener("pointermove", moveBubbleDrag);
+    window.addEventListener("pointerup", endBubbleDrag);
+    window.addEventListener("pointercancel", endBubbleDrag);
+
     function createReviewBubble(review) {
-        if (!review) {
-            return;
-        }
-
-        if (!review.id) {
-            return;
-        }
-
-        if (activeBubbles.size >= MAX_VISIBLE_BUBBLES) {
-            return;
-        }
-
-        if (activeReviewIds.has(review.id)) {
-            return;
-        }
-
-        const cooldownEndsAt = reviewCooldownUntil.get(review.id) || 0;
-        if (cooldownEndsAt > Date.now()) {
-            return;
-        }
+        if (!review?.id) return;
+        if (activeBubbles.size >= MAX_VISIBLE_BUBBLES) return;
+        if (activeReviewIds.has(review.id)) return;
+        if ((reviewCooldownUntil.get(review.id) || 0) > Date.now()) return;
 
         const position = getSafeBubblePosition(review);
 
@@ -847,6 +1228,9 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         bubble.style.left = `${position.left}%`;
         bubble.style.top = `${position.top}%`;
         bubble.style.setProperty("--bubble-float-duration", `${randomInRange(8.5, 13.5).toFixed(2)}s`);
+        bubble.style.setProperty("--bubble-drift-x", `${randomInRange(-22, 22).toFixed(2)}px`);
+        bubble.style.setProperty("--bubble-drift-y", `${randomInRange(-24, -10).toFixed(2)}px`);
+        bubble.style.setProperty("--bubble-float-delay", `${randomInRange(-4.5, 0).toFixed(2)}s`);
 
         const starsEl = document.createElement("div");
         starsEl.className = "review-bubble-stars";
@@ -861,6 +1245,7 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         authorEl.textContent = `- ${position.content.author}`;
 
         bubble.append(starsEl, textEl, authorEl);
+        makeBubbleDraggable(bubble);
         reviewBubbles.appendChild(bubble);
         activeBubbles.add(bubble);
         bubbleLayouts.set(bubble, position.rect);
@@ -878,7 +1263,7 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
                 bubbleLayouts.delete(bubble);
                 activeReviewIds.delete(review.id);
                 reviewCooldownUntil.set(review.id, Date.now() + REVIEW_COOLDOWN_MS);
-            }, 550);
+            }, 1100);
         }, BUBBLE_VISIBLE_MS);
     }
 
@@ -899,18 +1284,7 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         if (bubbleIntervalId) {
             clearInterval(bubbleIntervalId);
         }
-        /*
-        if (!reviewsCache.length) {
-            const fallback = {
-                id: "fallback-review",
-                name: "WebPro Ugyfel",
-                rating: 5,
-                message: "Ird meg az elso velemenyt, es maris megjelenik itt!"
-            };
-            createReviewBubble(fallback);
-            return;
-        }
-         */
+
         nextReviewCursor = 0;
         spawnNextBubble();
 
@@ -935,7 +1309,14 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         startBubbleLoop();
     }
 
-    openReviewModalBtn.addEventListener("click", openModal);
+    openReviewModalBtn.addEventListener("click", () => {
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            openAllReviewsModal();
+            return;
+        }
+
+        openModal();
+    });
     closeReviewModalBtn.addEventListener("click", closeModal);
 
     reviewModal.addEventListener("click", (event) => {
@@ -947,6 +1328,72 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && reviewModal.classList.contains("is-open")) {
             closeModal();
+        }
+    });
+
+    const allReviewsBackdrop = document.getElementById("allReviewsModal");
+    const allReviewsList = document.getElementById("allReviewsList");
+    const closeAllReviewsBtn = document.getElementById("closeAllReviewsModal");
+
+    async function openAllReviewsModal() {
+        if (!allReviewsBackdrop || !allReviewsList) return;
+
+        allReviewsList.innerHTML = "";
+
+        if (!reviewsCache.length) {
+            const loading = document.createElement("li");
+            loading.className = "all-reviews-empty";
+            loading.textContent = "Vélemények betöltése...";
+            allReviewsList.appendChild(loading);
+
+            await loadReviews();
+            allReviewsList.innerHTML = "";
+        }
+
+        if (!reviewsCache.length) {
+            const empty = document.createElement("li");
+            empty.className = "all-reviews-empty";
+            empty.textContent = "Még nincsenek vélemények. Legyél az első!";
+            allReviewsList.appendChild(empty);
+        } else {
+            reviewsCache.forEach((review) => {
+                const stars = "★".repeat(Math.max(1, Math.min(5, Number(review.rating) || 5)));
+                const li = document.createElement("li");
+                li.className = "all-review-item";
+                li.innerHTML = `
+                    <span class="all-review-item-stars">${stars}</span>
+                    <p class="all-review-item-text">"${String(review.message || "").slice(0, 320)}"</p>
+                    <span class="all-review-item-author">— ${String(review.name || "Névtelen").slice(0, 60)}</span>
+                `;
+                allReviewsList.appendChild(li);
+            });
+        }
+
+        allReviewsBackdrop.classList.add("is-open");
+        allReviewsBackdrop.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeAllReviewsModal() {
+        if (!allReviewsBackdrop) return;
+        allReviewsBackdrop.classList.remove("is-open");
+        allReviewsBackdrop.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    if (closeAllReviewsBtn) {
+        closeAllReviewsBtn.addEventListener("click", closeAllReviewsModal);
+    }
+
+    if (allReviewsBackdrop) {
+        allReviewsBackdrop.addEventListener("click", (e) => {
+            if (e.target === allReviewsBackdrop) closeAllReviewsModal();
+        });
+    }
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && allReviewsBackdrop?.classList.contains("is-open")) {
+            closeAllReviewsModal();
         }
     });
 
