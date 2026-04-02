@@ -133,11 +133,13 @@ nav.scrolled {
 }
 
 body {
-    transition: opacity 0.28s ease;
+    transition: opacity 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
+body.lang-switching-page,
 body.lang-switching {
     opacity: 0;
+    pointer-events: none;
 }
 
 .lang-switcher {
@@ -221,6 +223,7 @@ body.lang-switching {
 
 .hero {
     min-height: 100vh;
+    min-height: 100svh;
     background-image: url("assets/hero_picture.jpg");
     background-position: center;
     background-repeat: no-repeat;
@@ -231,7 +234,7 @@ body.lang-switching {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 2rem;
+    padding: clamp(4.25rem, 7vh, 5.75rem) 2rem clamp(2rem, 4.5vh, 3.25rem);
     overflow: hidden;
     margin-bottom: -1rem;
 }
@@ -342,6 +345,7 @@ body.lang-switching {
     position: relative;
     z-index: 1;
     max-width: 900px;
+    margin-top: clamp(0rem, 0.5vh, 0.45rem);
     pointer-events: none;
 }
 
@@ -351,7 +355,7 @@ body.lang-switching {
 }
 
 .hero h1 {
-    font-size: clamp(2.5rem, 6vw, 4.7rem);
+    font-size: clamp(2.35rem, 5.6vw, 4.25rem);
     font-weight: 800;
     color: var(--white);
     text-shadow: 0 3px 16px rgba(2, 6, 23, 0.58);
@@ -2068,5 +2072,22 @@ nav.nav-open .nav-hamburger span:nth-child(3) {
 
     .partners-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+    .hero {
+        padding-top: clamp(6rem, 14vh, 8rem);
+        padding-bottom: clamp(1rem, 3.2vh, 1.8rem);
+    }
+
+    .hero h1 {
+        font-size: clamp(2rem, 5.6vw, 2.8rem);
+        margin-bottom: 0.8rem;
+    }
+
+    .hero p {
+        font-size: clamp(0.9rem, 1.9vw, 1.02rem);
+        margin-bottom: 1.15rem;
     }
 }

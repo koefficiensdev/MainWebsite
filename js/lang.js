@@ -291,17 +291,46 @@
         const buttons = document.querySelectorAll(".lang-pill");
         if (!buttons.length) return;
 
+        const FADE_OUT_MS = 430;
+        let isSwitchingLanguage = false;
+
+        function waitForNextPaint() {
+            return new Promise((resolve) => {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(resolve);
+                });
+            });
+        }
+
+        function waitForVisualReadiness() {
+            const fontReadyPromise = document.fonts && document.fonts.ready
+                ? document.fonts.ready.catch(() => undefined)
+                : Promise.resolve();
+
+            return Promise.all([fontReadyPromise, waitForNextPaint()]);
+        }
+
         buttons.forEach((button) => {
-            button.addEventListener("click", () => {
+            button.addEventListener("click", async () => {
+                if (isSwitchingLanguage) {
+                    return;
+                }
+
                 // Always toggle: clicking either pill switches to the opposite language
                 const current = localStorage.getItem(STORAGE_KEY) === "en" ? "en" : "hu";
                 const nextLang = current === "en" ? "hu" : "en";
+                isSwitchingLanguage = true;
                 localStorage.setItem(STORAGE_KEY, nextLang);
                 document.body.classList.add("lang-switching");
-                setTimeout(() => {
-                    applyLanguage(nextLang);
-                    document.body.classList.remove("lang-switching");
-                }, 280);
+
+                await new Promise((resolve) => {
+                    setTimeout(resolve, FADE_OUT_MS);
+                });
+
+                applyLanguage(nextLang);
+                await waitForVisualReadiness();
+                document.body.classList.remove("lang-switching");
+                isSwitchingLanguage = false;
             });
         });
 
