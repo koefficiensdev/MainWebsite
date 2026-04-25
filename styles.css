@@ -1037,7 +1037,7 @@ section {
 .info-section {
     background: var(--dark-light);
     padding: 5rem 0;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 0px solid rgba(255, 255, 255, 0.05);
     margin-top: 0;
     text-align: center;
 }
@@ -1503,6 +1503,26 @@ footer p {
     gap: 0.8rem;
 }
 
+.custom-feature-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.custom-feature-group-title {
+    margin: 0;
+    color: rgba(226, 232, 240, 0.92);
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.custom-feature-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.65rem;
+}
+
 .custom-feature-checkbox {
     display: flex;
     align-items: center;
@@ -1527,6 +1547,17 @@ footer p {
     height: 18px;
     cursor: pointer;
     accent-color: var(--primary);
+}
+
+.custom-feature-checkbox input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.custom-feature-choice {
+    min-height: 52px;
 }
 
 .custom-builder-price-preview {

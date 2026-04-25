@@ -98,8 +98,12 @@ window.addEventListener("scroll", () => {
     function updateFloatingButtonState() {
         const sectionRect = targetSection.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
-        const fadeRange = viewportHeight * 1.35;
-        const visibility = clamp(sectionRect.top / fadeRange, 0, 1);
+        const sectionCenterY = sectionRect.top + sectionRect.height / 2;
+        const viewportCenterY = viewportHeight / 2;
+        const distanceFromCenter = Math.abs(sectionCenterY - viewportCenterY);
+        const fadeRange = Math.max(viewportHeight * 0.9, sectionRect.height * 0.75);
+        const proximity = 1 - clamp(distanceFromCenter / fadeRange, 0, 1);
+        const visibility = 1 - proximity;
         const opacity = 0.08 + visibility * 0.92;
         const scale = 0.9 + visibility * 0.1;
 
@@ -319,39 +323,45 @@ window.selectPackage = selectPackage;
 
     const packageDetails = {
         "Alapcsomag": {
-            price: "100,000 Ft - egyszeri díj",
-            description: "Gyors induláshoz optimalizált csomag, tiszta struktúrával és üzleti alapfunkciókkal.",
+            price: "70,000 Ft - egyszeri díj",
+            description: "Kedvező induló csomag stabil technikai alappal. Karbantartás és social media menedzsment opcionálisan bármikor kérhető.",
             features: [
                 { icon: "devices", title: "Reszponzív kialakítás", detail: "Mobilon, tableten és asztali nézetben is stabil, jól olvasható megjelenés." },
-                { icon: "layers", title: "5 stratégiai aloldal", detail: "Bemutatkozás, szolgáltatások, kapcsolat és további kulcsoldalak üzleti fókuszban." },
-                { icon: "search", title: "Alap SEO csomag", detail: "Oldalcímek, meta leírások, heading-hierarchia és indexelési alapok beállítása." },
+                { icon: "layers", title: "1-5 aloldalig", detail: "Alap üzleti struktúra a legfontosabb tartalmakhoz." },
+                { icon: "search", title: "SEO optimalizálás", detail: "Keresőbarát technikai és tartalmi alapok beállítása." },
                 { icon: "speed", title: "Gyors teljesítmény", detail: "Képek és kódrészletek optimalizálása a jobb betöltés és felhasználói élmény érdekében." },
+                { icon: "palette", title: "Alap dizájn", detail: "Letisztult, üzleti megjelenés gyors átadással." },
                 { icon: "mail", title: "Kapcsolati űrlap", detail: "Egyszerű érdeklődőgyűjtés, hogy a látogatók gyorsan elérjenek." },
-                { icon: "shield", title: "Biztonsági alapok", detail: "SSL és alapvető biztonsági javaslatok implementálása." }
+                { icon: "shield", title: "SSL tanúsítvány", detail: "Biztonságos HTTPS kapcsolat és megbízható működés." },
+                { icon: "brand", title: "Domain + tárhely + e-mail", detail: "1 év domain, 1 GB webtárhely és 1 GB e-mail tárhely (akár 5 cím)." }
             ]
         },
         "Prémium Csomag": {
-            price: "150,000 Ft + 15,000 Ft/hó karbantartás",
-            description: "Növekedésre tervezett prémium csomag folyamatos frissítéssel és jobb kereső láthatósággal.",
+            price: "150,000 Ft - egyszeri díj",
+            description: "Erősebb üzleti csomag bővített funkciókkal és komplex dizájnnal. Karbantartás és social media menedzsment opcionális.",
             features: [
-                { icon: "palette", title: "Egyedi dizájnrendszer", detail: "A márkádhoz illesztett vizuális stílus, tipográfia és komponensek." },
-                { icon: "expand", title: "Korlátlan bővíthetőség", detail: "Új aloldalak és tartalmi blokkok gyors hozzáadása üzleti növekedéshez." },
-                { icon: "search", title: "Haladó SEO finomhangolás", detail: "Kulcsszófókusz, technikai struktúra és tartalmi jelzések optimalizálása." },
-                { icon: "shield", title: "Havi karbantartás", detail: "Folyamatos rendszerfrissítések, hibajavítások és biztonsági felügyelet." },
-                { icon: "edit", title: "Tartalomfrissítés", detail: "Aktuális akciók, új szolgáltatások vagy referenciák gyors publikálása." },
-                { icon: "chart", title: "Havi riportok", detail: "Teljesítmény, látogatói viselkedés és konverziós trendek összefoglalása." }
+                { icon: "devices", title: "Reszponzív weboldal", detail: "Stabil megjelenés minden eszközön." },
+                { icon: "search", title: "Haladó SEO optimalizálás", detail: "Kiterjesztett kulcsszó és technikai optimalizálás." },
+                { icon: "layers", title: "1-10 aloldal", detail: "Bővített oldalszám részletesebb bemutatáshoz." },
+                { icon: "calendar", title: "Esemény naptár integráció", detail: "Foglalás vagy eseménykommunikáció támogatása." },
+                { icon: "palette", title: "Komplex dizájn", detail: "Fejlettebb, egyedibb vizuális kialakítás." },
+                { icon: "mail", title: "Review + kapcsolat + SSL", detail: "Vélemény megjelenítés, kapcsolatfelvétel és biztonság együtt." },
+                { icon: "expand", title: "Többnyelvűség", detail: "Több nyelv kezelése igény szerint." },
+                { icon: "brand", title: "Domain + tárhely + e-mail", detail: "1 év domain, 1 GB webtárhely és 1 GB e-mail tárhely (akár 5 cím)." }
             ]
         },
         "Üzleti Csomag": {
-            price: "300,000 Ft + 50,000 Ft/hó kezelés",
-            description: "Komplex online jelenlét: weboldal + közösségi média + marketing támogatás egyben.",
+            price: "330,000 Ft - egyszeri díj",
+            description: "Teljes üzleti csomag haladó funkciókkal. Karbantartás és social media menedzsment ennél is opcionális add-on.",
             features: [
-                { icon: "building", title: "Teljes vállalati webplatform", detail: "Komplex struktúra üzleti célokhoz igazított ügyfélutakkal." },
-                { icon: "social", title: "Social media rendszer", detail: "Facebook és Instagram felületek stratégiai felépítése és egységesítése." },
-                { icon: "calendar", title: "Heti tartalomgyártás", detail: "Ütemezett posztolási rendszer kampányokkal és tématervvel." },
-                { icon: "megaphone", title: "Hirdetéskezelés", detail: "Célzott kampányok, kreatív optimalizálás és költségkeret-kontroll." },
-                { icon: "brand", title: "Márkaépítés", detail: "Hangnem, vizuális irány és kommunikációs alapelvek egységesítése." },
-                { icon: "chart", title: "Teljes analitika", detail: "Web, social és kampány adatok közös értelmezése döntéstámogató módon." }
+                { icon: "devices", title: "Reszponzív weboldal", detail: "Korlátlan skálázás üzleti növekedéshez." },
+                { icon: "search", title: "Haladó SEO optimalizálás", detail: "Erősebb kereső láthatóság és technikai finomhangolás." },
+                { icon: "expand", title: "Korlátlan aloldal", detail: "Tetszőleges bővíthetőség új szolgáltatásokhoz." },
+                { icon: "calendar", title: "Naptár + review + kapcsolat", detail: "Ügyfélkapcsolati funkciók egy helyen." },
+                { icon: "palette", title: "Prémium dizájn", detail: "Magasabb vizuális minőség és egyedi arculat." },
+                { icon: "building", title: "Teljes admin felület + felhasználói rendszer", detail: "Belső kezelői eszközök és jogosultságkezelés." },
+                { icon: "social", title: "Chatbot / livechat", detail: "Automatizált és valós idejű ügyfélkommunikáció." },
+                { icon: "brand", title: "Domain + tárhely + e-mail", detail: "1 év domain, 5 GB webtárhely és 5 GB e-mail tárhely (akár 10 cím)." }
             ]
         }
     };
@@ -441,7 +451,8 @@ window.selectPackage = selectPackage;
     const customPackageModal = document.getElementById("customPackageModal");
     const pageCountInput = document.getElementById("pageCount");
     const pageCountDisplay = document.getElementById("pageCountDisplay");
-    const featuresCheckboxes = document.querySelectorAll('input[name="feature"]');
+    const featureInputs = document.querySelectorAll(".custom-features-list input[data-cost]");
+    const customFeaturesList = document.querySelector(".custom-features-list");
     const pricePreview = document.getElementById("pricePreview");
     const customBuilderNextBtn = document.getElementById("customBuilderNextBtn");
     const customBuilderBackBtn = document.getElementById("customBuilderBackBtn");
@@ -449,7 +460,7 @@ window.selectPackage = selectPackage;
     const customBuilderStep2 = document.getElementById("customBuilderStep2");
     const customPackageForm = document.querySelector(".custom-package-form");
 
-    if (!openCustomPackageBtn || !customPackageBackdrop || !customPackageModal) {
+    if (!openCustomPackageBtn || !customPackageBackdrop || !customPackageModal || !pageCountInput || !pageCountDisplay || !pricePreview || !customFeaturesList || !customBuilderNextBtn || !customBuilderBackBtn || !customBuilderStep1 || !customBuilderStep2 || !customPackageForm) {
         return;
     }
 
@@ -459,53 +470,41 @@ window.selectPackage = selectPackage;
     const CUSTOM_SUBMIT_COOLDOWN_MS = 2 * 60 * 1000;
 
     let currentStepData = {
-        pages: 5,
+        pages: "1-5",
         features: [],
-        price: 50000
+        price: 20000
     };
 
-    function calculatePrice() {
-        const pagesCount = parseInt(pageCountInput.value, 10) || 1;
-        
-        // Tiered pricing
-        const pagePricingTiers = {
-            1: 50000,
-            2: 65000,
-            3: 70000,
-            4: 70000,
-            5: 80000,
-            6: 85000,
-            7: 90000,
-            8: 95000,
-            9: 100000,
-            10: 110000,
-            11: 115000,
-            12: 120000,
-            13: 125000,
-            14: 130000,
-            15: 140000,
-            16: 145000,
-            17: 150000,
-            18: 155000,
-            19: 160000,
-            20: 170000
-        };
+    const pageTiers = {
+        1: { label: "1-5", price: 20000 },
+        2: { label: "1-10", price: 40000 },
+        3: { label: "Korlátlan", price: 80000 }
+    };
 
-        const basePrice = pagePricingTiers[pagesCount] || 50000;
+    function getSelectedPageTier() {
+        const sliderValue = parseInt(pageCountInput.value, 10) || 1;
+        return pageTiers[sliderValue] || pageTiers[1];
+    }
+
+    function calculatePrice() {
+        const selectedPageTier = getSelectedPageTier();
+        const basePrice = selectedPageTier.price;
 
         let featuresPrice = 0;
         const selectedFeatures = [];
 
-        featuresCheckboxes.forEach((checkbox) => {
-            if (checkbox.checked) {
-                const cost = parseInt(checkbox.dataset.cost, 10) || 0;
+        featureInputs.forEach((input) => {
+            if (input.checked) {
+                const cost = parseInt(input.dataset.cost, 10) || 0;
                 featuresPrice += cost;
-                selectedFeatures.push(checkbox.value);
+                if (cost > 0) {
+                    selectedFeatures.push(input.value);
+                }
             }
         });
 
         const total = basePrice + featuresPrice;
-        currentStepData.pages = pagesCount;
+        currentStepData.pages = selectedPageTier.label;
         currentStepData.features = selectedFeatures;
         currentStepData.price = total;
 
@@ -531,6 +530,8 @@ window.selectPackage = selectPackage;
         customPackageBackdrop.classList.remove("is-open");
         customPackageBackdrop.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
+        pageCountDisplay.textContent = getSelectedPageTier().label;
+        updatePricePreview();
         showStep(1);
     }
 
@@ -560,13 +561,12 @@ window.selectPackage = selectPackage;
     });
 
     pageCountInput.addEventListener("input", () => {
-        pageCountDisplay.textContent = pageCountInput.value;
+        pageCountDisplay.textContent = getSelectedPageTier().label;
         updatePricePreview();
     });
 
-    featuresCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", updatePricePreview);
-    });
+    customFeaturesList.addEventListener("change", updatePricePreview);
+    customFeaturesList.addEventListener("input", updatePricePreview);
 
     customBuilderNextBtn.addEventListener("click", () => {
         showStep(2);
