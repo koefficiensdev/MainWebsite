@@ -1195,11 +1195,13 @@ footer p {
 
 .cookie-consent {
     position: fixed;
-    left: 1rem;
-    right: 1rem;
-    bottom: 1rem;
+    left: 0;
+    right: 0;
+    bottom: max(0.8rem, env(safe-area-inset-bottom));
     z-index: 2500;
     display: none;
+    padding: 0 1rem;
+    pointer-events: none;
 }
 
 .cookie-consent.is-open {
@@ -1217,6 +1219,7 @@ footer p {
         linear-gradient(160deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.98));
     box-shadow: 0 18px 42px rgba(2, 6, 23, 0.62);
     backdrop-filter: blur(10px);
+    pointer-events: auto;
 }
 
 .cookie-consent-title {
@@ -1277,7 +1280,7 @@ footer p {
 .cookie-settings-fab {
     position: fixed;
     left: 1rem;
-    bottom: 1rem;
+    bottom: max(0.8rem, env(safe-area-inset-bottom));
     z-index: 2450;
     border: 1px solid rgba(147, 197, 253, 0.4);
     border-radius: 999px;
@@ -2328,9 +2331,8 @@ nav.nav-open .nav-hamburger span:nth-child(3) {
     }
 
     .cookie-consent {
-        left: 0.55rem;
-        right: 0.55rem;
-        bottom: 0.55rem;
+        bottom: max(0.55rem, env(safe-area-inset-bottom));
+        padding: 0 0.55rem;
     }
 
     .cookie-consent-content {
@@ -2348,7 +2350,7 @@ nav.nav-open .nav-hamburger span:nth-child(3) {
 
     .cookie-settings-fab {
         left: 0.55rem;
-        bottom: 0.55rem;
+        bottom: max(0.55rem, env(safe-area-inset-bottom));
         font-size: 0.78rem;
         padding: 0.5rem 0.75rem;
     }
