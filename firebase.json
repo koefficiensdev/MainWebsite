@@ -5,6 +5,7 @@
   },
   "hosting": {
     "public": ".",
+    "cleanUrls": true,
     "ignore": [
       "firebase.json",
       "firestore.rules",
@@ -12,7 +13,38 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "redirects": [
+      {
+        "source": "/cookie-policy.html",
+        "destination": "/cookie-policy",
+        "type": 301
+      },
+      {
+        "source": "/pages/cookie-policy.html",
+        "destination": "/cookie-policy",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/cookie-policy",
+        "destination": "/pages/cookie-policy.html"
+      }
+    ],
     "headers": [
+      {
+        "source": "/pages/statistics.html",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store"
+          }
+        ]
+      },
       {
         "source": "**/*.@(js|mjs)",
         "headers": [

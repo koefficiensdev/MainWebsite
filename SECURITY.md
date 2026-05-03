@@ -1,6 +1,6 @@
 # Firebase Security Checklist
 
-This project uses client-side Firebase, so config values in `script.js` are public by design.
+This project uses client-side Firebase, so config values in `js/main.js` are public by design.
 Real security is enforced by Firestore rules and Firebase settings.
 
 ## 1. Deploy the Firestore rules

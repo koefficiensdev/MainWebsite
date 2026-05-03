@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
     <title>OVEXI - Statistics Dashboard</title>
     <style>
         :root {
@@ -54,6 +55,18 @@
             display: flex;
             gap: 0.6rem;
             flex-wrap: wrap;
+        }
+
+        .stats-filter {
+            min-width: 150px;
+            padding: 0.52rem 0.88rem;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.38);
+            background: rgba(30, 41, 59, 0.85);
+            color: var(--white);
+            font: inherit;
+            font-size: 0.86rem;
+            font-weight: 700;
         }
 
         .btn {
@@ -230,7 +243,7 @@
             <input type="password" id="statsPassword" placeholder="Password">
             <button class="btn" id="statsLoginBtn" type="button">Open dashboard</button>
             <p class="error" id="statsAuthError"></p>
-            <a class="btn secondary" href="index.html" style="margin-top:0.45rem;">Back to website</a>
+            <a class="btn secondary" href="../index.html" style="margin-top:0.45rem;">Back to website</a>
         </div>
     </div>
 
@@ -238,8 +251,14 @@
         <div class="topbar">
             <h1 class="title">OVEXI Statistics Dashboard</h1>
             <div class="top-actions">
+                <select class="stats-filter" id="statsRangeFilter" aria-label="Statistics date range">
+                    <option value="24h">Last 24 hours</option>
+                    <option value="7d">Last 7 days</option>
+                    <option value="30d" selected>Last 30 days</option>
+                    <option value="all">All time</option>
+                </select>
                 <button class="btn secondary" type="button" id="refreshStatsBtn">Refresh</button>
-                <a class="btn secondary" href="index.html">Back to site</a>
+                <a class="btn secondary" href="../index.html">Back to site</a>
             </div>
         </div>
 
@@ -256,6 +275,8 @@
             <section class="card chart-wide"><h3>Top traffic sources</h3><div class="chart-canvas"><canvas id="sourceChart"></canvas></div></section>
             <section class="card chart-wide"><h3>Top clicked elements</h3><div class="chart-canvas"><canvas id="clickTargetsChart"></canvas></div></section>
             <section class="card chart-full"><h3>Hourly activity (UTC)</h3><div class="chart-canvas"><canvas id="hourlyChart"></canvas></div></section>
+            <section class="card chart-full"><h3>Average duration by page</h3><div class="table-wrap"><table><thead><tr><th>Page</th><th>Sessions with duration</th><th>Average duration</th></tr></thead><tbody id="pageDurationTable"></tbody></table></div></section>
+            <section class="card chart-full"><h3>CTA/button CTR</h3><div class="table-wrap"><table><thead><tr><th>Page</th><th>Element ID/Class</th><th>Label</th><th>Clicks</th><th>Page views</th><th>CTR</th></tr></thead><tbody id="ctaCtrTable"></tbody></table></div></section>
             <section class="card chart-full"><h3>Click breakdown (all elements)</h3><div class="table-wrap"><table><thead><tr><th>Element ID/Class</th><th>Label</th><th>Clicks</th></tr></thead><tbody id="clickBreakdownTable"></tbody></table></div></section>
             <section class="card chart-full"><h3>Recent events</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>Type</th><th>Source</th><th>Path</th><th>Target</th><th>Value</th></tr></thead><tbody id="recentEventsTable"></tbody></table></div></section>
         </div>
@@ -341,6 +362,33 @@
             return `${((part / total) * 100).toFixed(1)}%`;
         }
 
+        function getEventDate(event) {
+            if (event.createdAt?.toDate) {
+                return event.createdAt.toDate();
+            }
+            if (event.createdAt instanceof Date) {
+                return event.createdAt;
+            }
+            return null;
+        }
+
+        function getRangeStart(rangeValue) {
+            const now = Date.now();
+            if (rangeValue === "24h") return new Date(now - (24 * 60 * 60 * 1000));
+            if (rangeValue === "7d") return new Date(now - (7 * 24 * 60 * 60 * 1000));
+            if (rangeValue === "30d") return new Date(now - (30 * 24 * 60 * 60 * 1000));
+            return null;
+        }
+
+        function filterEventsByRange(events, rangeValue) {
+            const startDate = getRangeStart(rangeValue);
+            if (!startDate) return events;
+            return events.filter((event) => {
+                const createdAt = getEventDate(event);
+                return createdAt && createdAt >= startDate;
+            });
+        }
+
         function destroyCharts() {
             while (charts.length) {
                 const chart = charts.pop();
@@ -391,7 +439,9 @@
         async function loadStats() {
             const eventsQuery = query(collection(db, "analytics_events"), orderBy("createdAt", "desc"), limit(4000));
             const snapshot = await getDocs(eventsQuery);
-            const events = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            const allEvents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            const rangeValue = document.getElementById("statsRangeFilter").value;
+            const events = filterEventsByRange(allEvents, rangeValue);
 
             const pageViewEvents = events.filter((e) => e.eventType === "page_view");
             const clickEvents = events.filter((e) => e.eventType === "click");
@@ -418,6 +468,34 @@
             const avgDurationSeconds = durationSamples.length
                 ? durationSamples.reduce((sum, value) => sum + value, 0) / durationSamples.length
                 : 0;
+
+            const pageDurationBySession = new Map();
+            engagementEvents.forEach((event) => {
+                const sessionId = String(event.sessionId || "");
+                const pagePath = String(event.pagePath || "/");
+                const durationSeconds = Number.parseInt(event.value, 10);
+                if (!sessionId || !Number.isFinite(durationSeconds) || durationSeconds < 0) return;
+                const key = `${pagePath}::${sessionId}`;
+                const previous = pageDurationBySession.get(key) || 0;
+                if (durationSeconds > previous) {
+                    pageDurationBySession.set(key, durationSeconds);
+                }
+            });
+
+            const pageDurationStats = new Map();
+            pageDurationBySession.forEach((durationSeconds, key) => {
+                const [pagePath] = key.split("::");
+                const current = pageDurationStats.get(pagePath) || { count: 0, total: 0 };
+                current.count += 1;
+                current.total += durationSeconds;
+                pageDurationStats.set(pagePath, current);
+            });
+
+            const pageViewsByPath = mapCount(pageViewEvents, (event) => String(event.pagePath || "/"));
+            const ctaEntries = toSortedEntries(
+                mapCount(clickEvents, (event) => `${String(event.pagePath || "/")}::${String(event.target || "(no-target)")}::${String(event.value || "(no-label)")}`),
+                500
+            );
 
             document.getElementById("metricEvents").textContent = String(events.length);
             document.getElementById("metricSessions").textContent = String(new Set(events.map((e) => e.sessionId).filter(Boolean)).size);
@@ -471,11 +549,38 @@
                 clickBreakdownTable.appendChild(tr);
             });
 
+            const pageDurationTable = document.getElementById("pageDurationTable");
+            pageDurationTable.innerHTML = "";
+            const pageDurationRows = [...pageDurationStats.entries()]
+                .sort((a, b) => (b[1].total / b[1].count) - (a[1].total / a[1].count));
+            pageDurationRows.forEach(([pagePath, stats]) => {
+                const tr = document.createElement("tr");
+                const average = stats.count ? stats.total / stats.count : 0;
+                tr.innerHTML = `<td>${pagePath}</td><td>${stats.count}</td><td>${formatDuration(average)}</td>`;
+                pageDurationTable.appendChild(tr);
+            });
+            if (!pageDurationRows.length) {
+                pageDurationTable.innerHTML = '<tr><td colspan="3">No duration data in this range.</td></tr>';
+            }
+
+            const ctaCtrTable = document.getElementById("ctaCtrTable");
+            ctaCtrTable.innerHTML = "";
+            ctaEntries.forEach((entry) => {
+                const tr = document.createElement("tr");
+                const [pagePath, target, value] = String(entry[0]).split("::");
+                const pageViews = pageViewsByPath.get(pagePath) || 0;
+                tr.innerHTML = `<td>${pagePath || "-"}</td><td>${target || "-"}</td><td>${value || "-"}</td><td>${entry[1]}</td><td>${pageViews}</td><td>${formatPercent(entry[1], pageViews)}</td>`;
+                ctaCtrTable.appendChild(tr);
+            });
+            if (!ctaEntries.length) {
+                ctaCtrTable.innerHTML = '<tr><td colspan="6">No CTA/button click data in this range.</td></tr>';
+            }
+
             const table = document.getElementById("recentEventsTable");
             table.innerHTML = "";
             events.slice(0, 100).forEach((event) => {
                 const tr = document.createElement("tr");
-                const createdAt = event.createdAt?.toDate ? event.createdAt.toDate() : null;
+                const createdAt = getEventDate(event);
                 const timeText = createdAt ? createdAt.toISOString().replace("T", " ").slice(0, 19) : "-";
                 tr.innerHTML = `<td>${timeText}</td><td>${String(event.eventType || "-")}</td><td>${String(event.source || "-")}</td><td>${String(event.pagePath || "-")}</td><td>${String(event.target || "-")}</td><td>${String(event.value || "-")}</td>`;
                 table.appendChild(tr);
@@ -525,6 +630,12 @@
         document.getElementById("refreshStatsBtn").addEventListener("click", () => {
             loadStats().catch((error) => {
                 console.error("Statistics refresh error:", error);
+            });
+        });
+
+        document.getElementById("statsRangeFilter").addEventListener("change", () => {
+            loadStats().catch((error) => {
+                console.error("Statistics filter change error:", error);
             });
         });
 
