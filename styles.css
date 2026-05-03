@@ -1629,6 +1629,15 @@ footer p {
 
 .custom-package-form {
     margin-top: 1rem;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.custom-package-form .form-group {
+    margin-right: 0;
+    margin-left: 0;
+    align-items: stretch;
 }
 
 .custom-package-card {
