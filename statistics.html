@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVEXI - Statistics Dashboard</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --accent: #22d3ee;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --text: #cbd5e1;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(120% 90% at 20% 0%, rgba(99, 102, 241, 0.24), rgba(15, 23, 42, 0)),
+                radial-gradient(110% 80% at 100% 10%, rgba(34, 211, 238, 0.14), rgba(15, 23, 42, 0)),
+                var(--dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1.2rem;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .title {
+            margin: 0;
+            color: var(--white);
+            font-size: clamp(1.2rem, 2.5vw, 1.9rem);
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 999px;
+            padding: 0.52rem 0.88rem;
+            font: inherit;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--white);
+            background: var(--gradient);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn.secondary {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.38);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .card {
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.93), rgba(15, 23, 42, 0.97));
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            border-radius: 16px;
+            padding: 1rem;
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.45);
+        }
+
+        .metric {
+            grid-column: span 3;
+        }
+
+        .chart-wide {
+            grid-column: span 6;
+        }
+
+        .chart-full {
+            grid-column: span 12;
+        }
+
+        .chart-canvas {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            margin-top: 0.6rem;
+        }
+
+        .chart-full .chart-canvas {
+            height: 300px;
+        }
+
+        .chart-canvas canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .metric h3,
+        .card h3 {
+            margin: 0 0 0.35rem;
+            color: var(--white);
+            font-size: 0.96rem;
+        }
+
+        .metric p {
+            margin: 0;
+            font-size: 1.7rem;
+            color: #dbeafe;
+            font-weight: 800;
+        }
+
+        .table-wrap {
+            overflow: auto;
+            max-height: 380px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.84rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.42rem 0.3rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            vertical-align: top;
+        }
+
+        th {
+            color: #dbeafe;
+            font-weight: 700;
+        }
+
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .auth-box {
+            width: min(420px, 92vw);
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.99));
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 18px;
+            padding: 1.2rem;
+        }
+
+        .auth-box h2 {
+            margin: 0 0 0.35rem;
+            color: var(--white);
+        }
+
+        .auth-box p {
+            margin: 0 0 0.7rem;
+            color: #a6b5c9;
+            font-size: 0.92rem;
+        }
+
+        .auth-hint {
+            margin: 0.1rem 0 0.75rem;
+            color: #93c5fd;
+            font-size: 0.82rem;
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 0.7rem;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.42);
+            background: rgba(15, 23, 42, 0.82);
+            color: var(--white);
+            margin-bottom: 0.65rem;
+        }
+
+        .error {
+            min-height: 1.1rem;
+            color: #fca5a5;
+            font-size: 0.82rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 980px) {
+            .metric,
+            .chart-wide,
+            .chart-full {
+                grid-column: span 12;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-box">
+            <h2>Statistics Access</h2>
+            <p>Enter password to open analytics dashboard.</p>
+            <input type="password" id="statsPassword" placeholder="Password">
+            <button class="btn" id="statsLoginBtn" type="button">Open dashboard</button>
+            <p class="error" id="statsAuthError"></p>
+            <a class="btn secondary" href="index.html" style="margin-top:0.45rem;">Back to website</a>
+        </div>
+    </div>
+
+    <div class="wrap hidden" id="statsApp">
+        <div class="topbar">
+            <h1 class="title">OVEXI Statistics Dashboard</h1>
+            <div class="top-actions">
+                <button class="btn secondary" type="button" id="refreshStatsBtn">Refresh</button>
+                <a class="btn secondary" href="index.html">Back to site</a>
+            </div>
+        </div>
+
+        <div class="grid">
+            <section class="card metric"><h3>Total events</h3><p id="metricEvents">0</p></section>
+            <section class="card metric"><h3>Unique sessions</h3><p id="metricSessions">0</p></section>
+            <section class="card metric"><h3>Page views</h3><p id="metricViews">0</p></section>
+            <section class="card metric"><h3>Button/link clicks</h3><p id="metricClicks">0</p></section>
+            <section class="card metric"><h3>Avg. duration on site</h3><p id="metricAvgDuration">0s</p></section>
+            <section class="card metric"><h3>Reached 75% scroll</h3><p id="metricScroll75">0%</p></section>
+            <section class="card metric"><h3>Reached 100% scroll</h3><p id="metricScroll100">0%</p></section>
+
+            <section class="card chart-wide"><h3>Events by type</h3><div class="chart-canvas"><canvas id="eventsByTypeChart"></canvas></div></section>
+            <section class="card chart-wide"><h3>Top traffic sources</h3><div class="chart-canvas"><canvas id="sourceChart"></canvas></div></section>
+            <section class="card chart-wide"><h3>Top clicked elements</h3><div class="chart-canvas"><canvas id="clickTargetsChart"></canvas></div></section>
+            <section class="card chart-full"><h3>Hourly activity (UTC)</h3><div class="chart-canvas"><canvas id="hourlyChart"></canvas></div></section>
+            <section class="card chart-full"><h3>Click breakdown (all elements)</h3><div class="table-wrap"><table><thead><tr><th>Element ID/Class</th><th>Label</th><th>Clicks</th></tr></thead><tbody id="clickBreakdownTable"></tbody></table></div></section>
+            <section class="card chart-full"><h3>Recent events</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>Type</th><th>Source</th><th>Path</th><th>Target</th><th>Value</th></tr></thead><tbody id="recentEventsTable"></tbody></table></div></section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, limit, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+        const AUTH_KEY = "ovexi_stats_auth";
+        const STATS_ACCESS_DOC_PATH = ["admin_config", "stats_access"];
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",
+            authDomain: "ovexi-6ef38.firebaseapp.com",
+            projectId: "ovexi-6ef38",
+            storageBucket: "ovexi-6ef38.firebasestorage.app",
+            messagingSenderId: "370083022451",
+            appId: "1:370083022451:web:4e3ba562d07641fcef4c06",
+            measurementId: "G-5CV4P809ZL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const charts = [];
+
+        async function sha256Hex(value) {
+            const encoded = new TextEncoder().encode(value);
+            const digest = await crypto.subtle.digest("SHA-256", encoded);
+            return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        async function verifyDashboardPassword(plainPassword) {
+            const accessDocRef = doc(db, STATS_ACCESS_DOC_PATH[0], STATS_ACCESS_DOC_PATH[1]);
+            const snapshot = await getDoc(accessDocRef);
+            if (!snapshot.exists()) {
+                throw new Error("Stats access config is missing in Firestore.");
+            }
+
+            const data = snapshot.data();
+            const enabled = data?.enabled !== false;
+            const salt = String(data?.salt || "");
+            const passwordHash = String(data?.passwordHash || "").toLowerCase();
+
+            if (!enabled) {
+                throw new Error("Dashboard access is disabled.");
+            }
+
+            if (!salt || !passwordHash) {
+                throw new Error("Invalid stats access config. Required: salt, passwordHash.");
+            }
+
+            const computedHash = (await sha256Hex(`${salt}:${plainPassword}`)).toLowerCase();
+            return computedHash === passwordHash;
+        }
+
+        function mapCount(items, keyFn) {
+            const map = new Map();
+            items.forEach((item) => {
+                const key = keyFn(item) || "unknown";
+                map.set(key, (map.get(key) || 0) + 1);
+            });
+            return map;
+        }
+
+        function toSortedEntries(map, max = 12) {
+            return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, max);
+        }
+
+        function formatDuration(seconds) {
+            const safeSeconds = Math.max(0, Math.round(Number(seconds) || 0));
+            const minutes = Math.floor(safeSeconds / 60);
+            const remainingSeconds = safeSeconds % 60;
+            if (minutes <= 0) {
+                return `${remainingSeconds}s`;
+            }
+            return `${minutes}m ${remainingSeconds}s`;
+        }
+
+        function formatPercent(part, total) {
+            if (!total) return "0%";
+            return `${((part / total) * 100).toFixed(1)}%`;
+        }
+
+        function destroyCharts() {
+            while (charts.length) {
+                const chart = charts.pop();
+                chart.destroy();
+            }
+        }
+
+        function buildBarChart(canvasId, labels, data, color) {
+            const chart = new Chart(document.getElementById(canvasId), {
+                type: "bar",
+                data: {
+                    labels,
+                    datasets: [{ label: "Count", data, backgroundColor: color }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: "#cbd5e1" } } },
+                    scales: {
+                        x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.12)" } },
+                        y: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.12)" } }
+                    }
+                }
+            });
+            charts.push(chart);
+        }
+
+        function buildLineChart(canvasId, labels, data) {
+            const chart = new Chart(document.getElementById(canvasId), {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [{ label: "Events", data, borderColor: "#67e8f9", backgroundColor: "rgba(103,232,249,0.22)", fill: true, tension: 0.3 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: "#cbd5e1" } } },
+                    scales: {
+                        x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.12)" } },
+                        y: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.12)" } }
+                    }
+                }
+            });
+            charts.push(chart);
+        }
+
+        async function loadStats() {
+            const eventsQuery = query(collection(db, "analytics_events"), orderBy("createdAt", "desc"), limit(4000));
+            const snapshot = await getDocs(eventsQuery);
+            const events = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+            const pageViewEvents = events.filter((e) => e.eventType === "page_view");
+            const clickEvents = events.filter((e) => e.eventType === "click");
+            const scrollEvents = events.filter((e) => e.eventType === "scroll_depth" && e.target === "page");
+            const engagementEvents = events.filter((e) => e.eventType === "session_engagement" && e.target === "duration_seconds");
+
+            const sessionsWithPageView = new Set(pageViewEvents.map((e) => e.sessionId).filter(Boolean));
+            const sessionsReached75 = new Set(scrollEvents.filter((e) => e.value === "75%").map((e) => e.sessionId).filter(Boolean));
+            const sessionsReached100 = new Set(scrollEvents.filter((e) => e.value === "100%").map((e) => e.sessionId).filter(Boolean));
+
+            const maxDurationBySession = new Map();
+            engagementEvents.forEach((event) => {
+                const sessionId = String(event.sessionId || "");
+                if (!sessionId) return;
+                const durationSeconds = Number.parseInt(event.value, 10);
+                if (!Number.isFinite(durationSeconds) || durationSeconds < 0) return;
+                const previous = maxDurationBySession.get(sessionId) || 0;
+                if (durationSeconds > previous) {
+                    maxDurationBySession.set(sessionId, durationSeconds);
+                }
+            });
+
+            const durationSamples = [...maxDurationBySession.values()];
+            const avgDurationSeconds = durationSamples.length
+                ? durationSamples.reduce((sum, value) => sum + value, 0) / durationSamples.length
+                : 0;
+
+            document.getElementById("metricEvents").textContent = String(events.length);
+            document.getElementById("metricSessions").textContent = String(new Set(events.map((e) => e.sessionId).filter(Boolean)).size);
+            document.getElementById("metricViews").textContent = String(pageViewEvents.length);
+            document.getElementById("metricClicks").textContent = String(clickEvents.length);
+            document.getElementById("metricAvgDuration").textContent = formatDuration(avgDurationSeconds);
+            document.getElementById("metricScroll75").textContent = formatPercent(sessionsReached75.size, sessionsWithPageView.size);
+            document.getElementById("metricScroll100").textContent = formatPercent(sessionsReached100.size, sessionsWithPageView.size);
+
+            destroyCharts();
+
+            const byType = toSortedEntries(mapCount(events, (e) => e.eventType || "unknown"), 14);
+            buildBarChart("eventsByTypeChart", byType.map((e) => e[0]), byType.map((e) => e[1]), "rgba(129,140,248,0.75)");
+
+            const bySource = toSortedEntries(mapCount(events, (e) => e.source || "unknown"), 10);
+            buildBarChart("sourceChart", bySource.map((e) => e[0]), bySource.map((e) => e[1]), "rgba(34,211,238,0.72)");
+
+            const clickKeyEntries = toSortedEntries(
+                mapCount(clickEvents, (e) => `${String(e.target || "(no-target)")}::${String(e.value || "(no-label)")}`),
+                12
+            );
+            buildBarChart(
+                "clickTargetsChart",
+                clickKeyEntries.map((entry) => {
+                    const [target, value] = String(entry[0]).split("::");
+                    return `${target} | ${value}`.slice(0, 42);
+                }),
+                clickKeyEntries.map((entry) => entry[1]),
+                "rgba(244,114,182,0.72)"
+            );
+
+            const hourly = Array.from({ length: 24 }, (_, i) => [String(i).padStart(2, "0"), 0]);
+            events.forEach((event) => {
+                const createdAt = event.createdAt?.toDate ? event.createdAt.toDate() : null;
+                if (!createdAt) return;
+                const hour = createdAt.getUTCHours();
+                hourly[hour][1] += 1;
+            });
+            buildLineChart("hourlyChart", hourly.map((h) => `${h[0]}:00`), hourly.map((h) => h[1]));
+
+            const clickBreakdownTable = document.getElementById("clickBreakdownTable");
+            clickBreakdownTable.innerHTML = "";
+            const allClickEntries = toSortedEntries(
+                mapCount(clickEvents, (e) => `${String(e.target || "(no-target)")}::${String(e.value || "(no-label)")}`),
+                500
+            );
+            allClickEntries.forEach((entry) => {
+                const tr = document.createElement("tr");
+                const [target, value] = String(entry[0]).split("::");
+                tr.innerHTML = `<td>${target || "-"}</td><td>${value || "-"}</td><td>${entry[1]}</td>`;
+                clickBreakdownTable.appendChild(tr);
+            });
+
+            const table = document.getElementById("recentEventsTable");
+            table.innerHTML = "";
+            events.slice(0, 100).forEach((event) => {
+                const tr = document.createElement("tr");
+                const createdAt = event.createdAt?.toDate ? event.createdAt.toDate() : null;
+                const timeText = createdAt ? createdAt.toISOString().replace("T", " ").slice(0, 19) : "-";
+                tr.innerHTML = `<td>${timeText}</td><td>${String(event.eventType || "-")}</td><td>${String(event.source || "-")}</td><td>${String(event.pagePath || "-")}</td><td>${String(event.target || "-")}</td><td>${String(event.value || "-")}</td>`;
+                table.appendChild(tr);
+            });
+        }
+
+        function showDashboard() {
+            document.getElementById("authOverlay").classList.add("hidden");
+            document.getElementById("statsApp").classList.remove("hidden");
+            loadStats().catch((error) => {
+                console.error("Statistics load error:", error);
+                alert("Statistics could not be loaded. Check Firestore rules and data availability.");
+            });
+        }
+
+        const loginBtn = document.getElementById("statsLoginBtn");
+        const passwordInput = document.getElementById("statsPassword");
+        const authError = document.getElementById("statsAuthError");
+
+        loginBtn.addEventListener("click", async () => {
+            const typed = passwordInput.value;
+            loginBtn.disabled = true;
+            authError.textContent = "";
+
+            try {
+                const ok = await verifyDashboardPassword(typed);
+                if (ok) {
+                    sessionStorage.setItem(AUTH_KEY, "1");
+                    showDashboard();
+                } else {
+                    authError.textContent = "Wrong password.";
+                }
+            } catch (error) {
+                console.error("Statistics auth error:", error);
+                authError.textContent = error?.message || "Authentication failed.";
+            } finally {
+                loginBtn.disabled = false;
+            }
+        });
+
+        passwordInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                loginBtn.click();
+            }
+        });
+
+        document.getElementById("refreshStatsBtn").addEventListener("click", () => {
+            loadStats().catch((error) => {
+                console.error("Statistics refresh error:", error);
+            });
+        });
+
+        if (sessionStorage.getItem(AUTH_KEY) === "1") {
+            showDashboard();
+        }
+    </script>
+</body>
+</html>

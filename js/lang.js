@@ -60,37 +60,157 @@
             why4Text: "Mindig elérhetőek vagyunk, hogy segítsünk és válaszoljunk a kérdéseidre.",
             partnersTitle: "Partnereink",
             partnersText: "",
+            partnerTag1: "Weboldal helyi éttermek kereséséhez",
+            partnerTag2: "Marketinglehetőség éttermeknek és extra jövedelem lakáskiadóknak",
+            partnerTag3: "Turisztikai és információs portál",
+            partnerTag4: "Légy te a következő!",
             servicesTitle: "Fedezd fel a hozzád illő csomagot",
-            servicesText: "Minden csomag tartalmazza a professzionális tervezést és az Ön igényeire szabott megoldásokat. Vagy rakd össze magadnak a saját csomagod a testreszabott opcióban!",
+            servicesText: "Minden csomag tartalmazza a professzionális tervezést és az igényeidre szabott megoldásokat. Vagy állítsd össze a saját csomagodat a testreszabott opcióban!",
             pkgInfoBtn: "Részletes információ",
             pickBtn: "Választom",
+            packageBadgePopular: "Népszerű",
+            packageTitleBasic: "Alapcsomag",
+            packageTitlePremium: "Prémium Csomag",
+            packageTitleBusiness: "Üzleti Csomag",
+            packageFeaturesBasic: [
+                "Reszponzív weboldal",
+                "Gyors betöltési idő",
+                "Mobilbarát dizájn",
+                "SEO optimalizálás",
+                "Kapcsolati űrlap",
+                "SSL tanúsítvány",
+                "1-5 aloldal",
+                "Alap dizájn",
+                "Domain 1 évre",
+                "1 GB e-mail tárhely (akár 5 e-mail cím) 1 évre",
+                "1 GB webtárhely 1 évre",
+                "Karbantartás és social media menedzsment opcionális"
+            ],
+            packageFeaturesPremium: [
+                "Reszponzív weboldal",
+                "Haladó SEO optimalizálás",
+                "1-10 aloldal",
+                "Gyors betöltési idő",
+                "Eseménynaptár integráció",
+                "Mobilbarát dizájn",
+                "Kapcsolati űrlap",
+                "Vélemény modul",
+                "SSL tanúsítvány",
+                "Többnyelvűség",
+                "Komplex dizájn",
+                "1 GB e-mail tárhely (akár 5 e-mail cím) 1 évre",
+                "1 GB webtárhely 1 évre",
+                "Domain 1 évre",
+                "Karbantartás és social media menedzsment opcionális"
+            ],
+            packageFeaturesBusiness: [
+                "Reszponzív weboldal",
+                "Haladó SEO optimalizálás",
+                "Korlátlan aloldal",
+                "Gyors betöltési idő",
+                "Eseménynaptár integráció",
+                "Mobilbarát dizájn",
+                "Kapcsolati űrlap",
+                "Vélemény modul",
+                "SSL tanúsítvány",
+                "Többnyelvűség",
+                "Prémium dizájn",
+                "Teljes adminfelület",
+                "Chatbot",
+                "5 GB e-mail tárhely (akár 10 e-mail cím) 1 évre",
+                "5 GB webtárhely 1 évre",
+                "Domain 1 évre",
+                "Karbantartás és social media menedzsment opcionális"
+            ],
             customTitle: "Saját Csomag",
             customPeriod: "Testreszabott",
             customHint: "Nem tudsz dönteni? Állítsd össze magadnak!",
-            customPlanBtn: "Tervezz Most",
+            customPlanBtn: "Tervezz most",
             builderStep1Title: "Weboldalad Konfigurálása",
             builderStep1Text: "Válaszd ki, hány oldalra van szükséged és az alapvető funkciók közül.",
             pageCountLabel: "Oldalak száma:",
-            featuresLabel: "Funkciók (válassz ki az szükségeseket):",
+            featuresLabel: "Funkciók (válaszd ki a szükségeseket):",
             estPrice: "Becsült ár:",
             nextBtn: "Következő",
             builderStep2Title: "Elérhetőséged",
             builderStep2Text: "Add meg az adataidat, hogy felvehessek veled a kapcsolatot az ajánlattal.",
             backBtn: "Vissza",
             sendBtn: "Küldés",
+            customDetailsLabel: "Projekt leírása",
+            rangeLabel1: "1-5",
+            rangeLabel2: "1-10",
+            rangeLabel3: "Korlátlan",
+            seoGroupTitle: "SEO (egyet válassz):",
+            seoNone: "SEO - nincs (+0 Ft)",
+            seoBasic: "SEO - Alap (+20,000 Ft)",
+            seoAdvanced: "SEO - Haladó (+40,000 Ft)",
+            designGroupTitle: "Dizájn (egyet válassz):",
+            designNone: "Dizájn - nincs (+0 Ft)",
+            designBasic: "Dizájn - Alap (+30,000 Ft)",
+            designComplex: "Dizájn - Komplex (+50,000 Ft)",
+            designPremium: "Dizájn - Prémium (+85,000 Ft)",
+            featureMultilang: "Többnyelvűség (+40,000 Ft / nyelv)",
+            featureEcommerce: "E-commerce / online fizetési rendszer (+180,000 Ft)",
+            featureCalendar: "Naptárkezelés (+25,000 Ft)",
+            featureAdmin: "Adminoldal (+40,000 Ft)",
+            featureUsers: "Felhasználói rendszer (+70,000 Ft)",
+            featureChatbot: "Chatbot / live chat (+20,000 Ft)",
+            featureDomain: "Domain 1 évre (+5,000 Ft)",
+            hostingGroupTitle: "Tárhely (egyet válassz):",
+            hostingNone: "Tárhely - nincs (+0 Ft)",
+            hosting1gb: "Tárhely 1 évre - 1 GB (+16,000 Ft)",
+            hosting5gb: "Tárhely 1 évre - 5 GB (+25,000 Ft)",
+            maintenanceGroupTitle: "Karbantartás (egyet válassz):",
+            maintenanceNone: "Karbantartás - nincs (+0 Ft / hó)",
+            maintenanceBasic: "Karbantartás - Alap (+20,000 Ft / hó)",
+            maintenanceFull: "Karbantartás - Átfogó (+30,000 Ft / hó)",
+            maintenanceComplex: "Karbantartás - Komplex (+50,000 Ft / hó)",
+            socialGroupTitle: "Social media kezelés (egyet válassz):",
+            socialNone: "Social media kezelés - nincs (+0 Ft / hó)",
+            socialManagement: "Social media kezelés (Instagram, Facebook, TikTok) (+55,000 Ft / hó)",
             contactTitle: "Lépj velünk kapcsolatba",
             contactText: "Töltsd ki az űrlapot és hamarosan felveszem veled a kapcsolatot",
+            phoneHint: "A gyorsabb ügyintézés érdekében add meg a telefonszámod",
             labelName: "Név *",
-            labelEmail: "Email cím *",
+            labelEmail: "E-mail cím *",
             labelPhone: "Telefonszám",
-            labelPackage: "Választott csomag",
+            labelPackage: "Választott csomag *",
             labelMessage: "Üzenet / Részletek *",
             contactPlaceholder: "Írj pár szót a projektedről...",
+            packageChoose: "Válassz csomagot...",
+            packageOptionBasic: "Alapcsomag - 70,000 Ft",
+            packageOptionPremium: "Prémium Csomag - 150,000 Ft",
+            packageOptionBusiness: "Üzleti Csomag - 330,000 Ft",
+            contactSubmitBtn: "Üzenet küldése",
             consultationTitle: "Ingyenes Konzultáció",
             consultationText: "Nem vagy biztos benne, melyik csomag illik hozzád? Semmi gond! Foglalj egy ingyenes, kötelezettségmentes konzultációt, és közösen megtaláljuk a legjobb megoldást a vállalkozásodnak.",
-            noteText: "Általában 24 órán belül válaszolunk. Hétvégén is elérhetőek vagyunk!",
+            noteText: "Általában 24 órán belül válaszolok. Hétvégén is elérhető vagyok!",
             floatingConsult: "Ingyenes konzultáció",
+            backToTopAria: "Vissza az oldal tetejére",
+            backToTopTitle: "Vissza fel",
             footerText: "© 2026 OVEXI. Minden jog fenntartva.",
+            cookiePolicyLink: "Cookie tájékoztató",
+            cookieRegionAria: "Cookie hozzájárulás",
+            cookieTitle: "Cookie beállítások",
+            cookieText: "A weboldal működéséhez szükséges cookie-kat és tárolást mindig használunk. A kényelmi cookie-k (pl. nyelvi beállítás) csak hozzájárulás után aktívak.",
+            cookieReject: "Csak szükséges",
+            cookieSettings: "Beállítások",
+            cookieAccept: "Összes elfogadása",
+            cookieFab: "Cookie beállítások",
+            cookieFabAria: "Cookie beállítások megnyitása",
+            cookieModalTitle: "Cookie beállítások",
+            cookieModalIntro: "Az alábbi kategóriák között választhatsz. A szükséges cookie-k nélkül az oldal nem működik megfelelően.",
+            cookieNecessaryTitle: "Szükséges",
+            cookieNecessaryHelp: "Biztonsági, űrlap-küldési védelmi és működési funkciók.",
+            cookieNecessaryLabel: "Szükséges",
+            cookiePrefTitle: "Kényelmi",
+            cookiePrefHelp: "Nyelvi beállítás és használati preferenciák megjegyzése.",
+            cookiePrefLabel: "Engedélyezve",
+            cookieAnalyticsTitle: "Analitikai",
+            cookieAnalyticsHelp: "Forgalmi és használati statisztikák gyűjtése (pl. gombkattintások, forrás, oldalmegtekintések).",
+            cookieAnalyticsLabel: "Engedélyezve",
+            cookieDetailsPrefix: "Részletek:",
+            cookieSave: "Beállítások mentése",
             reviewTitle: "Írj véleményt",
             reviewText: "Oszd meg a tapasztalatod. A jó véleményed felhőként megjelenik a fő­oldalon.",
             reviewNameLabel: "Név *",
@@ -122,10 +242,68 @@
             why4Text: "We are always available to help and answer your questions.",
             partnersTitle: "Our Partners",
             partnersText: "We work alongside online projects that build stable presence, stronger visibility, and trust.",
+            partnerTag1: "Website for finding local restaurants",
+            partnerTag2: "Marketing opportunities for restaurants and extra income for property hosts",
+            partnerTag3: "Tourism and information portal",
+            partnerTag4: "Be the next one!",
             servicesTitle: "Choose from the Packages",
             servicesText: "Every package includes professional design and solutions tailored to your needs",
             pkgInfoBtn: "Detailed info",
             pickBtn: "Choose",
+            packageBadgePopular: "Popular",
+            packageTitleBasic: "Starter Package",
+            packageTitlePremium: "Premium Package",
+            packageTitleBusiness: "Business Package",
+            packageFeaturesBasic: [
+                "Responsive website",
+                "Fast loading speed",
+                "Mobile-friendly design",
+                "SEO optimization",
+                "Contact form",
+                "SSL certificate",
+                "1-5 pages",
+                "Basic design",
+                "Domain for 1 year",
+                "1 GB email hosting (up to 5 email accounts) for 1 year",
+                "1 GB web hosting for 1 year",
+                "Maintenance and social media management optional"
+            ],
+            packageFeaturesPremium: [
+                "Responsive website",
+                "Advanced SEO optimization",
+                "1-10 pages",
+                "Fast loading speed",
+                "Event calendar integration",
+                "Mobile-friendly design",
+                "Contact form",
+                "Review module",
+                "SSL certificate",
+                "Multilingual support",
+                "Complex design",
+                "1 GB email hosting (up to 5 email accounts) for 1 year",
+                "1 GB web hosting for 1 year",
+                "Domain for 1 year",
+                "Maintenance and social media management optional"
+            ],
+            packageFeaturesBusiness: [
+                "Responsive website",
+                "Advanced SEO optimization",
+                "Unlimited pages",
+                "Fast loading speed",
+                "Event calendar integration",
+                "Mobile-friendly design",
+                "Contact form",
+                "Review module",
+                "SSL certificate",
+                "Multilingual support",
+                "Premium design",
+                "Full admin panel",
+                "Chatbot",
+                "5 GB email hosting (up to 10 email accounts) for 1 year",
+                "5 GB web hosting for 1 year",
+                "Domain for 1 year",
+                "Maintenance and social media management optional"
+            ],
             customTitle: "Custom Package",
             customPeriod: "Tailor-made",
             customHint: "Not sure yet? Build your own package!",
@@ -140,19 +318,81 @@
             builderStep2Text: "Enter your details so I can contact you with a tailored offer.",
             backBtn: "Back",
             sendBtn: "Send",
+            customDetailsLabel: "Project description",
+            rangeLabel1: "1-5",
+            rangeLabel2: "1-10",
+            rangeLabel3: "Unlimited",
+            seoGroupTitle: "SEO (choose one):",
+            seoNone: "SEO - none (+0 HUF)",
+            seoBasic: "SEO - Basic (+20,000 HUF)",
+            seoAdvanced: "SEO - Advanced (+40,000 HUF)",
+            designGroupTitle: "Design (choose one):",
+            designNone: "Design - none (+0 HUF)",
+            designBasic: "Design - Basic (+30,000 HUF)",
+            designComplex: "Design - Complex (+50,000 HUF)",
+            designPremium: "Design - Premium (+85,000 HUF)",
+            featureMultilang: "Multilingual support (+40,000 HUF / language)",
+            featureEcommerce: "E-commerce / online payment system (+180,000 HUF)",
+            featureCalendar: "Calendar management (+25,000 HUF)",
+            featureAdmin: "Admin page (+40,000 HUF)",
+            featureUsers: "User system (+70,000 HUF)",
+            featureChatbot: "Chatbot / live chat (+20,000 HUF)",
+            featureDomain: "Domain for 1 year (+5,000 HUF)",
+            hostingGroupTitle: "Hosting (choose one):",
+            hostingNone: "Hosting - none (+0 HUF)",
+            hosting1gb: "Hosting for 1 year - 1 GB (+16,000 HUF)",
+            hosting5gb: "Hosting for 1 year - 5 GB (+25,000 HUF)",
+            maintenanceGroupTitle: "Maintenance (choose one):",
+            maintenanceNone: "Maintenance - none (+0 HUF / month)",
+            maintenanceBasic: "Maintenance - Basic (+20,000 HUF / month)",
+            maintenanceFull: "Maintenance - Full (+30,000 HUF / month)",
+            maintenanceComplex: "Maintenance - Complex (+50,000 HUF / month)",
+            socialGroupTitle: "Social media management (choose one):",
+            socialNone: "Social media management - none (+0 HUF / month)",
+            socialManagement: "Social media management (Instagram, Facebook, TikTok) (+55,000 HUF / month)",
             contactTitle: "Get in Touch",
             contactText: "Fill out the form and I will contact you soon",
+            phoneHint: "For faster response, please add your phone number",
             labelName: "Name *",
             labelEmail: "Email *",
             labelPhone: "Phone",
             labelPackage: "Selected package *",
             labelMessage: "Message / Details *",
             contactPlaceholder: "Tell me a few words about your project...",
+            packageChoose: "Choose a package...",
+            packageOptionBasic: "Starter Package - 70,000 HUF",
+            packageOptionPremium: "Premium Package - 150,000 HUF",
+            packageOptionBusiness: "Business Package - 330,000 HUF",
+            contactSubmitBtn: "Send message",
             consultationTitle: "Free Consultation",
             consultationText: "Not sure which package fits you? No problem. Book a free, no-obligation consultation and we will find the best solution for your business together.",
             noteText: "I usually reply within 24 hours. Available on weekends too!",
             floatingConsult: "Free consultation",
+            backToTopAria: "Back to top",
+            backToTopTitle: "Go up",
             footerText: "© 2026 OVEXI. All rights reserved.",
+            cookiePolicyLink: "Cookie policy",
+            cookieRegionAria: "Cookie consent",
+            cookieTitle: "Cookie settings",
+            cookieText: "We always use cookies and storage required for the website to function. Preference cookies (e.g. language setting) are only active after consent.",
+            cookieReject: "Necessary only",
+            cookieSettings: "Settings",
+            cookieAccept: "Accept all",
+            cookieFab: "Cookie settings",
+            cookieFabAria: "Open cookie settings",
+            cookieModalTitle: "Cookie settings",
+            cookieModalIntro: "You can choose from the categories below. Without necessary cookies, the website cannot function properly.",
+            cookieNecessaryTitle: "Necessary",
+            cookieNecessaryHelp: "Security, form-submission protection, and essential functionality.",
+            cookieNecessaryLabel: "Necessary",
+            cookiePrefTitle: "Preferences",
+            cookiePrefHelp: "Remembering language and usage preferences.",
+            cookiePrefLabel: "Enabled",
+            cookieAnalyticsTitle: "Analytics",
+            cookieAnalyticsHelp: "Collect traffic and usage statistics (e.g. button clicks, sources, page views).",
+            cookieAnalyticsLabel: "Enabled",
+            cookieDetailsPrefix: "Details:",
+            cookieSave: "Save settings",
             reviewTitle: "Write a review",
             reviewText: "Share your experience. Your positive review appears as a cloud on the homepage.",
             reviewNameLabel: "Name *",
@@ -204,11 +444,40 @@
 
         setText("#partners .section-header h2", t.partnersTitle);
         setText("#partners .section-header p", t.partnersText);
+        const partnerTags = document.querySelectorAll(".partner-tag");
+        if (partnerTags.length >= 4) {
+            partnerTags[0].textContent = t.partnerTag1;
+            partnerTags[1].textContent = t.partnerTag2;
+            partnerTags[2].textContent = t.partnerTag3;
+            partnerTags[3].textContent = t.partnerTag4;
+        }
 
         setText("#services .section-header h2", t.servicesTitle);
         setText("#services .section-header p", t.servicesText);
         setAllText(".package-info-button", t.pkgInfoBtn);
         setAllText(".pricing-card .pricing-button:not(#openCustomPackageBuilder)", t.pickBtn);
+
+        const pricingBadge = document.querySelector(".pricing-badge");
+        if (pricingBadge) pricingBadge.textContent = t.packageBadgePopular;
+
+        const pricingHeaders = document.querySelectorAll(".pricing-grid .pricing-card:not(.custom-package-card) .pricing-header h3");
+        if (pricingHeaders.length >= 3) {
+            pricingHeaders[0].textContent = t.packageTitleBasic;
+            pricingHeaders[1].textContent = t.packageTitlePremium;
+            pricingHeaders[2].textContent = t.packageTitleBusiness;
+        }
+
+        const pricingFeatureLists = document.querySelectorAll(".pricing-grid .pricing-card:not(.custom-package-card) .pricing-features");
+        const featureSets = [t.packageFeaturesBasic, t.packageFeaturesPremium, t.packageFeaturesBusiness];
+        pricingFeatureLists.forEach((list, index) => {
+            const texts = featureSets[index] || [];
+            const items = list.querySelectorAll("li");
+            items.forEach((item, itemIndex) => {
+                if (texts[itemIndex]) {
+                    item.textContent = texts[itemIndex];
+                }
+            });
+        });
 
         setText(".custom-package-card .pricing-header h3", t.customTitle);
         setText(".custom-package-card .price-period", t.customPeriod);
@@ -241,11 +510,66 @@
         setText("#customBuilderNextBtn", t.nextBtn);
         setText("#customBuilderStep2 h2", t.builderStep2Title);
         setText("#customBuilderStep2 .custom-builder-subtitle", t.builderStep2Text);
+        setText("label[for='customDetails']", t.customDetailsLabel);
         setText("#customBuilderBackBtn", t.backBtn);
         setText("#customBuilderStep2 button[type='submit']", t.sendBtn);
 
+        const rangeLabels = document.querySelectorAll(".custom-range-labels span");
+        if (rangeLabels.length >= 3) {
+            rangeLabels[0].textContent = t.rangeLabel1;
+            rangeLabels[1].textContent = t.rangeLabel2;
+            rangeLabels[2].textContent = t.rangeLabel3;
+        }
+
+        const customFeatureGroupTitles = document.querySelectorAll(".custom-feature-group-title");
+        if (customFeatureGroupTitles.length >= 5) {
+            customFeatureGroupTitles[0].textContent = t.seoGroupTitle;
+            customFeatureGroupTitles[1].textContent = t.designGroupTitle;
+            customFeatureGroupTitles[2].textContent = t.hostingGroupTitle;
+            customFeatureGroupTitles[3].textContent = t.maintenanceGroupTitle;
+            customFeatureGroupTitles[4].textContent = t.socialGroupTitle;
+        }
+
+        const customFeatureChoices = document.querySelectorAll(".custom-feature-checkbox");
+        const customFeatureTexts = [
+            t.seoNone,
+            t.seoBasic,
+            t.seoAdvanced,
+            t.designNone,
+            t.designBasic,
+            t.designComplex,
+            t.designPremium,
+            t.featureMultilang,
+            t.featureEcommerce,
+            t.featureCalendar,
+            t.featureAdmin,
+            t.featureUsers,
+            t.featureChatbot,
+            t.featureDomain,
+            t.hostingNone,
+            t.hosting1gb,
+            t.hosting5gb,
+            t.maintenanceNone,
+            t.maintenanceBasic,
+            t.maintenanceFull,
+            t.maintenanceComplex,
+            t.socialNone,
+            t.socialManagement
+        ];
+        customFeatureChoices.forEach((label, index) => {
+            const nextText = customFeatureTexts[index];
+            if (!nextText) return;
+            const textNode = Array.from(label.childNodes).find((node) => node.nodeType === Node.TEXT_NODE && node.nodeValue.trim().length);
+            if (textNode) {
+                textNode.nodeValue = ` ${nextText}`;
+            } else {
+                label.append(` ${nextText}`);
+            }
+        });
+
         setText("#contact .section-header h2", t.contactTitle);
         setText("#contact .section-header p", t.contactText);
+        setText("#contact .phoneNum", t.phoneHint);
 
         const labels = document.querySelectorAll("#contact .form-group label");
         if (labels.length >= 5) {
@@ -261,11 +585,69 @@
             messageInput.placeholder = t.contactPlaceholder;
         }
 
+        const packageSelect = document.getElementById("package");
+        if (packageSelect && packageSelect.options.length >= 4) {
+            packageSelect.options[0].textContent = t.packageChoose;
+            packageSelect.options[1].textContent = t.packageOptionBasic;
+            packageSelect.options[2].textContent = t.packageOptionPremium;
+            packageSelect.options[3].textContent = t.packageOptionBusiness;
+        }
+
+        setText("#contactForm .submit-button", t.contactSubmitBtn);
+
         setText("#info-section h2", t.consultationTitle);
         setText("#info-section .info-subtitle", t.consultationText);
         setText("#info-section .info-note", t.noteText);
         setText(".floating-consultation-button", t.floatingConsult);
+        const backToTopBtn = document.getElementById("backToTopBtn");
+        if (backToTopBtn) {
+            backToTopBtn.setAttribute("aria-label", t.backToTopAria);
+            backToTopBtn.setAttribute("title", t.backToTopTitle);
+        }
         setText("footer p", t.footerText);
+        setText(".footer-legal-links a", t.cookiePolicyLink);
+
+        const cookieConsent = document.getElementById("cookieConsent");
+        if (cookieConsent) cookieConsent.setAttribute("aria-label", t.cookieRegionAria);
+        setText(".cookie-consent-title", t.cookieTitle);
+        setText(".cookie-consent-text", t.cookieText);
+        setText("#cookieRejectBtn", t.cookieReject);
+        setText("#cookieOpenSettingsBtn", t.cookieSettings);
+        setText("#cookieAcceptBtn", t.cookieAccept);
+        setText("#cookieSettingsFab", t.cookieFab);
+
+        const cookieFab = document.getElementById("cookieSettingsFab");
+        if (cookieFab) cookieFab.setAttribute("aria-label", t.cookieFabAria);
+        setText("#cookieSettingsTitle", t.cookieModalTitle);
+        setText(".cookie-settings-intro", t.cookieModalIntro);
+        const cookieSettingTitles = document.querySelectorAll(".cookie-setting-title");
+        if (cookieSettingTitles.length >= 3) {
+            cookieSettingTitles[0].textContent = t.cookieNecessaryTitle;
+            cookieSettingTitles[1].textContent = t.cookiePrefTitle;
+            cookieSettingTitles[2].textContent = t.cookieAnalyticsTitle;
+        }
+        const cookieSettingHelp = document.querySelectorAll(".cookie-setting-help");
+        if (cookieSettingHelp.length >= 3) {
+            cookieSettingHelp[0].textContent = t.cookieNecessaryHelp;
+            cookieSettingHelp[1].textContent = t.cookiePrefHelp;
+            cookieSettingHelp[2].textContent = t.cookieAnalyticsHelp;
+        }
+        const cookieSwitchLabels = document.querySelectorAll(".cookie-switch span");
+        if (cookieSwitchLabels.length >= 3) {
+            cookieSwitchLabels[0].textContent = t.cookieNecessaryLabel;
+            cookieSwitchLabels[1].textContent = t.cookiePrefLabel;
+            cookieSwitchLabels[2].textContent = t.cookieAnalyticsLabel;
+        }
+        const cookieDetailsLink = document.querySelector(".cookie-settings-links a");
+        if (cookieDetailsLink) {
+            cookieDetailsLink.textContent = t.cookiePolicyLink;
+            const parent = cookieDetailsLink.parentNode;
+            if (parent && parent.firstChild) {
+                parent.firstChild.nodeValue = `${t.cookieDetailsPrefix} `;
+            }
+        }
+        setText("#cookieSettingsRejectBtn", t.cookieReject);
+        setText("#cookieSettingsSaveBtn", t.cookieSave);
 
         setText("#reviewModalTitle", t.reviewTitle);
         setText("#reviewModal .review-modal p", t.reviewText);
@@ -355,7 +737,7 @@
                 }
 
                 // Always toggle: clicking either pill switches to the opposite language
-                const current = getStoredLanguage() === "en" ? "en" : "hu";
+                const current = document.documentElement.getAttribute("lang") === "en" ? "en" : "hu";
                 const nextLang = current === "en" ? "hu" : "en";
                 isSwitchingLanguage = true;
                 setStoredLanguage(nextLang);

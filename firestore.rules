@@ -95,6 +95,64 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
     }
 
+      function isValidAnalyticsCreate() {
+        return request.resource.data.keys().hasOnly([
+          'sessionId',
+          'eventType',
+          'pagePath',
+          'pageUrl',
+          'referrer',
+          'source',
+          'lang',
+          'screenW',
+          'screenH',
+          'viewportW',
+          'viewportH',
+          'userAgent',
+          'target',
+          'value',
+          'consentAnalytics',
+          'createdAt'
+        ])
+        && request.resource.data.sessionId is string
+        && request.resource.data.eventType is string
+        && request.resource.data.pagePath is string
+        && request.resource.data.pageUrl is string
+        && request.resource.data.referrer is string
+        && request.resource.data.source is string
+        && request.resource.data.lang is string
+        && request.resource.data.screenW is int
+        && request.resource.data.screenH is int
+        && request.resource.data.viewportW is int
+        && request.resource.data.viewportH is int
+        && request.resource.data.userAgent is string
+        && request.resource.data.target is string
+        && request.resource.data.value is string
+        && request.resource.data.consentAnalytics is bool
+        && request.resource.data.sessionId.size() >= 8
+        && request.resource.data.sessionId.size() <= 64
+        && request.resource.data.eventType.size() >= 2
+        && request.resource.data.eventType.size() <= 40
+        && request.resource.data.pagePath.size() <= 200
+        && request.resource.data.pageUrl.size() <= 500
+        && request.resource.data.referrer.size() <= 500
+        && request.resource.data.source.size() <= 120
+        && request.resource.data.lang.size() <= 10
+        && request.resource.data.userAgent.size() <= 320
+        && request.resource.data.target.size() <= 180
+        && request.resource.data.value.size() <= 320
+        && request.resource.data.screenW >= 0
+        && request.resource.data.screenW <= 12000
+        && request.resource.data.screenH >= 0
+        && request.resource.data.screenH <= 12000
+        && request.resource.data.viewportW >= 0
+        && request.resource.data.viewportW <= 12000
+        && request.resource.data.viewportH >= 0
+        && request.resource.data.viewportH <= 12000
+        && request.resource.data.consentAnalytics == true
+        && request.resource.data.createdAt == request.time;
+      }
+
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if isValidReviewCreate();
@@ -109,6 +167,17 @@ service cloud.firestore {
     match /custom_packages/{packageId} {
       allow create: if isValidCustomPackageCreate();
       allow read, update, delete: if isAdmin();
+    }
+
+    match /analytics_events/{eventId} {
+      allow create: if isValidAnalyticsCreate();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /admin_config/stats_access {
+      allow read, create, update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /{document=**} {

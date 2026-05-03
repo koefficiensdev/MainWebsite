@@ -84,10 +84,11 @@ function clearOptionalClientStorage(consentState) {
     const cookieSettingsSaveBtn = document.getElementById("cookieSettingsSaveBtn");
     const cookieSettingsRejectBtn = document.getElementById("cookieSettingsRejectBtn");
     const cookiePrefToggle = document.getElementById("cookiePrefToggle");
+    const cookieAnalyticsToggle = document.getElementById("cookieAnalyticsToggle");
 
     if (!cookieConsent || !cookieAcceptBtn || !cookieRejectBtn || !cookieOpenSettingsBtn ||
         !cookieSettingsFab || !cookieSettingsModal || !cookieSettingsSaveBtn ||
-        !cookieSettingsRejectBtn || !cookiePrefToggle) {
+        !cookieSettingsRejectBtn || !cookiePrefToggle || !cookieAnalyticsToggle) {
         return;
     }
 
@@ -109,6 +110,7 @@ function clearOptionalClientStorage(consentState) {
     function syncPreferenceToggle() {
         const state = consentState || CONSENT_DEFAULT_STATE;
         cookiePrefToggle.checked = Boolean(state.preferences);
+        cookieAnalyticsToggle.checked = Boolean(state.analytics);
     }
 
     function openSettings() {
@@ -170,7 +172,7 @@ function clearOptionalClientStorage(consentState) {
     cookieSettingsSaveBtn.addEventListener("click", () => {
         persistConsent({
             preferences: cookiePrefToggle.checked,
-            analytics: false,
+            analytics: cookieAnalyticsToggle.checked,
             marketing: false
         });
     });
@@ -196,6 +198,114 @@ function clearOptionalClientStorage(consentState) {
     } else {
         showBanner();
     }
+})();
+
+(function initConsentAwareAnalytics() {
+    const analyticsCollection = collection(db, "analytics_events");
+    const sessionStorageKey = "ovexi_analytics_session_id";
+    const scrollMilestones = new Set();
+    const sessionStart = Date.now();
+
+    function canTrackAnalytics() {
+        return Boolean(window.OVEXI_COOKIE_CONSENT?.canUse?.("analytics"));
+    }
+
+    function getSessionId() {
+        try {
+            const existing = sessionStorage.getItem(sessionStorageKey);
+            if (existing) return existing;
+            const created = `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+            sessionStorage.setItem(sessionStorageKey, created);
+            return created;
+        } catch {
+            return `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        }
+    }
+
+    function getTrafficSource() {
+        const url = new URL(window.location.href);
+        const utmSource = normalizeText(url.searchParams.get("utm_source"));
+        const utmMedium = normalizeText(url.searchParams.get("utm_medium"));
+        const utmCampaign = normalizeText(url.searchParams.get("utm_campaign"));
+        if (utmSource) {
+            return [utmSource, utmMedium, utmCampaign].filter(Boolean).join("/");
+        }
+
+        const ref = normalizeText(document.referrer);
+        if (!ref) return "direct";
+        try {
+            const hostname = new URL(ref).hostname.replace(/^www\./, "");
+            return hostname || "referral";
+        } catch {
+            return "referral";
+        }
+    }
+
+    async function trackEvent(eventType, target = "", value = "") {
+        if (!canTrackAnalytics()) {
+            return;
+        }
+
+        try {
+            await addDoc(analyticsCollection, {
+                sessionId: getSessionId(),
+                eventType: String(eventType || "unknown").slice(0, 40),
+                pagePath: String(window.location.pathname || "/").slice(0, 200),
+                pageUrl: String(window.location.href || "").slice(0, 500),
+                referrer: String(document.referrer || "").slice(0, 500),
+                source: String(getTrafficSource()).slice(0, 120),
+                lang: String(document.documentElement.getAttribute("lang") || "hu").slice(0, 10),
+                screenW: Number(window.screen?.width || 0),
+                screenH: Number(window.screen?.height || 0),
+                viewportW: Number(window.innerWidth || 0),
+                viewportH: Number(window.innerHeight || 0),
+                userAgent: String(navigator.userAgent || "").slice(0, 320),
+                target: String(target || "").slice(0, 180),
+                value: String(value || "").slice(0, 320),
+                consentAnalytics: true,
+                createdAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Analytics event save error:", error);
+        }
+    }
+
+    window.OVEXI_ANALYTICS = {
+        track: trackEvent
+    };
+
+    trackEvent("page_view");
+
+    document.addEventListener("click", (event) => {
+        const target = event.target.closest("button, a, [role='button'], .pricing-button, .submit-button");
+        if (!target) return;
+
+        const label = normalizeText(target.textContent || target.getAttribute("aria-label") || "interaction");
+        const targetId = normalizeText(target.id || target.className || target.tagName);
+        trackEvent("click", targetId, label);
+    });
+
+    window.addEventListener("scroll", () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (docHeight <= 0) return;
+        const ratio = (scrollTop / docHeight) * 100;
+        const checkpoints = [25, 50, 75, 100];
+
+        checkpoints.forEach((checkpoint) => {
+            if (ratio >= checkpoint && !scrollMilestones.has(checkpoint)) {
+                scrollMilestones.add(checkpoint);
+                trackEvent("scroll_depth", "page", `${checkpoint}%`);
+            }
+        });
+    }, { passive: true });
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+            const durationSeconds = Math.max(1, Math.round((Date.now() - sessionStart) / 1000));
+            trackEvent("session_engagement", "duration_seconds", String(durationSeconds));
+        }
+    });
 })();
 
 (function () {
@@ -286,6 +396,45 @@ window.addEventListener("scroll", () => {
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
     window.addEventListener("resize", onScrollOrResize);
     updateFloatingButtonState();
+})();
+
+(function() {
+    const backToTopBtn = document.getElementById("backToTopBtn");
+    if (!backToTopBtn) {
+        return;
+    }
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    let ticking = false;
+
+    function updateBackToTopState() {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+        const viewportHeight = window.innerHeight || 1;
+        const visibility = clamp((scrollTop - 120) / (viewportHeight * 0.8), 0, 1);
+        const opacity = 0.08 + visibility * 0.92;
+        const scale = 0.9 + visibility * 0.1;
+
+        backToTopBtn.style.opacity = opacity.toFixed(3);
+        backToTopBtn.style.setProperty("--consult-scale", scale.toFixed(3));
+        backToTopBtn.classList.toggle("is-faded", opacity < 0.16);
+        ticking = false;
+    }
+
+    function onScrollOrResize() {
+        if (ticking) {
+            return;
+        }
+        ticking = true;
+        requestAnimationFrame(updateBackToTopState);
+    }
+
+    backToTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+    updateBackToTopState();
 })();
 
 (function() {
@@ -528,6 +677,54 @@ window.selectPackage = selectPackage;
         }
     };
 
+    const packageDetailsEn = {
+        "Alapcsomag": {
+            displayName: "Starter Package",
+            price: "70,000 HUF - one-time fee",
+            description: "Affordable starter package with a stable technical foundation. Maintenance and social media management are optional add-ons.",
+            features: [
+                { icon: "devices", title: "Responsive layout", detail: "Stable, readable display on mobile, tablet, and desktop." },
+                { icon: "layers", title: "Up to 5 pages", detail: "Core business structure for your most important content." },
+                { icon: "search", title: "SEO optimization", detail: "Search-friendly technical and content setup." },
+                { icon: "speed", title: "Fast performance", detail: "Image and code optimization for better loading speed and UX." },
+                { icon: "palette", title: "Basic design", detail: "Clean business look with fast delivery." },
+                { icon: "mail", title: "Contact form", detail: "Simple lead collection so visitors can reach you quickly." },
+                { icon: "shield", title: "SSL certificate", detail: "Secure HTTPS connection and reliable operation." },
+                { icon: "brand", title: "Domain + hosting + email", detail: "1 year domain, 1 GB web hosting, and 1 GB email hosting (up to 5 accounts)." }
+            ]
+        },
+        "Prémium Csomag": {
+            displayName: "Premium Package",
+            price: "150,000 HUF - one-time fee",
+            description: "Stronger business package with advanced functionality and a more complex design. Maintenance and social media management are optional.",
+            features: [
+                { icon: "devices", title: "Responsive website", detail: "Stable display on every device." },
+                { icon: "search", title: "Advanced SEO", detail: "Expanded keyword and technical optimization." },
+                { icon: "layers", title: "Up to 10 pages", detail: "More pages for richer presentation." },
+                { icon: "calendar", title: "Event calendar integration", detail: "Support for bookings and event communication." },
+                { icon: "palette", title: "Complex design", detail: "More advanced, more unique visual identity." },
+                { icon: "mail", title: "Reviews + contact + SSL", detail: "Social proof, contact, and security in one." },
+                { icon: "expand", title: "Multilingual", detail: "Multi-language support based on your needs." },
+                { icon: "brand", title: "Domain + hosting + email", detail: "1 year domain, 1 GB web hosting, and 1 GB email hosting (up to 5 accounts)." }
+            ]
+        },
+        "Üzleti Csomag": {
+            displayName: "Business Package",
+            price: "330,000 HUF - one-time fee",
+            description: "Complete business package with advanced capabilities. Maintenance and social media management remain optional add-ons.",
+            features: [
+                { icon: "devices", title: "Responsive website", detail: "Scales for long-term business growth." },
+                { icon: "search", title: "Advanced SEO", detail: "Stronger search visibility and technical refinement." },
+                { icon: "expand", title: "Unlimited pages", detail: "Flexible expansion for new services and content." },
+                { icon: "calendar", title: "Calendar + reviews + contact", detail: "Client engagement tools in one flow." },
+                { icon: "palette", title: "Premium design", detail: "Higher visual quality and unique brand presence." },
+                { icon: "building", title: "Full admin + user system", detail: "Internal management tools with role handling." },
+                { icon: "social", title: "Chatbot / live chat", detail: "Automated and real-time customer communication." },
+                { icon: "brand", title: "Domain + hosting + email", detail: "1 year domain, 5 GB web hosting, and 5 GB email hosting (up to 10 accounts)." }
+            ]
+        }
+    };
+
     function getFeatureIcon(icon) {
         const icons = {
             devices: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="14" height="10" rx="2"/><rect x="8" y="15" width="14" height="7" rx="2"/></svg>',
@@ -551,12 +748,14 @@ window.selectPackage = selectPackage;
     }
 
     function openPackageModal(packageName) {
-        const details = packageDetails[packageName];
+        const activeLang = document.documentElement.getAttribute("lang") === "en" ? "en" : "hu";
+        const sourceDetails = activeLang === "en" ? packageDetailsEn : packageDetails;
+        const details = sourceDetails[packageName];
         if (!details) {
             return;
         }
 
-        packageModalTitle.textContent = packageName;
+        packageModalTitle.textContent = details.displayName || packageName;
         packageModalPrice.textContent = details.price;
         packageModalDescription.textContent = details.description;
         packageModalFeatures.innerHTML = "";

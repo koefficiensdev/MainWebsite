@@ -949,7 +949,8 @@ section {
 
 .form-group {
     margin-bottom: 1rem;
-    margin-right: 6rem;
+    margin-right: 0;
+    margin-left: 0;
 }
 
 .form-group label {
@@ -1286,11 +1287,11 @@ footer p {
     z-index: 2450;
     border: 1px solid rgba(147, 197, 253, 0.4);
     border-radius: 999px;
-    padding: 0.56rem 0.9rem;
+    padding: 0.42rem 0.7rem;
     background: rgba(15, 23, 42, 0.88);
     color: #dbeafe;
     font: inherit;
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease;
@@ -1399,7 +1400,8 @@ footer p {
     gap: 0.6rem;
 }
 
-.floating-consultation-button {
+.floating-consultation-button,
+.back-to-top-button {
     position: fixed;
     right: 1.5rem;
     bottom: 1.5rem;
@@ -1420,20 +1422,35 @@ footer p {
     animation: consultationBounce 2.8s ease-in-out infinite, consultationPulse 2.8s ease-in-out infinite;
 }
 
-.floating-consultation-button:hover {
+.floating-consultation-button:hover,
+.back-to-top-button:hover {
     animation-play-state: paused;
     transform: translateY(-4px) scale(var(--consult-scale, 1));
     filter: brightness(1.06);
     box-shadow: 0 16px 32px rgba(14, 165, 233, 0.45);
 }
 
-.floating-consultation-button.is-faded {
+.floating-consultation-button.is-faded,
+.back-to-top-button.is-faded {
     pointer-events: none;
 }
 
-.floating-consultation-button:focus-visible {
+.floating-consultation-button:focus-visible,
+.back-to-top-button:focus-visible {
     outline: 2px solid rgba(255, 255, 255, 0.95);
     outline-offset: 3px;
+}
+
+.back-to-top-button {
+    bottom: 6.2rem;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .review-modal-backdrop {
@@ -2077,7 +2094,8 @@ footer p {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .floating-consultation-button {
+    .floating-consultation-button,
+    .back-to-top-button {
         animation: none;
         transform: none;
     }
@@ -2288,9 +2306,9 @@ nav.nav-open .nav-hamburger span:nth-child(3) {
     }
 
     .form-group {
-        align-items: center;
-        margin-right: 4rem;
-        margin-left: -2.5rem;
+        align-items: stretch;
+        margin-right: 0;
+        margin-left: 0;
     }
 
     /* Info cards — prevent email overflow */
@@ -2332,6 +2350,14 @@ nav.nav-open .nav-hamburger span:nth-child(3) {
         padding: 0.8rem 1.1rem;
     }
 
+    .back-to-top-button {
+        right: 1rem;
+        bottom: 5.2rem;
+        width: 46px;
+        height: 46px;
+        font-size: 1.35rem;
+    }
+
     .cookie-consent {
         bottom: 0.55rem;
         bottom: max(0.55rem, env(safe-area-inset-bottom));
@@ -2355,8 +2381,8 @@ nav.nav-open .nav-hamburger span:nth-child(3) {
         left: 0.55rem;
         bottom: 0.55rem;
         bottom: max(0.55rem, env(safe-area-inset-bottom));
-        font-size: 0.78rem;
-        padding: 0.5rem 0.75rem;
+        font-size: 0.68rem;
+        padding: 0.38rem 0.58rem;
     }
 
     .cookie-setting-row {

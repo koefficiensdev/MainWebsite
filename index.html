@@ -105,7 +105,7 @@
                         <li>Karbantartás és Social media menedzsment opcionális</li>
                     </ul>
                     <div class="pricing-actions">
-                        <button type="button" class="package-info-button" data-package-info="Alapcsomag">Reszletes informacio</button>
+                        <button type="button" class="package-info-button" data-package-info="Alapcsomag">Részletes információ</button>
                         <button class="pricing-button" onclick="selectPackage('Alapcsomag')">Választom</button>
                     </div>
                 </div>
@@ -138,7 +138,7 @@
                         <li>Karbantartás és Social media menedzsment opcionális</li>
                     </ul>
                     <div class="pricing-actions">
-                        <button type="button" class="package-info-button" data-package-info="Prémium Csomag">Reszletes informacio</button>
+                        <button type="button" class="package-info-button" data-package-info="Prémium Csomag">Részletes információ</button>
                         <button class="pricing-button" onclick="selectPackage('Prémium Csomag')">Választom</button>
                     </div>
                 </div>
@@ -172,7 +172,7 @@
                         <li>Karbantartás és Social media menedzsment opcionális</li>
                     </ul>
                     <div class="pricing-actions">
-                        <button type="button" class="package-info-button" data-package-info="Üzleti Csomag">Reszletes informacio</button>
+                        <button type="button" class="package-info-button" data-package-info="Üzleti Csomag">Részletes információ</button>
                         <button class="pricing-button" onclick="selectPackage('Üzleti Csomag')">Választom</button>
                     </div>
                 </div>
@@ -192,7 +192,7 @@
                         </p>
                     </div>
                     <div class="pricing-actions">
-                        <button type="button" class="pricing-button" id="openCustomPackageBuilder">Tervezz Most</button>
+                        <button type="button" class="pricing-button" id="openCustomPackageBuilder">Tervezz most</button>
                     </div>
                 </div>
             </div>
@@ -221,7 +221,7 @@
                     </div>
 
                     <div class="custom-builder-section">
-                        <label class="custom-builder-label">Funkciók (válassz ki az szükségeseket):</label>
+                        <label class="custom-builder-label">Funkciók (válaszd ki a szükségeseket):</label>
                         <div class="custom-features-list">
                             <div class="custom-feature-group">
                                 <p class="custom-feature-group-title">SEO (egyet válassz):</p>
@@ -343,7 +343,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="customEmail">Email cím *</label>
+                            <label for="customEmail">E-mail cím *</label>
                             <input type="email" id="customEmail" name="email" required>
                         </div>
 
@@ -353,7 +353,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="customDetails">Projekt Leírása</label>
+                            <label for="customDetails">Projekt leírása</label>
                             <textarea id="customDetails" name="details" placeholder="Röviden írj a projektedről, célaidról..."></textarea>
                         </div>
 
@@ -383,7 +383,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="email">Email cím *</label>
+                    <label for="email">E-mail cím *</label>
                     <input type="email" id="email" name="email" required>
                 </div>
                 
@@ -446,6 +446,10 @@
         Ingyenes konzultáció
     </a>
 
+    <button type="button" class="back-to-top-button is-faded" id="backToTopBtn" aria-label="Vissza az oldal tetejére" title="Vissza fel">
+        ↑
+    </button>
+
     <section class="partners-section" id="partners">
         <div class="container">
             <div class="section-header partners-header">
@@ -457,13 +461,13 @@
                 <div class="partner-card">
                     <span class="partner-mark">AAM</span>
                     <span class="partner-name">AllAccessMap</span>
-                    <span class="partner-tag">Weboldal helyi ettermek kereséséhez</span>
+                    <span class="partner-tag">Weboldal helyi éttermek kereséséhez</span>
                 </div>
 
                 <div class="partner-card">
                     <span class="partner-mark">AAB</span>
                     <span class="partner-name">AllAccessBudapest</span>
-                    <span class="partner-tag">Marketing lehetoseg ettermeknek es extra jovedelem lakaskiadoknak</span>
+                    <span class="partner-tag">Marketinglehetőség éttermeknek és extra jövedelem lakáskiadóknak</span>
                 </div>
 
                 <div class="partner-card">
@@ -485,63 +489,74 @@
         <div class="container">
             <p>&copy; 2026 OVEXI. Minden jog fenntartva.</p>
             <p class="footer-legal-links">
-                <a href="cookie-policy.html">Cookie tajekoztato</a>
+                <a href="cookie-policy.html">Cookie tájékoztató</a>
             </p>
         </div>
     </footer>
 
-    <div class="cookie-consent" id="cookieConsent" role="region" aria-label="Cookie hozzajarulas" aria-hidden="true">
+    <div class="cookie-consent" id="cookieConsent" role="region" aria-label="Cookie hozzájárulás" aria-hidden="true">
         <div class="cookie-consent-content">
-            <p class="cookie-consent-title">Cookie beallitasok</p>
+            <p class="cookie-consent-title">Cookie beállítások</p>
             <p class="cookie-consent-text">
-                A weboldal mukodesehez szukseges cookie-kat es tarolast mindig hasznalunk. A kenyelmi cookie-k (pl. nyelvi beallitas) csak hozzajarulas utan aktivak.
+                A weboldal működéséhez szükséges cookie-kat és tárolást mindig használunk. A kényelmi cookie-k (pl. nyelvi beállítás) csak hozzájárulás után aktívak.
             </p>
             <div class="cookie-consent-actions">
-                <button type="button" class="cookie-btn cookie-btn-secondary" id="cookieRejectBtn">Csak szukseges</button>
-                <button type="button" class="cookie-btn cookie-btn-ghost" id="cookieOpenSettingsBtn">Beallitasok</button>
-                <button type="button" class="cookie-btn cookie-btn-primary" id="cookieAcceptBtn">Osszes elfogadasa</button>
+                <button type="button" class="cookie-btn cookie-btn-secondary" id="cookieRejectBtn">Csak szükséges</button>
+                <button type="button" class="cookie-btn cookie-btn-ghost" id="cookieOpenSettingsBtn">Beállítások</button>
+                <button type="button" class="cookie-btn cookie-btn-primary" id="cookieAcceptBtn">Összes elfogadása</button>
             </div>
         </div>
     </div>
 
-    <button type="button" class="cookie-settings-fab" id="cookieSettingsFab" aria-label="Cookie beallitasok megnyitasa">
-        Cookie beallitasok
+    <button type="button" class="cookie-settings-fab" id="cookieSettingsFab" aria-label="Cookie beállítások megnyitása">
+        Cookie beállítások
     </button>
 
     <div class="cookie-settings-modal-backdrop" id="cookieSettingsModal" aria-hidden="true">
         <div class="cookie-settings-modal" role="dialog" aria-modal="true" aria-labelledby="cookieSettingsTitle">
-            <h2 id="cookieSettingsTitle">Cookie beallitasok</h2>
-            <p class="cookie-settings-intro">Az alábbi kategoriak kozott valaszthatsz. A szukseges cookie-k nelkul az oldal nem mukodik megfeleloen.</p>
+            <h2 id="cookieSettingsTitle">Cookie beállítások</h2>
+            <p class="cookie-settings-intro">Az alábbi kategóriák között választhatsz. A szükséges cookie-k nélkül az oldal nem működik megfelelően.</p>
 
             <div class="cookie-setting-row">
                 <div>
-                    <p class="cookie-setting-title">Szukseges</p>
-                    <p class="cookie-setting-help">Biztonsagi, urlap kuldesi vedelmi es mukodesi funkciok.</p>
+                    <p class="cookie-setting-title">Szükséges</p>
+                    <p class="cookie-setting-help">Biztonsági, űrlap-küldési védelmi és működési funkciók.</p>
                 </div>
                 <label class="cookie-switch">
                     <input type="checkbox" checked disabled>
-                    <span>Szukseges</span>
+                    <span>Szükséges</span>
                 </label>
             </div>
 
             <div class="cookie-setting-row">
                 <div>
-                    <p class="cookie-setting-title">Kenyelmi</p>
-                    <p class="cookie-setting-help">Nyelvi beallitas es hasznalati preferenciak megjegyzese.</p>
+                    <p class="cookie-setting-title">Kényelmi</p>
+                    <p class="cookie-setting-help">Nyelvi beállítás és használati preferenciák megjegyzése.</p>
                 </div>
                 <label class="cookie-switch">
                     <input type="checkbox" id="cookiePrefToggle">
-                    <span>Engedelyezve</span>
+                    <span>Engedélyezve</span>
+                </label>
+            </div>
+
+            <div class="cookie-setting-row">
+                <div>
+                    <p class="cookie-setting-title">Analitikai</p>
+                    <p class="cookie-setting-help">Forgalmi és használati statisztikák gyűjtése (pl. gombkattintások, forrás, oldalmegtekintések).</p>
+                </div>
+                <label class="cookie-switch">
+                    <input type="checkbox" id="cookieAnalyticsToggle">
+                    <span>Engedélyezve</span>
                 </label>
             </div>
 
             <p class="cookie-settings-links">
-                Reszletek: <a href="cookie-policy.html" target="_blank" rel="noopener noreferrer">Cookie tajekoztato</a>
+                Részletek: <a href="cookie-policy.html" target="_blank" rel="noopener noreferrer">Cookie tájékoztató</a>
             </p>
 
             <div class="cookie-settings-actions">
-                <button type="button" class="cookie-btn cookie-btn-secondary" id="cookieSettingsRejectBtn">Csak szukseges</button>
-                <button type="button" class="cookie-btn cookie-btn-primary" id="cookieSettingsSaveBtn">Beallitasok mentese</button>
+                <button type="button" class="cookie-btn cookie-btn-secondary" id="cookieSettingsRejectBtn">Csak szükséges</button>
+                <button type="button" class="cookie-btn cookie-btn-primary" id="cookieSettingsSaveBtn">Beállítások mentése</button>
             </div>
         </div>
     </div>
