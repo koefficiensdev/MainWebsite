@@ -434,7 +434,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                     </span>
                     <span class="info-card-label">Telefon</span>
-                    <span class="info-card-value">+36 30 123 4567</span>
+                    <span class="info-card-value">+36 70 572 3437</span>
                 </a>
             </div>
 
@@ -484,8 +484,67 @@
     <footer>
         <div class="container">
             <p>&copy; 2026 OVEXI. Minden jog fenntartva.</p>
+            <p class="footer-legal-links">
+                <a href="cookie-policy.html">Cookie tajekoztato</a>
+            </p>
         </div>
     </footer>
+
+    <div class="cookie-consent" id="cookieConsent" role="region" aria-label="Cookie hozzajarulas" aria-hidden="true">
+        <div class="cookie-consent-content">
+            <p class="cookie-consent-title">Cookie beallitasok</p>
+            <p class="cookie-consent-text">
+                A weboldal mukodesehez szukseges cookie-kat es tarolast mindig hasznalunk. A kenyelmi cookie-k (pl. nyelvi beallitas) csak hozzajarulas utan aktivak.
+            </p>
+            <div class="cookie-consent-actions">
+                <button type="button" class="cookie-btn cookie-btn-secondary" id="cookieRejectBtn">Csak szukseges</button>
+                <button type="button" class="cookie-btn cookie-btn-ghost" id="cookieOpenSettingsBtn">Beallitasok</button>
+                <button type="button" class="cookie-btn cookie-btn-primary" id="cookieAcceptBtn">Osszes elfogadasa</button>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="cookie-settings-fab" id="cookieSettingsFab" aria-label="Cookie beallitasok megnyitasa">
+        Cookie beallitasok
+    </button>
+
+    <div class="cookie-settings-modal-backdrop" id="cookieSettingsModal" aria-hidden="true">
+        <div class="cookie-settings-modal" role="dialog" aria-modal="true" aria-labelledby="cookieSettingsTitle">
+            <h2 id="cookieSettingsTitle">Cookie beallitasok</h2>
+            <p class="cookie-settings-intro">Az alábbi kategoriak kozott valaszthatsz. A szukseges cookie-k nelkul az oldal nem mukodik megfeleloen.</p>
+
+            <div class="cookie-setting-row">
+                <div>
+                    <p class="cookie-setting-title">Szukseges</p>
+                    <p class="cookie-setting-help">Biztonsagi, urlap kuldesi vedelmi es mukodesi funkciok.</p>
+                </div>
+                <label class="cookie-switch">
+                    <input type="checkbox" checked disabled>
+                    <span>Szukseges</span>
+                </label>
+            </div>
+
+            <div class="cookie-setting-row">
+                <div>
+                    <p class="cookie-setting-title">Kenyelmi</p>
+                    <p class="cookie-setting-help">Nyelvi beallitas es hasznalati preferenciak megjegyzese.</p>
+                </div>
+                <label class="cookie-switch">
+                    <input type="checkbox" id="cookiePrefToggle">
+                    <span>Engedelyezve</span>
+                </label>
+            </div>
+
+            <p class="cookie-settings-links">
+                Reszletek: <a href="cookie-policy.html" target="_blank" rel="noopener noreferrer">Cookie tajekoztato</a>
+            </p>
+
+            <div class="cookie-settings-actions">
+                <button type="button" class="cookie-btn cookie-btn-secondary" id="cookieSettingsRejectBtn">Csak szukseges</button>
+                <button type="button" class="cookie-btn cookie-btn-primary" id="cookieSettingsSaveBtn">Beallitasok mentese</button>
+            </div>
+        </div>
+    </div>
 
     <div class="package-modal-backdrop" id="packageModal" aria-hidden="true">
         <div class="package-modal" role="dialog" aria-modal="true" aria-labelledby="packageModalTitle">

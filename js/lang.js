@@ -1,6 +1,36 @@
 (function () {
     const STORAGE_KEY = "ovexi_lang";
 
+    function canUsePreferenceStorage() {
+        const manager = window.OVEXI_COOKIE_CONSENT;
+        if (!manager || typeof manager.canUse !== "function") {
+            return false;
+        }
+        return manager.canUse("preferences");
+    }
+
+    function getStoredLanguage() {
+        if (!canUsePreferenceStorage()) {
+            return null;
+        }
+        try {
+            return localStorage.getItem(STORAGE_KEY);
+        } catch {
+            return null;
+        }
+    }
+
+    function setStoredLanguage(lang) {
+        if (!canUsePreferenceStorage()) {
+            return;
+        }
+        try {
+            localStorage.setItem(STORAGE_KEY, lang);
+        } catch {
+            // Ignore storage failures.
+        }
+    }
+
     const dictionary = {
         hu: {
             pageTitle: "OVEXI - Weboldal fejlesztés",
@@ -317,10 +347,10 @@
                 }
 
                 // Always toggle: clicking either pill switches to the opposite language
-                const current = localStorage.getItem(STORAGE_KEY) === "en" ? "en" : "hu";
+                const current = getStoredLanguage() === "en" ? "en" : "hu";
                 const nextLang = current === "en" ? "hu" : "en";
                 isSwitchingLanguage = true;
-                localStorage.setItem(STORAGE_KEY, nextLang);
+                setStoredLanguage(nextLang);
                 document.body.classList.add("lang-switching");
 
                 await new Promise((resolve) => {
@@ -334,9 +364,27 @@
             });
         });
 
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = getStoredLanguage();
         const initialLang = stored === "en" ? "en" : "hu";
         applyLanguage(initialLang);
+
+        window.addEventListener("ovexi-consent-updated", (event) => {
+            const state = event?.detail;
+            if (!state || typeof state !== "object") {
+                return;
+            }
+
+            if (state.preferences) {
+                const currentLang = document.documentElement.getAttribute("lang") === "en" ? "en" : "hu";
+                setStoredLanguage(currentLang);
+            } else {
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                } catch {
+                    // Ignore storage failures.
+                }
+            }
+        });
     }
 
     document.addEventListener("DOMContentLoaded", initLanguageSwitcher);

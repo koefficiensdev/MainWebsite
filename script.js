@@ -36,6 +36,168 @@ function isValidEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+const CONSENT_STORAGE_KEY = "ovexi_cookie_consent_v1";
+const CONSENT_DEFAULT_STATE = Object.freeze({
+    necessary: true,
+    preferences: false,
+    analytics: false,
+    marketing: false,
+    updatedAt: 0
+});
+
+function readConsentState() {
+    try {
+        const raw = localStorage.getItem(CONSENT_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") {
+            return null;
+        }
+        return {
+            ...CONSENT_DEFAULT_STATE,
+            ...parsed,
+            necessary: true
+        };
+    } catch {
+        return null;
+    }
+}
+
+function clearOptionalClientStorage(consentState) {
+    if (consentState.preferences) {
+        return;
+    }
+    try {
+        localStorage.removeItem("ovexi_lang");
+    } catch {
+        // Ignore storage failures.
+    }
+}
+
+(function initCookieConsentManager() {
+    const cookieConsent = document.getElementById("cookieConsent");
+    const cookieAcceptBtn = document.getElementById("cookieAcceptBtn");
+    const cookieRejectBtn = document.getElementById("cookieRejectBtn");
+    const cookieOpenSettingsBtn = document.getElementById("cookieOpenSettingsBtn");
+    const cookieSettingsFab = document.getElementById("cookieSettingsFab");
+    const cookieSettingsModal = document.getElementById("cookieSettingsModal");
+    const cookieSettingsSaveBtn = document.getElementById("cookieSettingsSaveBtn");
+    const cookieSettingsRejectBtn = document.getElementById("cookieSettingsRejectBtn");
+    const cookiePrefToggle = document.getElementById("cookiePrefToggle");
+
+    if (!cookieConsent || !cookieAcceptBtn || !cookieRejectBtn || !cookieOpenSettingsBtn ||
+        !cookieSettingsFab || !cookieSettingsModal || !cookieSettingsSaveBtn ||
+        !cookieSettingsRejectBtn || !cookiePrefToggle) {
+        return;
+    }
+
+    let consentState = readConsentState();
+
+    window.OVEXI_COOKIE_CONSENT = {
+        canUse(category) {
+            const activeState = consentState || CONSENT_DEFAULT_STATE;
+            if (category === "necessary") {
+                return true;
+            }
+            return Boolean(activeState[category]);
+        },
+        getState() {
+            return { ...(consentState || CONSENT_DEFAULT_STATE) };
+        }
+    };
+
+    function syncPreferenceToggle() {
+        const state = consentState || CONSENT_DEFAULT_STATE;
+        cookiePrefToggle.checked = Boolean(state.preferences);
+    }
+
+    function openSettings() {
+        syncPreferenceToggle();
+        cookieSettingsModal.classList.add("is-open");
+        cookieSettingsModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSettings() {
+        cookieSettingsModal.classList.remove("is-open");
+        cookieSettingsModal.setAttribute("aria-hidden", "true");
+    }
+
+    function hideBanner() {
+        cookieConsent.classList.remove("is-open");
+        cookieConsent.setAttribute("aria-hidden", "true");
+    }
+
+    function showBanner() {
+        cookieConsent.classList.add("is-open");
+        cookieConsent.setAttribute("aria-hidden", "false");
+    }
+
+    function persistConsent(nextState) {
+        consentState = {
+            ...CONSENT_DEFAULT_STATE,
+            ...nextState,
+            necessary: true,
+            updatedAt: Date.now()
+        };
+
+        try {
+            localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(consentState));
+        } catch {
+            // Ignore storage failures.
+        }
+
+        clearOptionalClientStorage(consentState);
+
+        window.dispatchEvent(new CustomEvent("ovexi-consent-updated", {
+            detail: { ...consentState }
+        }));
+
+        hideBanner();
+        closeSettings();
+    }
+
+    cookieAcceptBtn.addEventListener("click", () => {
+        persistConsent({ preferences: true, analytics: true, marketing: true });
+    });
+
+    cookieRejectBtn.addEventListener("click", () => {
+        persistConsent({ preferences: false, analytics: false, marketing: false });
+    });
+
+    cookieOpenSettingsBtn.addEventListener("click", openSettings);
+    cookieSettingsFab.addEventListener("click", openSettings);
+
+    cookieSettingsSaveBtn.addEventListener("click", () => {
+        persistConsent({
+            preferences: cookiePrefToggle.checked,
+            analytics: false,
+            marketing: false
+        });
+    });
+
+    cookieSettingsRejectBtn.addEventListener("click", () => {
+        persistConsent({ preferences: false, analytics: false, marketing: false });
+    });
+
+    cookieSettingsModal.addEventListener("click", (event) => {
+        if (event.target === cookieSettingsModal) {
+            closeSettings();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && cookieSettingsModal.classList.contains("is-open")) {
+            closeSettings();
+        }
+    });
+
+    if (consentState) {
+        hideBanner();
+    } else {
+        showBanner();
+    }
+})();
+
 (function () {
     const hamburger = document.getElementById("navHamburger");
     const navbar = document.getElementById("navbar");
