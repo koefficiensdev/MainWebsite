@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /pages/statistics.html
+Disallow: /404.html
+Disallow: /405.html
+
+Sitemap: https://ovexi.hu/sitemap.xml
