@@ -1197,6 +1197,7 @@ footer p {
     position: fixed;
     left: 0;
     right: 0;
+    bottom: 0.8rem;
     bottom: max(0.8rem, env(safe-area-inset-bottom));
     z-index: 2500;
     display: none;
@@ -1280,6 +1281,7 @@ footer p {
 .cookie-settings-fab {
     position: fixed;
     left: 1rem;
+    bottom: 0.8rem;
     bottom: max(0.8rem, env(safe-area-inset-bottom));
     z-index: 2450;
     border: 1px solid rgba(147, 197, 253, 0.4);
@@ -2331,6 +2333,7 @@ nav.nav-open .nav-hamburger span:nth-child(3) {
     }
 
     .cookie-consent {
+        bottom: 0.55rem;
         bottom: max(0.55rem, env(safe-area-inset-bottom));
         padding: 0 0.55rem;
     }
@@ -2350,6 +2353,7 @@ nav.nav-open .nav-hamburger span:nth-child(3) {
 
     .cookie-settings-fab {
         left: 0.55rem;
+        bottom: 0.55rem;
         bottom: max(0.55rem, env(safe-area-inset-bottom));
         font-size: 0.78rem;
         padding: 0.5rem 0.75rem;
