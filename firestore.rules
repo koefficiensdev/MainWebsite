@@ -171,12 +171,13 @@ service cloud.firestore {
 
     match /analytics_events/{eventId} {
       allow create: if isValidAnalyticsCreate();
-      allow read: if isAdmin();
+      allow read: if true;
       allow update, delete: if false;
     }
 
     match /admin_config/stats_access {
-      allow read, create, update: if isAdmin();
+      allow read: if true;
+      allow create, update: if isAdmin();
       allow delete: if isAdmin();
     }
 
