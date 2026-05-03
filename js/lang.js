@@ -1,10 +1,18 @@
 (function () {
     const STORAGE_KEY = "ovexi_lang";
+    const CONSENT_STORAGE_KEY = "ovexi_cookie_consent_v1";
 
     function canUsePreferenceStorage() {
         const manager = window.OVEXI_COOKIE_CONSENT;
         if (!manager || typeof manager.canUse !== "function") {
-            return false;
+            try {
+                const rawConsent = localStorage.getItem(CONSENT_STORAGE_KEY);
+                if (!rawConsent) return false;
+                const parsedConsent = JSON.parse(rawConsent);
+                return Boolean(parsedConsent && parsedConsent.preferences);
+            } catch {
+                return false;
+            }
         }
         return manager.canUse("preferences");
     }
