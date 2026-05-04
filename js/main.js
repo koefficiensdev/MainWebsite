@@ -945,8 +945,8 @@ window.selectPackage = selectPackage;
         const phone = normalizeText(document.getElementById("customPhone")?.value);
         const details = normalizeText(document.getElementById("customDetails")?.value);
 
-        if (!name || !email) {
-            alert("Kérlek add meg a nevet és az email címet.");
+        if (!email) {
+            alert("Kérlek add meg az email címet.");
             return;
         }
 
@@ -1052,8 +1052,8 @@ if (contactForm) {
             return;
         }
 
-        if (!formData.name || !formData.email || !formData.package || !formData.message) {
-            alert("Kerlek toltsd ki a kotelezo mezoket.");
+        if (!formData.email) {
+            alert("Kerlek add meg az email cimet.");
             submitButton.textContent = originalText;
             submitButton.disabled = false;
             return;
@@ -1066,9 +1066,9 @@ if (contactForm) {
             return;
         }
 
-        if (formData.name.length < 2 || formData.name.length > 80 ||
-            formData.package.length < 3 || formData.package.length > 80 ||
-            formData.message.length < 10 || formData.message.length > 1200 ||
+        if (formData.name.length > 80 ||
+            formData.package.length > 80 ||
+            formData.message.length > 1200 ||
             formData.phone.length > 32) {
             alert("A megadott adatok formaja nem megfelelo.");
             submitButton.textContent = originalText;

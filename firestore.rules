@@ -42,15 +42,12 @@ service cloud.firestore {
         && request.resource.data.message is string
         && request.resource.data.source is string
         && request.resource.data.status is string
-        && request.resource.data.name.size() >= 2
         && request.resource.data.name.size() <= 80
         && request.resource.data.email.size() >= 5
         && request.resource.data.email.size() <= 160
         && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
         && request.resource.data.phone.size() <= 32
-        && request.resource.data.package.size() >= 3
         && request.resource.data.package.size() <= 80
-        && request.resource.data.message.size() >= 10
         && request.resource.data.message.size() <= 1200
         && request.resource.data.source == 'website_contact_form'
         && request.resource.data.status == 'new'
@@ -74,21 +71,20 @@ service cloud.firestore {
         && request.resource.data.email is string
         && request.resource.data.phone is string
         && request.resource.data.details is string
-        && request.resource.data.pages is int
+        && request.resource.data.pages is string
         && request.resource.data.features is list
         && request.resource.data.price is int
         && request.resource.data.source is string
         && request.resource.data.status is string
-        && request.resource.data.name.size() >= 2
         && request.resource.data.name.size() <= 60
         && request.resource.data.email.size() >= 5
         && request.resource.data.email.size() <= 100
         && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
         && request.resource.data.phone.size() <= 32
         && request.resource.data.details.size() <= 1200
-        && request.resource.data.pages >= 1
-        && request.resource.data.pages <= 20
-        && request.resource.data.price >= 50000
+        && request.resource.data.pages.size() >= 1
+        && request.resource.data.pages.size() <= 20
+        && request.resource.data.price >= 20000
         && request.resource.data.price <= 600000
         && request.resource.data.source == 'website_custom_package'
         && request.resource.data.status == 'new'
