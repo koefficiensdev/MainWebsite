@@ -1,0 +1,14 @@
+// Small dependency-free ZIP writer. Files are stored without compression;
+// UTF-8 filenames, CRC32 and central-directory offsets follow the ZIP format.
+const encoder=new TextEncoder();
+function crc32(bytes){let crc=0xffffffff;for(const byte of bytes){crc^=byte;for(let bit=0;bit<8;bit++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}return (crc^0xffffffff)>>>0;}
+export function zipFiles(files){const chunks=[],central=[];let offset=0;
+  for(const [name,value] of Object.entries(files)){if(!/^[\w.-]+$/.test(name))throw Error('Érvénytelen fájlnév.');const filename=encoder.encode(name),data=typeof value==='string'?encoder.encode(value):value,crc=crc32(data),header=new Uint8Array(30+filename.length),h=new DataView(header.buffer);
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x800,true);h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,filename.length,true);header.set(filename,30);chunks.push(header,data);
+    const entry=new Uint8Array(46+filename.length),c=new DataView(entry.buffer);c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x800,true);c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,filename.length,true);c.setUint32(42,offset,true);entry.set(filename,46);central.push(entry);offset+=header.length+data.length;
+  }
+  const length=central.reduce((sum,c)=>sum+c.length,0),end=new Uint8Array(22),v=new DataView(end.buffer);v.setUint32(0,0x06054b50,true);v.setUint16(8,central.length,true);v.setUint16(10,central.length,true);v.setUint32(12,length,true);v.setUint32(16,offset,true);
+  const result=new Uint8Array(offset+length+22);let cursor=0;for(const part of [...chunks,...central,end]){result.set(part,cursor);cursor+=part.length;}return result;
+}
+async function png(svg){const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const image=new Image();image.src=url;await image.decode();const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;if(!canvas.width||canvas.width>2000||canvas.height>2000)throw Error('Hibás képméret.');canvas.getContext('2d').drawImage(image,0,0);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('A kép mentése nem sikerült.');return new Uint8Array(await blob.arrayBuffer());}finally{URL.revokeObjectURL(url);}}
+export async function downloadPackage(files,name){const packaged={...files};for(const [filename,content] of Object.entries(files))if(filename.endsWith('.svg'))packaged[filename.replace(/\.svg$/,'.png')]=await png(content);const url=URL.createObjectURL(new Blob([zipFiles(packaged)],{type:'application/zip'})),link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

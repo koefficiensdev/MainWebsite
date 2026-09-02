@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>OVEXI · Ügyféltér</title>
+  <link rel="stylesheet" href="/css/customer.css?v=20260902-1">
+</head>
+<body>
+  <header class="customer-header"><a href="/"><img src="/assets/images/logo-256.png" alt="OVEXI"></a><span>Ügyféltér</span></header>
+  <main>
+    <section id="accessPanel" class="access-card">
+      <p class="eyebrow">Biztonságos rendeléskövetés</p>
+      <h1>A munkád állapota, egy helyen.</h1>
+      <p>Írd be a rendelési azonosítót és a rendelésnél használt e-mail-címet. Ha az adatok egyeznek, 24 óráig érvényes belépési linket küldünk.</p>
+      <form id="accessForm">
+        <label>Rendelési azonosító<input name="orderNumber" autocomplete="off" placeholder="OVX-…" maxlength="60" required></label>
+        <label>E-mail-cím<input name="email" type="email" autocomplete="email" maxlength="160" required></label>
+        <button type="submit">Belépési link kérése →</button>
+        <p id="accessStatus" class="status" role="status"></p>
+      </form><button id="retryAccess" type="button" class="secondary" hidden>Betöltés újrapróbálása</button>
+      <p class="fineprint">Biztonsági okból nem jelezzük, hogy melyik adat volt helytelen. Kártyaadatot vagy jelszót soha nem kérünk e-mailben.</p>
+    </section>
+    <section id="workspace" hidden>
+      <div class="workspace-title"><div><p class="eyebrow">Aktív ügyfélmunka</p><h1 id="companyName">Rendelés</h1><p id="orderMeta"></p></div><button id="logoutButton" class="secondary" type="button">Kilépés</button></div>
+      <div class="workspace-toolbar"><button id="refreshWorkspace" type="button" class="secondary">Állapot frissítése</button><p id="workspaceStatus" role="status"></p></div><p class="callout">Az egyeztetés és az előnézet jóváhagyása nem indít fizetést. A fizetés és a végleges átadás külön lépés.</p><div class="status-grid" id="statusGrid"></div>
+      <section class="surface"><div class="section-head"><div><p class="eyebrow">Folyamat</p><h2>Hol tart a munka?</h2></div><span id="stageBadge" class="badge"></span></div><div id="workflowSteps" class="timeline"></div><p id="nextAction" class="callout"></p></section>
+      <section class="surface"><div class="section-head"><div><p class="eyebrow">Karbantartás</p><h2>Figyelt weboldalak</h2></div></div><div id="maintenanceHistory"></div></section>
+      <section class="surface" id="briefSection"><details><summary>Az igény adatainak pontosítása</summary><p id="missingFields"></p><form id="briefForm"><label>Vállalkozás bemutatása<textarea name="businessDescription" required minlength="10" maxlength="1200" rows="4"></textarea></label><label>Célközönség<input name="targetAudience" maxlength="300"></label><label>Jelenlegi weboldal (HTTPS)<input name="currentUrl" type="url" maxlength="300" placeholder="https://pelda.hu"></label><label>Megjegyzések<textarea name="notes" maxlength="1600" rows="3"></textarea></label><p>A pontosítás után az előnézet korábbi jóváhagyását újra kell egyeztetni.</p><button type="submit">Pontosítás mentése</button><p id="briefStatus" role="status"></p></form></details></section>
+      <section class="surface"><p class="eyebrow">Ellenőrzés</p><h2>Előnézet és jóváhagyás</h2><div id="previewContent"></div><form id="decisionForm" hidden><label>Döntés<select name="decision"><option value="approved">Az előnézetet jóváhagyom</option><option value="changes_requested">Módosítást kérek</option></select></label><label>Megjegyzés / kért módosítás<textarea name="note" maxlength="1500" rows="3"></textarea></label><button type="submit">Döntés rögzítése</button><p id="decisionStatus" role="status"></p></form></section>
+      <section class="surface"><p class="eyebrow">Végleges anyagok</p><h2>Átadás</h2><div id="deliveryContent"></div></section>
+      <div class="two-column">
+        <section class="surface"><p class="eyebrow">Kérések</p><h2>Üzenet az OVEXI csapatának</h2><form id="requestForm"><label>Típus<select name="kind"><option value="question">Kérdés</option><option value="content">Tartalom / adat küldése</option><option value="change">Módosítási kérés</option><option value="maintenance">Karbantartási kérés</option></select></label><label>Üzenet<textarea name="message" minlength="5" maxlength="1500" rows="6" required></textarea></label><button type="submit">Kérés elküldése</button><p id="requestStatus" class="status" role="status"></p></form></section>
+        <section class="surface"><p class="eyebrow">Előzmények</p><h2>Beküldött kérések</h2><div id="requestHistory"></div><p id="historyNote" class="fineprint"></p></section>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/js/customer.js?v=20260902-1"></script>
+</body>
+</html>

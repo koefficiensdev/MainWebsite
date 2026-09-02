@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
 Disallow: /pages/statistics.html
+Disallow: /admin
+Disallow: /pages/admin.html
+Disallow: /ugyfelter
+Disallow: /foglalas
+Disallow: /pages/
 Disallow: /404.html
 Disallow: /405.html
 

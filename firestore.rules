@@ -91,6 +91,7 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
     }
 
+
       function isValidAnalyticsCreate() {
         return request.resource.data.keys().hasOnly([
           'sessionId',
@@ -165,14 +166,116 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    match /orders/{orderId} {
+      // Orders are created only by the server-side validated, rate-limited endpoint.
+      allow create, delete: if false;
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.status in ['new', 'needs_review', 'qualified', 'cancelled']
+        && !(resource.data.status in ['completed', 'cancelled']);
+    }
+
+    match /commerce_tasks/{taskId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /stripe_events/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Outbound mail evidence is server-owned, never an editable CRM status.
+    match /outreach_research/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /outreach_replies/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /outreach_controls/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /outreach_messages/{messageId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    function validCampaign() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['name','platform','destination','creative','budgetMinor','currency','budgetPeriod','status','source','createdAt','updatedAt','createdBy'])
+        && d.keys().hasOnly(['name','platform','destination','creative','budgetMinor','currency','budgetPeriod','status','source','createdAt','updatedAt','createdBy'])
+        && d.name is string && d.name.size() >= 2 && d.name.size() <= 120
+        && d.platform in ['Meta Ads','Google Ads','TikTok Ads','LinkedIn Ads','E-mail','Egyéb']
+        && d.destination is string && d.destination.size() <= 500 && d.destination.matches('^https?://.+')
+        && d.creative is string && d.creative.size() <= 2000
+        && d.budgetMinor is int && d.budgetMinor >= 0 && d.budgetMinor <= 10000000000
+        && d.currency == 'HUF' && d.budgetPeriod == 'monthly'
+        && d.status in ['planned','active','paused','completed'] && d.source == 'manual'
+        && d.createdAt is timestamp && d.updatedAt == request.time && d.createdBy is string;
+    }
+
+    match /campaigns/{campaignId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && validCampaign()
+        && request.resource.data.createdAt == request.time && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin() && validCampaign()
+        && request.resource.data.createdAt == resource.data.createdAt && request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if false;
+    }
+
+    function validExpense() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['label','amountMinor','currency','incurredOn','category','campaignId','source','createdAt','updatedAt','createdBy'])
+        && d.keys().hasOnly(['label','amountMinor','currency','incurredOn','category','campaignId','source','createdAt','updatedAt','createdBy'])
+        && d.label is string && d.label.size() >= 2 && d.label.size() <= 120
+        && d.amountMinor is int && d.amountMinor > 0 && d.amountMinor <= 10000000000
+        && d.currency in ['HUF','EUR','USD']
+        && d.incurredOn is string && d.incurredOn.matches('^20[0-9]{2}-[0-9]{2}-[0-9]{2}$')
+        && d.category in ['advertising','hosting','ai','invoicing','email','other']
+        && d.campaignId is string && d.campaignId.size() <= 80
+        && (d.campaignId == '' || exists(/databases/$(database)/documents/campaigns/$(d.campaignId)))
+        && d.source == 'manual' && d.createdAt is timestamp && d.updatedAt == request.time && d.createdBy is string;
+    }
+
+    match /expenses/{expenseId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && validExpense()
+        && request.resource.data.createdAt == request.time && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin() && validExpense()
+        && request.resource.data.createdAt == resource.data.createdAt && request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if false;
+    }
+
+    match /leads/{leadId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    match /production_copy_jobs/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /production_jobs/{jobId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /order_workflows/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /customer_requests/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /customer_notifications/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /customer_sessions/{id} { allow read, write: if false; }
+    match /customer_access_limits/{id} { allow read, write: if false; }
+    match /maintenance_sites/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /internal_alerts/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /booking_tenants/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /booking_notifications/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /operations_health/{id} { allow read: if isAdmin(); allow write: if false; }
+
     match /analytics_events/{eventId} {
       allow create: if isValidAnalyticsCreate();
-      allow read: if true;
+      allow read: if isAdmin();
       allow update, delete: if false;
     }
 
     match /admin_config/stats_access {
-      allow read: if true;
+      allow read: if isAdmin();
       allow create, update: if isAdmin();
       allow delete: if isAdmin();
     }

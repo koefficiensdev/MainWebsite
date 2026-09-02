@@ -1,0 +1,27 @@
+{
+  "name": "ovexi-functions",
+  "private": true,
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "scripts": {
+    "check": "node --check index.js && node --check commerce.js && node --check commerce-domain.js && node --check operations.js && node --check operations-domain.js && node --check invoice-workflow.js && node --check catalog.js && node --check billingo.js && node --check booking-domain.js && node --check booking-service.js && node --check booking.js && node --check set-admin.js && node --check import-leads.js && node --check operations-service.js",
+    "set-admin": "node set-admin.js",
+    "import-leads": "node import-leads.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.2.0",
+    "firebase-functions": "^7.3.2",
+    "imapflow": "^1.7.6",
+    "ipaddr.js": "^2.5.0",
+    "mailparser": "^3.9.17",
+    "nodemailer": "^9.0.5",
+    "openai": "^7.4.0",
+    "stripe": "^22.4.0"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}

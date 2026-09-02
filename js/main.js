@@ -1,16 +1,13 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { STOREFRONT_CONFIG } from "./storefront-config.js?v=20260830-1";
+import {safeStorage,cleanCart,submissionManager} from "./checkout-model.js?v=20260831-1";
 import {
-    getFirestore,
-    collection,
-    addDoc,
-    query,
-    orderBy,
-    limit,
-    getDocs,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  PRODUCT_CATALOG,
+  CATEGORY_LABELS,
+  billingLabel,
+  formatPrice,
+  getProduct
+} from "./catalog.js?v=20260830-3";
 
-// Firebase config — safe to expose in frontend; protect data with Firestore rules
 const firebaseConfig = {
   apiKey: "AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",
   authDomain: "ovexi-6ef38.firebaseapp.com",
@@ -21,1823 +18,381 @@ const firebaseConfig = {
   measurementId: "G-5CV4P809ZL"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+let appPromise,functionsSdkPromise,firestoreSdkPromise;
+async function firebaseApp(){appPromise||=import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js").then(({initializeApp})=>initializeApp(firebaseConfig));return appPromise;}
+async function functionsSdk(){functionsSdkPromise||=Promise.all([firebaseApp(),import("https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js")]);return functionsSdkPromise;}
+async function firestoreSdk(){firestoreSdkPromise||=Promise.all([firebaseApp(),import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js")]);return firestoreSdkPromise;}
+const CART_STORAGE_KEY = "ovexi_cart_v2";
+const COOKIE_STORAGE_KEY = "ovexi_cookie_consent_v2";
+const ORDER_COOLDOWN_KEY = "ovexi_last_order_at";
+const ORDER_COOLDOWN_MS = 2 * 60 * 1000;
+const local=safeStorage(()=>window.localStorage),session=safeStorage(()=>window.sessionStorage);
+const submission=submissionManager(session);
 
-const CONTACT_SUBMIT_COOLDOWN_MS = 2 * 60 * 1000;
-const REVIEW_SUBMIT_COOLDOWN_MS = 60 * 1000;
-const MIN_FORM_FILL_MS = 2500;
+const state = {
+  category: ["website","marketing","maintenance","oneoff"].includes(new URLSearchParams(location.search).get("category")) ? new URLSearchParams(location.search).get("category") : "website",
+  cart: submission.pending?.itemIds || readCart()
+};
 
-function normalizeText(value) {
-    return String(value || "").replace(/\s+/g, " ").trim();
+const productGrid = document.getElementById("productGrid");
+const cartCount = document.getElementById("cartCount");
+const cartDrawer = document.getElementById("cartDrawer");
+const drawerBackdrop = document.getElementById("drawerBackdrop");
+const cartItems = document.getElementById("cartItems");
+const cartSummary = document.getElementById("cartSummary");
+const startCheckoutButton = document.getElementById("startCheckoutButton");
+const checkoutBackdrop = document.getElementById("checkoutBackdrop");
+const checkoutForm = document.getElementById("checkoutForm");
+const checkoutReview = document.getElementById("checkoutReview");
+const checkoutStatus = document.getElementById("checkoutStatus");
+const toast = document.getElementById("toast");
+let toastTimer = null;
+let formLoadedAt = Date.now();
+let overlayReturnFocus=null,drawerCloseTimer=null;
+
+function readCart() {
+  try {
+    return cleanCart(JSON.parse(local.get(CART_STORAGE_KEY) || "[]"));
+  } catch {
+    return [];
+  }
+}
+
+function saveCart() {
+  local.set(CART_STORAGE_KEY, JSON.stringify(state.cart));
+}
+
+function cartProducts() {
+  return state.cart.map(getProduct).filter(Boolean);
+}
+
+function totals() {
+  return cartProducts().reduce((result, product) => {
+    if (product.billing === "monthly") result.monthly += product.price;
+    else result.once += product.price;
+    return result;
+  }, { once: 0, monthly: 0 });
+}
+
+function renderCatalog() {
+  const products = PRODUCT_CATALOG.filter((product) => product.category === state.category);
+  productGrid.innerHTML = products.map((product) => `
+    <article class="product-card${product.featured ? " is-featured" : ""}">
+      <span class="product-badge">${escapeHtml(product.badge)}</span>
+      <h3>${escapeHtml(product.name)}</h3>
+      <p class="product-description">${escapeHtml(product.description)}</p>
+      <div class="product-price"><strong>${formatPrice(product.price)}</strong><span>${billingLabel(product)}</span></div>
+      <ul class="product-features">${product.features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("")}</ul>
+      ${product.availabilityNote ? `<p class="checkout-note">${escapeHtml(product.availabilityNote)}</p>` : ""}
+      <button class="button ${product.featured ? "button-primary" : "button-ghost"} button-full" type="button" data-add-product="${product.id}">
+        ${state.cart.includes(product.id) ? "A kosárban" : product.availability === "request_only" ? "Igényfelmérést kérek" : "Kosárba teszem"}
+      </button>
+    </article>
+  `).join("");
+}
+
+function renderCart() {
+  const products = cartProducts();
+  const calculated = totals();
+  cartCount.textContent = String(products.length);
+  document.getElementById("openCartButton")?.setAttribute("aria-label",`Kosár, ${products.length} termék, megnyitás`);
+
+  if (!products.length) {
+    cartItems.innerHTML = `<div class="empty-cart"><div><h3>A kosarad még üres</h3><p>Válassz egy weboldal-, marketing- vagy karbantartási csomagot.</p></div></div>`;
+  } else {
+    cartItems.innerHTML = products.map((product) => `
+      <article class="cart-item">
+        <div><h3>${escapeHtml(product.name)}</h3><p>${CATEGORY_LABELS[product.category]} · ${billingLabel(product)}</p></div>
+        <div class="cart-item-price">${formatPrice(product.price)}</div>
+        <button class="remove-item" type="button" data-remove-product="${product.id}">Eltávolítás</button>
+      </article>
+    `).join("");
+  }
+
+  const hasWebsite = products.some((product) => product.category === "website");
+  cartSummary.innerHTML = `
+    <div class="summary-line"><span>Egyszeri díj</span><strong>${formatPrice(calculated.once)}</strong></div>
+    <div class="summary-line"><span>Havi díj</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>
+    ${hasWebsite ? `<p class="checkout-note">A weboldal egyszeri ára nem tartalmaz folyamatos tárhelyet, domainmegújítást vagy e-mail-szolgáltatást. Ezek díját fizetés előtt külön egyeztetjük.</p>` : ""}
+    ${products.some((p) => p.availability === "request_only") ? `<p class="checkout-note">A foglalós csomag fejlesztés alatt áll. Erre most fizetés nélküli igényfelmérést fogadunk.</p>` : ""}
+  `;
+  startCheckoutButton.disabled = products.length === 0;
+  renderCatalog();
+}
+
+function addToCart(productId) {
+  if(submission.pending){showToast("Előbb ellenőrizd a függőben lévő beküldést.");openCheckout();return;}
+  const product = getProduct(productId);
+  if (!product) return;
+  if (state.cart.includes(productId)) {
+    openCart();
+    return;
+  }
+
+  if (["website", "marketing", "maintenance"].includes(product.category)) {
+    const replaced = state.cart.find((id) => getProduct(id)?.category === product.category);
+    state.cart = state.cart.filter((id) => getProduct(id)?.category !== product.category);
+    if (replaced) showToast(`A korábbi ${CATEGORY_LABELS[product.category].toLowerCase()} csomagot lecseréltük.`);
+  }
+
+  state.cart.push(productId);
+  saveCart();
+  renderCart();
+  showToast(`${product.name} a kosárba került.`);
+}
+
+function removeFromCart(productId) {
+  if(submission.pending){showToast("A függőben lévő igény csomagjai nem módosíthatók.");return;}
+  state.cart = state.cart.filter((id) => id !== productId);
+  saveCart();
+  renderCart();
+}
+
+function openCart() {
+  window.clearTimeout(drawerCloseTimer);
+  overlayReturnFocus=document.activeElement;
+  drawerBackdrop.hidden = false;
+  cartDrawer.inert = false;
+  requestAnimationFrame(() => cartDrawer.classList.add("is-open"));
+  document.body.classList.add("is-locked");
+  document.getElementById("closeCartButton")?.focus();
+}
+
+function closeCart() {
+  cartDrawer.classList.remove("is-open");
+  cartDrawer.inert = true;
+  drawerCloseTimer=window.setTimeout(() => { drawerBackdrop.hidden = true; }, 280);
+  if(checkoutBackdrop.hidden)document.body.classList.remove("is-locked");
+  overlayReturnFocus?.focus();
+}
+
+function openCheckout() {
+  if (!state.cart.length) return;
+  closeCart();
+  overlayReturnFocus=document.getElementById('openCartButton');
+  checkoutReview.innerHTML = orderSummaryMarkup();
+  checkoutBackdrop.hidden = false;
+  document.body.classList.add("is-locked");
+  formLoadedAt = Date.now();
+  const pending=submission.pending;
+  if(pending){for(const [key,value] of Object.entries(pending)){const field=checkoutForm.elements.namedItem(key);if(field){if(field.type==='checkbox')field.checked=value;else field.value=value;}}lockCheckout(true);checkoutForm.querySelector('[type="submit"]').disabled=false;setFormStatus('Egy korábbi beküldés eredménye még bizonytalan. Ugyanazokkal az adatokkal ellenőrizzük újra; nem indítunk új igényt.');}
+  (pending?checkoutForm.querySelector('[type="submit"]'):checkoutForm.querySelector("input"))?.focus();
+}
+
+function closeCheckout() {
+  if(submission.busy)return;
+  checkoutBackdrop.hidden = true;
+  document.body.classList.remove("is-locked");
+  setFormStatus("");
+  overlayReturnFocus?.focus();
+}
+function lockCheckout(locked){for(const element of checkoutForm.elements)element.disabled=locked;}
+function renderReceipt(){const receipt=submission.receipt,box=document.getElementById('orderReceipt');if(!receipt||!box)return;box.hidden=false;box.innerHTML=`<div class="success-state"><p class="eyebrow">Szerver által visszaigazolt igény</p><h2>Megkaptuk az igényedet.</h2><p>Azonosító: <strong>${escapeHtml(receipt.orderNumber)}</strong></p><p>Ez a visszaigazolás nem fizetési vagy teljesítési igazolás. Az egyeztetéshez őrizd meg az azonosítót.</p><p>${receipt.emailQueued?'Az e-mailes visszaigazolás küldési sorba került; ez még nem kézbesítési igazolás.':'Ha nem érkezik e-mail, az azonosítóval az info@ovexi.hu címen érdeklődhetsz.'}</p><p>Az ügyféltérben az azonosítóddal és a megadott e-mail-címmel kérhetsz belépési linket, követheted a munkát és pontosíthatod az adatokat.</p><a class="button button-primary" href="/ugyfelter">Ügyféltér megnyitása</a> <a class="button button-ghost" href="mailto:info@ovexi.hu?subject=${encodeURIComponent('Igény egyeztetése: '+receipt.orderNumber)}">Kapcsolat az igényemről</a></div>`;}
+
+function orderSummaryMarkup() {
+  const calculated = totals();
+  return `
+    <div class="summary-line"><span>Kiválasztott csomagok</span><strong>${cartProducts().length} db</strong></div>
+    ${cartProducts().map((product) => `<div class="summary-line"><span>${escapeHtml(product.name)}</span><span>${formatPrice(product.price)} ${product.billing === "monthly" ? "/ hó" : ""}</span></div>`).join("")}
+    <div class="summary-line"><span>Egyszeri összesen</span><strong>${formatPrice(calculated.once)}</strong></div>
+    <div class="summary-line"><span>Havonta összesen</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>
+    <p class="checkout-note">A havi összeg csak a kosárba tett havi modulokat tartalmazza. A külső szolgáltatók üzemeltetési díjai ezen felül, külön egyeztetés szerint fizetendők.</p>
+  `;
+}
+
+function setFormStatus(message, isError = false) {
+  checkoutStatus.textContent = message;
+  checkoutStatus.classList.toggle("is-error", isError);
+}
+
+function createOrderNumber() {
+  const timePart = Date.now().toString(36).toUpperCase();
+  const randomPart = crypto.getRandomValues(new Uint32Array(1))[0].toString(36).slice(0, 4).toUpperCase();
+  return `OVX-${timePart}-${randomPart}`;
+}
+
+async function submitOrder(event) {
+  event.preventDefault();
+  if(submission.busy)return;
+  const submitButton=checkoutForm.querySelector("button[type='submit']");
+  const formData=new FormData(checkoutForm);
+  if(formData.get("website"))return;
+  if(!STOREFRONT_CONFIG.orderApiEnabled){setFormStatus("Az online igényfogadás átmenetileg nem elérhető. Írj az info@ovexi.hu címre.",true);return;}
+  if(!submission.pending){
+    if(Date.now()-formLoadedAt<2500){setFormStatus("Ellenőrizd az adatokat, majd küldd be az igényt.",true);return;}
+    if(Date.now()-Number(local.get(ORDER_COOLDOWN_KEY)||0)<ORDER_COOLDOWN_MS){setFormStatus("Egy igényt már elküldtél. Új igény előtt várj két percet.",true);return;}
+  }
+  const raw={...Object.fromEntries(formData),itemIds:[...state.cart],termsAccepted:formData.get("termsAccepted")==="on",operatingCostsAcknowledged:formData.get("operatingCostsAcknowledged")==="on",marketingConsent:formData.get("marketingConsent")==="on"};
+  lockCheckout(true);setFormStatus("Az igény rögzítése folyamatban…");
+  let accepted=null;
+  try{
+    const [app,{getFunctions,httpsCallable}]=await functionsSdk();
+    const submit=httpsCallable(getFunctions(app,"europe-west1"),"submitOrder",{timeout:70000});
+    const result=await submission.send(raw,async payload=>(await submit(payload)).data);
+    accepted=result;
+    local.set(ORDER_COOLDOWN_KEY,String(Date.now()));
+    state.cart=[];saveCart();renderCart();renderReceipt();
+    checkoutForm.reset();lockCheckout(false);submitButton.textContent='Igény beküldése — fizetés nélkül';closeCheckout();
+    const receiptBox=document.getElementById("orderReceipt");
+    receiptBox.scrollIntoView({behavior:"smooth",block:"center"});receiptBox.focus();
+    logAnalytics("order_submitted",result.orderNumber);
+    if(result.checkoutUrl){
+      let destination;
+      try{destination=new URL(result.checkoutUrl);}catch{}
+      if(destination?.protocol==="https:"&&destination.hostname==="checkout.stripe.com"&&!destination.username&&!destination.password){window.location.assign(destination.href);return;}
+      showToast("Az igényt rögzítettük, de a fizetési linket ellenőrizni kell. Ne küldd be újra.");
+    }else if(result.status==="checkout_failed")showToast("Az igényt rögzítettük. A fizetés indítása nem sikerült; ne küldd be újra.");
+  }catch(error){
+    if(accepted){setFormStatus("Az igényedet rögzítettük: "+accepted.orderNumber+". Ne küldd be újra.",false);return;}
+    if(submission.pending){
+      lockCheckout(true);submitButton.disabled=false;submitButton.textContent="Ugyanazon igény újraellenőrzése";
+      setFormStatus("A beküldés eredménye bizonytalan. Az adataidat ehhez az igényhez megőriztük ebben a böngészőlapban. A gomb ugyanazt a kérést ellenőrzi újra; ne készíts új igényt.",true);
+    }else{
+      lockCheckout(false);submitButton.textContent="Igény beküldése — fizetés nélkül";
+      const validation=error.code==="functions/invalid-argument"||!error.code;
+      setFormStatus(validation?String(error.message||"Ellenőrizd a kötelező mezőket.").slice(0,300):"Most nem fogadható új igény. Próbáld később, vagy írj az info@ovexi.hu címre.",true);
+    }
+  }
+}
+
+function normalize(value, maxLength) {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
 
 function isValidEmail(value) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-const CONSENT_STORAGE_KEY = "ovexi_cookie_consent_v1";
-const CONSENT_DEFAULT_STATE = Object.freeze({
-    necessary: true,
-    preferences: false,
-    analytics: false,
-    marketing: false,
-    updatedAt: 0
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" })[character]);
+}
+
+function showToast(message) {
+  window.clearTimeout(toastTimer);
+  toast.textContent = message;
+  toast.hidden = false;
+  toastTimer = window.setTimeout(() => { toast.hidden = true; }, 3200);
+}
+
+function initCookieConsent() {
+  const banner = document.getElementById("cookieBanner");
+  document.getElementById('openCookieSettings')?.addEventListener('click',()=>{banner.hidden=false;document.getElementById('cookieReject')?.focus();});
+  if (!local.get(COOKIE_STORAGE_KEY)) banner.hidden = false;
+  document.getElementById("cookieReject")?.addEventListener("click", () => {
+    local.set(COOKIE_STORAGE_KEY, JSON.stringify({ analytics: false, updatedAt: Date.now() }));
+    banner.hidden = true;
+  });
+  document.getElementById("cookieAccept")?.addEventListener("click", () => {
+    local.set(COOKIE_STORAGE_KEY, JSON.stringify({ analytics: true, updatedAt: Date.now() }));
+    banner.hidden = true;
+    logAnalytics("consent_accepted", "analytics");
+  });
+}
+
+async function logAnalytics(eventType, value = "") {
+  try {
+    const consent = JSON.parse(local.get(COOKIE_STORAGE_KEY) || "{}");
+    if (!consent.analytics) return;
+    const [app,{addDoc,collection,getFirestore,serverTimestamp}]=await firestoreSdk(),db=getFirestore(app);
+    await addDoc(collection(db, "analytics_events"), {
+      sessionId: getSessionId(),
+      eventType: normalize(eventType, 40),
+      pagePath: location.pathname.slice(0, 200),
+      pageUrl: (location.origin+location.pathname).slice(0, 500),
+      referrer: document.referrer ? new URL(document.referrer).origin.slice(0,500) : "",
+      source: new URLSearchParams(location.search).get("utm_source")?.slice(0, 120) || "direct",
+      lang: document.documentElement.lang,
+      screenW: window.screen.width,
+      screenH: window.screen.height,
+      viewportW: window.innerWidth,
+      viewportH: window.innerHeight,
+      userAgent: navigator.userAgent.slice(0, 320),
+      target: "storefront",
+      value: normalize(value, 320),
+      consentAnalytics: true,
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.debug("Analytics skipped", error);
+  }
+}
+
+function getSessionId() {
+  const key = "ovexi_session_v2";
+  let id = session.get(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    session.set(key, id);
+  }
+  return id;
+}
+
+document.querySelectorAll(".catalog-tab").forEach((button) => {
+  button.addEventListener("click", () => {
+    state.category = button.dataset.category;
+    document.querySelectorAll(".catalog-tab").forEach((tab) => {
+      const active = tab === button;
+      tab.classList.toggle("is-active", active);
+      tab.setAttribute("aria-selected", String(active));
+    });
+    renderCatalog();
+  });
 });
 
-function readConsentState() {
-    try {
-        const raw = localStorage.getItem(CONSENT_STORAGE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") {
-            return null;
-        }
-        return {
-            ...CONSENT_DEFAULT_STATE,
-            ...parsed,
-            necessary: true
-        };
-    } catch {
-        return null;
-    }
-}
-
-function clearOptionalClientStorage(consentState) {
-    if (consentState.preferences) {
-        return;
-    }
-    try {
-        localStorage.removeItem("ovexi_lang");
-    } catch {
-        // Ignore storage failures.
-    }
-}
-
-(function initCookieConsentManager() {
-    const cookieConsent = document.getElementById("cookieConsent");
-    const cookieAcceptBtn = document.getElementById("cookieAcceptBtn");
-    const cookieRejectBtn = document.getElementById("cookieRejectBtn");
-    const cookieOpenSettingsBtn = document.getElementById("cookieOpenSettingsBtn");
-    const cookieSettingsFab = document.getElementById("cookieSettingsFab");
-    const cookieSettingsModal = document.getElementById("cookieSettingsModal");
-    const cookieSettingsSaveBtn = document.getElementById("cookieSettingsSaveBtn");
-    const cookieSettingsRejectBtn = document.getElementById("cookieSettingsRejectBtn");
-    const cookiePrefToggle = document.getElementById("cookiePrefToggle");
-    const cookieAnalyticsToggle = document.getElementById("cookieAnalyticsToggle");
-
-    if (!cookieConsent || !cookieAcceptBtn || !cookieRejectBtn || !cookieOpenSettingsBtn ||
-        !cookieSettingsFab || !cookieSettingsModal || !cookieSettingsSaveBtn ||
-        !cookieSettingsRejectBtn || !cookiePrefToggle || !cookieAnalyticsToggle) {
-        return;
-    }
-
-    let consentState = readConsentState();
-
-    window.OVEXI_COOKIE_CONSENT = {
-        canUse(category) {
-            const activeState = consentState || CONSENT_DEFAULT_STATE;
-            if (category === "necessary") {
-                return true;
-            }
-            return Boolean(activeState[category]);
-        },
-        getState() {
-            return { ...(consentState || CONSENT_DEFAULT_STATE) };
-        }
-    };
-
-    function syncPreferenceToggle() {
-        const state = consentState || CONSENT_DEFAULT_STATE;
-        cookiePrefToggle.checked = Boolean(state.preferences);
-        cookieAnalyticsToggle.checked = Boolean(state.analytics);
-    }
-
-    function openSettings() {
-        syncPreferenceToggle();
-        cookieSettingsModal.classList.add("is-open");
-        cookieSettingsModal.setAttribute("aria-hidden", "false");
-    }
-
-    function closeSettings() {
-        cookieSettingsModal.classList.remove("is-open");
-        cookieSettingsModal.setAttribute("aria-hidden", "true");
-    }
-
-    function hideBanner() {
-        cookieConsent.classList.remove("is-open");
-        cookieConsent.setAttribute("aria-hidden", "true");
-    }
-
-    function showBanner() {
-        cookieConsent.classList.add("is-open");
-        cookieConsent.setAttribute("aria-hidden", "false");
-    }
-
-    function persistConsent(nextState) {
-        consentState = {
-            ...CONSENT_DEFAULT_STATE,
-            ...nextState,
-            necessary: true,
-            updatedAt: Date.now()
-        };
-
-        try {
-            localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(consentState));
-        } catch {
-            // Ignore storage failures.
-        }
-
-        clearOptionalClientStorage(consentState);
-
-        window.dispatchEvent(new CustomEvent("ovexi-consent-updated", {
-            detail: { ...consentState }
-        }));
-
-        hideBanner();
-        closeSettings();
-    }
-
-    cookieAcceptBtn.addEventListener("click", () => {
-        persistConsent({ preferences: true, analytics: true, marketing: true });
-    });
-
-    cookieRejectBtn.addEventListener("click", () => {
-        persistConsent({ preferences: false, analytics: false, marketing: false });
-    });
-
-    cookieOpenSettingsBtn.addEventListener("click", openSettings);
-    cookieSettingsFab.addEventListener("click", openSettings);
-
-    cookieSettingsSaveBtn.addEventListener("click", () => {
-        persistConsent({
-            preferences: cookiePrefToggle.checked,
-            analytics: cookieAnalyticsToggle.checked,
-            marketing: false
-        });
-    });
-
-    cookieSettingsRejectBtn.addEventListener("click", () => {
-        persistConsent({ preferences: false, analytics: false, marketing: false });
-    });
-
-    cookieSettingsModal.addEventListener("click", (event) => {
-        if (event.target === cookieSettingsModal) {
-            closeSettings();
-        }
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && cookieSettingsModal.classList.contains("is-open")) {
-            closeSettings();
-        }
-    });
-
-    if (consentState) {
-        hideBanner();
-    } else {
-        showBanner();
-    }
-})();
-
-(function initConsentAwareAnalytics() {
-    const analyticsCollection = collection(db, "analytics_events");
-    const sessionStorageKey = "ovexi_analytics_session_id";
-    const scrollMilestones = new Set();
-    const sessionStart = Date.now();
-
-    function canTrackAnalytics() {
-        return Boolean(window.OVEXI_COOKIE_CONSENT?.canUse?.("analytics"));
-    }
-
-    function getSessionId() {
-        try {
-            const existing = sessionStorage.getItem(sessionStorageKey);
-            if (existing) return existing;
-            const created = `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-            sessionStorage.setItem(sessionStorageKey, created);
-            return created;
-        } catch {
-            return `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-        }
-    }
-
-    function getTrafficSource() {
-        const url = new URL(window.location.href);
-        const utmSource = normalizeText(url.searchParams.get("utm_source"));
-        const utmMedium = normalizeText(url.searchParams.get("utm_medium"));
-        const utmCampaign = normalizeText(url.searchParams.get("utm_campaign"));
-        if (utmSource) {
-            return [utmSource, utmMedium, utmCampaign].filter(Boolean).join("/");
-        }
-
-        const ref = normalizeText(document.referrer);
-        if (!ref) return "direct";
-        try {
-            const hostname = new URL(ref).hostname.replace(/^www\./, "");
-            return hostname || "referral";
-        } catch {
-            return "referral";
-        }
-    }
-
-    async function trackEvent(eventType, target = "", value = "") {
-        if (!canTrackAnalytics()) {
-            return;
-        }
-
-        try {
-            await addDoc(analyticsCollection, {
-                sessionId: getSessionId(),
-                eventType: String(eventType || "unknown").slice(0, 40),
-                pagePath: String(window.location.pathname || "/").slice(0, 200),
-                pageUrl: String(window.location.href || "").slice(0, 500),
-                referrer: String(document.referrer || "").slice(0, 500),
-                source: String(getTrafficSource()).slice(0, 120),
-                lang: String(document.documentElement.getAttribute("lang") || "hu").slice(0, 10),
-                screenW: Number(window.screen?.width || 0),
-                screenH: Number(window.screen?.height || 0),
-                viewportW: Number(window.innerWidth || 0),
-                viewportH: Number(window.innerHeight || 0),
-                userAgent: String(navigator.userAgent || "").slice(0, 320),
-                target: String(target || "").slice(0, 180),
-                value: String(value || "").slice(0, 320),
-                consentAnalytics: true,
-                createdAt: serverTimestamp()
-            });
-        } catch (error) {
-            console.error("Analytics event save error:", error);
-        }
-    }
-
-    window.OVEXI_ANALYTICS = {
-        track: trackEvent
-    };
-
-    trackEvent("page_view");
-
-    document.addEventListener("click", (event) => {
-        const target = event.target.closest("button, a, [role='button'], .pricing-button, .submit-button");
-        if (!target) return;
-
-        const label = normalizeText(target.textContent || target.getAttribute("aria-label") || "interaction");
-        const targetId = normalizeText(target.id || target.className || target.tagName);
-        trackEvent("click", targetId, label);
-    });
-
-    window.addEventListener("scroll", () => {
-        const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        if (docHeight <= 0) return;
-        const ratio = (scrollTop / docHeight) * 100;
-        const checkpoints = [25, 50, 75, 100];
-
-        checkpoints.forEach((checkpoint) => {
-            if (ratio >= checkpoint && !scrollMilestones.has(checkpoint)) {
-                scrollMilestones.add(checkpoint);
-                trackEvent("scroll_depth", "page", `${checkpoint}%`);
-            }
-        });
-    }, { passive: true });
-
-    document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") {
-            const durationSeconds = Math.max(1, Math.round((Date.now() - sessionStart) / 1000));
-            trackEvent("session_engagement", "duration_seconds", String(durationSeconds));
-        }
-    });
-})();
-
-(function () {
-    const hamburger = document.getElementById("navHamburger");
-    const navbar = document.getElementById("navbar");
-    const navLinks = document.getElementById("navLinks");
-    if (!hamburger || !navbar || !navLinks) return;
-
-    hamburger.addEventListener("click", () => {
-        const isOpen = navbar.classList.toggle("nav-open");
-        hamburger.setAttribute("aria-expanded", isOpen);
-    });
-
-    navLinks.querySelectorAll("a, button").forEach((el) => {
-        if (el.classList.contains("lang-pill")) return;
-        el.addEventListener("click", () => {
-            navbar.classList.remove("nav-open");
-            hamburger.setAttribute("aria-expanded", "false");
-        });
-    });
-
-    document.addEventListener("click", (e) => {
-        if (navbar.classList.contains("nav-open") && !navbar.contains(e.target)) {
-            navbar.classList.remove("nav-open");
-            hamburger.setAttribute("aria-expanded", "false");
-        }
-    });
-})();
-
-window.addEventListener("scroll", () => {
-    const navbar = document.getElementById("navbar");
-    if (navbar.classList.contains("nav-open")) {
-        navbar.classList.remove("nav-open");
-        const hamburger = document.getElementById("navHamburger");
-        if (hamburger) hamburger.setAttribute("aria-expanded", "false");
-    }
-    if (window.scrollY > 50) {
-        navbar.classList.add("scrolled");
-    } else {
-        navbar.classList.remove("scrolled");
-    }
-    // Update progress bar
-    const navbarProgress = document.getElementById("navbarProgress");
-    if (navbarProgress) {
-        const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const scrolled = windowHeight > 0 ? (window.scrollY / windowHeight) * 100 : 0;
-        navbarProgress.style.width = scrolled + "%";
-    }
+document.querySelectorAll("[data-open-category]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelector(`.catalog-tab[data-category="${button.dataset.openCategory}"]`)?.click();
+    document.getElementById("csomagok")?.scrollIntoView({ behavior: "smooth" });
+  });
 });
 
-(function() {
-    const button = document.querySelector(".floating-consultation-button");
-    const targetSection = document.getElementById("info-section");
-
-    if (!button || !targetSection) {
-        return;
-    }
-
-    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-    let ticking = false;
-
-    function updateFloatingButtonState() {
-        const sectionRect = targetSection.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const sectionCenterY = sectionRect.top + sectionRect.height / 2;
-        const viewportCenterY = viewportHeight / 2;
-        const distanceFromCenter = Math.abs(sectionCenterY - viewportCenterY);
-        const fadeRange = Math.max(viewportHeight * 0.9, sectionRect.height * 0.75);
-        const proximity = 1 - clamp(distanceFromCenter / fadeRange, 0, 1);
-        const visibility = 1 - proximity;
-        const opacity = 0.08 + visibility * 0.92;
-        const scale = 0.9 + visibility * 0.1;
-
-        button.style.opacity = opacity.toFixed(3);
-        button.style.setProperty("--consult-scale", scale.toFixed(3));
-        button.classList.toggle("is-faded", opacity < 0.16);
-        ticking = false;
-    }
-
-    function onScrollOrResize() {
-        if (ticking) {
-            return;
-        }
-        ticking = true;
-        requestAnimationFrame(updateFloatingButtonState);
-    }
-
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
-    updateFloatingButtonState();
-})();
-
-(function() {
-    const backToTopBtn = document.getElementById("backToTopBtn");
-    if (!backToTopBtn) {
-        return;
-    }
-
-    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-    let ticking = false;
-
-    function updateBackToTopState() {
-        const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-        const viewportHeight = window.innerHeight || 1;
-        const visibility = clamp((scrollTop - 120) / (viewportHeight * 0.8), 0, 1);
-        const opacity = 0.08 + visibility * 0.92;
-        const scale = 0.9 + visibility * 0.1;
-
-        backToTopBtn.style.opacity = opacity.toFixed(3);
-        backToTopBtn.style.setProperty("--consult-scale", scale.toFixed(3));
-        backToTopBtn.classList.toggle("is-faded", opacity < 0.16);
-        ticking = false;
-    }
-
-    function onScrollOrResize() {
-        if (ticking) {
-            return;
-        }
-        ticking = true;
-        requestAnimationFrame(updateBackToTopState);
-    }
-
-    backToTopBtn.addEventListener("click", () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
-    updateBackToTopState();
-})();
-
-(function() {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) {
-        return;
-    }
-
-    const revealMap = [
-        { selector: ".section-header", variant: "reveal" },
-        { selector: ".pricing-card", variant: "reveal reveal-zoom", stagger: 120 },
-        { selector: ".why-choose-us h2", variant: "reveal" },
-        { selector: ".slider-wrapper", variant: "reveal reveal-zoom" },
-        { selector: ".contact-form .form-group", variant: "reveal reveal-right", stagger: 70 },
-        { selector: ".contact-form .submit-button", variant: "reveal" },
-        { selector: ".info-section .container > *", variant: "reveal", stagger: 90 }
-    ];
-
-    const revealElements = [];
-
-    revealMap.forEach(({ selector, variant, stagger = 0 }) => {
-        document.querySelectorAll(selector).forEach((element, index) => {
-            element.classList.add(...variant.split(" "));
-            if (stagger) {
-                element.style.setProperty("--reveal-delay", `${index * stagger}ms`);
-            }
-            revealElements.push(element);
-        });
-    });
-
-    if (!revealElements.length) {
-        return;
-    }
-
-    const observer = new IntersectionObserver((entries, currentObserver) => {
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-                return;
-            }
-
-            entry.target.classList.add("is-visible");
-            currentObserver.unobserve(entry.target);
-        });
-    }, {
-        threshold: 0.2,
-        rootMargin: "0px 0px -8% 0px"
-    });
-
-    revealElements.forEach((element) => observer.observe(element));
-})();
-
-(function() {
-    const items = document.querySelectorAll("#featureSlider .feature-item");
-    const dots = document.querySelectorAll(".slider-dots .dot");
-
-    if (!items.length || !dots.length) {
-        return;
-    }
-
-    let current = 0;
-    let autoSlideInterval;
-    let startX = 0;
-    let isDragging = false;
-
-    function updateSlider(index) {
-        items.forEach((item, i) => {
-            item.classList.remove("active", "prev", "next");
-            if (i === index) {
-                item.classList.add("active");
-            } else if (i === (index - 1 + items.length) % items.length) {
-                item.classList.add("prev");
-            } else if (i === (index + 1) % items.length) {
-                item.classList.add("next");
-            }
-        });
-
-        dots.forEach((dot, i) => {
-            dot.classList.toggle("active", i === index);
-        });
-
-        current = index;
-    }
-
-    function nextSlide() {
-        updateSlider((current + 1) % items.length);
-    }
-
-    function prevSlide() {
-        updateSlider((current - 1 + items.length) % items.length);
-    }
-
-    function resetAutoSlide() {
-        clearInterval(autoSlideInterval);
-        autoSlideInterval = setInterval(nextSlide, 10000);
-    }
-
-    dots.forEach((dot) => {
-        dot.addEventListener("click", () => {
-            updateSlider(parseInt(dot.dataset.index, 10));
-            resetAutoSlide();
-        });
-    });
-
-    items.forEach((item) => {
-        item.addEventListener("click", () => {
-            if (item.classList.contains("prev")) {
-                prevSlide();
-            } else if (item.classList.contains("next") || item.classList.contains("active")) {
-                nextSlide();
-            }
-            resetAutoSlide();
-        });
-    });
-
-    const slider = document.getElementById("featureSlider");
-    if (!slider) {
-        return;
-    }
-
-    slider.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        startX = e.clientX;
-        slider.style.cursor = "grabbing";
-    });
-
-    slider.addEventListener("mouseup", (e) => {
-        if (!isDragging) {
-            return;
-        }
-
-        isDragging = false;
-        slider.style.cursor = "grab";
-        const diff = e.clientX - startX;
-
-        if (Math.abs(diff) > 50) {
-            diff < 0 ? nextSlide() : prevSlide();
-            resetAutoSlide();
-        }
-    });
-
-    slider.addEventListener("mouseleave", () => {
-        isDragging = false;
-        slider.style.cursor = "grab";
-    });
-
-    slider.addEventListener("touchstart", (e) => {
-        startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    slider.addEventListener("touchend", (e) => {
-        const diff = e.changedTouches[0].clientX - startX;
-        if (Math.abs(diff) > 50) {
-            diff < 0 ? nextSlide() : prevSlide();
-            resetAutoSlide();
-        }
-    });
-
-    updateSlider(0);
-    autoSlideInterval = setInterval(nextSlide, 5000);
-})();
-
-function selectPackage(packageName) {
-    const packageSelect = document.getElementById("package");
-    if (!packageSelect) {
-        return;
-    }
-
-    const options = packageSelect.options;
-
-    for (let i = 0; i < options.length; i += 1) {
-        if (options[i].value === packageName) {
-            packageSelect.selectedIndex = i;
-            break;
-        }
-    }
-
-    const contactSection = document.getElementById("contact");
-    if (contactSection) {
-        contactSection.scrollIntoView({ behavior: "smooth" });
-    }
-}
-
-window.selectPackage = selectPackage;
-
-(function() {
-    const packageInfoButtons = document.querySelectorAll("[data-package-info]");
-    const packageModal = document.getElementById("packageModal");
-    const closePackageModalBtn = document.getElementById("closePackageModalBtn");
-    const packageModalTitle = document.getElementById("packageModalTitle");
-    const packageModalPrice = document.getElementById("packageModalPrice");
-    const packageModalDescription = document.getElementById("packageModalDescription");
-    const packageModalFeatures = document.getElementById("packageModalFeatures");
-
-    if (!packageInfoButtons.length || !packageModal || !closePackageModalBtn || !packageModalTitle || !packageModalPrice || !packageModalDescription || !packageModalFeatures) {
-        return;
-    }
-
-    const packageDetails = {
-        "Alapcsomag": {
-            price: "70,000 Ft - egyszeri díj",
-            description: "Kedvező induló csomag stabil technikai alappal. Karbantartás és social media menedzsment opcionálisan bármikor kérhető.",
-            features: [
-                { icon: "devices", title: "Reszponzív kialakítás", detail: "Mobilon, tableten és asztali nézetben is stabil, jól olvasható megjelenés." },
-                { icon: "layers", title: "1-5 aloldalig", detail: "Alap üzleti struktúra a legfontosabb tartalmakhoz." },
-                { icon: "search", title: "SEO optimalizálás", detail: "Keresőbarát technikai és tartalmi alapok beállítása." },
-                { icon: "speed", title: "Gyors teljesítmény", detail: "Képek és kódrészletek optimalizálása a jobb betöltés és felhasználói élmény érdekében." },
-                { icon: "palette", title: "Alap dizájn", detail: "Letisztult, üzleti megjelenés gyors átadással." },
-                { icon: "mail", title: "Kapcsolati űrlap", detail: "Egyszerű érdeklődőgyűjtés, hogy a látogatók gyorsan elérjenek." },
-                { icon: "shield", title: "SSL tanúsítvány", detail: "Biztonságos HTTPS kapcsolat és megbízható működés." },
-                { icon: "brand", title: "Domain + tárhely + e-mail", detail: "1 év domain, 1 GB webtárhely és 1 GB e-mail tárhely (akár 5 cím)." }
-            ]
-        },
-        "Prémium Csomag": {
-            price: "150,000 Ft - egyszeri díj",
-            description: "Erősebb üzleti csomag bővített funkciókkal és komplex dizájnnal. Karbantartás és social media menedzsment opcionális.",
-            features: [
-                { icon: "devices", title: "Reszponzív weboldal", detail: "Stabil megjelenés minden eszközön." },
-                { icon: "search", title: "Haladó SEO optimalizálás", detail: "Kiterjesztett kulcsszó és technikai optimalizálás." },
-                { icon: "layers", title: "1-10 aloldal", detail: "Bővített oldalszám részletesebb bemutatáshoz." },
-                { icon: "calendar", title: "Esemény naptár integráció", detail: "Foglalás vagy eseménykommunikáció támogatása." },
-                { icon: "palette", title: "Komplex dizájn", detail: "Fejlettebb, egyedibb vizuális kialakítás." },
-                { icon: "mail", title: "Review + kapcsolat + SSL", detail: "Vélemény megjelenítés, kapcsolatfelvétel és biztonság együtt." },
-                { icon: "expand", title: "Többnyelvűség", detail: "Több nyelv kezelése igény szerint." },
-                { icon: "brand", title: "Domain + tárhely + e-mail", detail: "1 év domain, 1 GB webtárhely és 1 GB e-mail tárhely (akár 5 cím)." }
-            ]
-        },
-        "Üzleti Csomag": {
-            price: "330,000 Ft - egyszeri díj",
-            description: "Teljes üzleti csomag haladó funkciókkal. Karbantartás és social media menedzsment ennél is opcionális add-on.",
-            features: [
-                { icon: "devices", title: "Reszponzív weboldal", detail: "Korlátlan skálázás üzleti növekedéshez." },
-                { icon: "search", title: "Haladó SEO optimalizálás", detail: "Erősebb kereső láthatóság és technikai finomhangolás." },
-                { icon: "expand", title: "Korlátlan aloldal", detail: "Tetszőleges bővíthetőség új szolgáltatásokhoz." },
-                { icon: "calendar", title: "Naptár + review + kapcsolat", detail: "Ügyfélkapcsolati funkciók egy helyen." },
-                { icon: "palette", title: "Prémium dizájn", detail: "Magasabb vizuális minőség és egyedi arculat." },
-                { icon: "building", title: "Teljes admin felület + felhasználói rendszer", detail: "Belső kezelői eszközök és jogosultságkezelés." },
-                { icon: "social", title: "Chatbot / livechat", detail: "Automatizált és valós idejű ügyfélkommunikáció." },
-                { icon: "brand", title: "Domain + tárhely + e-mail", detail: "1 év domain, 5 GB webtárhely és 5 GB e-mail tárhely (akár 10 cím)." }
-            ]
-        }
-    };
-
-    const packageDetailsEn = {
-        "Alapcsomag": {
-            displayName: "Starter Package",
-            price: "70,000 HUF - one-time fee",
-            description: "Affordable starter package with a stable technical foundation. Maintenance and social media management are optional add-ons.",
-            features: [
-                { icon: "devices", title: "Responsive layout", detail: "Stable, readable display on mobile, tablet, and desktop." },
-                { icon: "layers", title: "Up to 5 pages", detail: "Core business structure for your most important content." },
-                { icon: "search", title: "SEO optimization", detail: "Search-friendly technical and content setup." },
-                { icon: "speed", title: "Fast performance", detail: "Image and code optimization for better loading speed and UX." },
-                { icon: "palette", title: "Basic design", detail: "Clean business look with fast delivery." },
-                { icon: "mail", title: "Contact form", detail: "Simple lead collection so visitors can reach you quickly." },
-                { icon: "shield", title: "SSL certificate", detail: "Secure HTTPS connection and reliable operation." },
-                { icon: "brand", title: "Domain + hosting + email", detail: "1 year domain, 1 GB web hosting, and 1 GB email hosting (up to 5 accounts)." }
-            ]
-        },
-        "Prémium Csomag": {
-            displayName: "Premium Package",
-            price: "150,000 HUF - one-time fee",
-            description: "Stronger business package with advanced functionality and a more complex design. Maintenance and social media management are optional.",
-            features: [
-                { icon: "devices", title: "Responsive website", detail: "Stable display on every device." },
-                { icon: "search", title: "Advanced SEO", detail: "Expanded keyword and technical optimization." },
-                { icon: "layers", title: "Up to 10 pages", detail: "More pages for richer presentation." },
-                { icon: "calendar", title: "Event calendar integration", detail: "Support for bookings and event communication." },
-                { icon: "palette", title: "Complex design", detail: "More advanced, more unique visual identity." },
-                { icon: "mail", title: "Reviews + contact + SSL", detail: "Social proof, contact, and security in one." },
-                { icon: "expand", title: "Multilingual", detail: "Multi-language support based on your needs." },
-                { icon: "brand", title: "Domain + hosting + email", detail: "1 year domain, 1 GB web hosting, and 1 GB email hosting (up to 5 accounts)." }
-            ]
-        },
-        "Üzleti Csomag": {
-            displayName: "Business Package",
-            price: "330,000 HUF - one-time fee",
-            description: "Complete business package with advanced capabilities. Maintenance and social media management remain optional add-ons.",
-            features: [
-                { icon: "devices", title: "Responsive website", detail: "Scales for long-term business growth." },
-                { icon: "search", title: "Advanced SEO", detail: "Stronger search visibility and technical refinement." },
-                { icon: "expand", title: "Unlimited pages", detail: "Flexible expansion for new services and content." },
-                { icon: "calendar", title: "Calendar + reviews + contact", detail: "Client engagement tools in one flow." },
-                { icon: "palette", title: "Premium design", detail: "Higher visual quality and unique brand presence." },
-                { icon: "building", title: "Full admin + user system", detail: "Internal management tools with role handling." },
-                { icon: "social", title: "Chatbot / live chat", detail: "Automated and real-time customer communication." },
-                { icon: "brand", title: "Domain + hosting + email", detail: "1 year domain, 5 GB web hosting, and 5 GB email hosting (up to 10 accounts)." }
-            ]
-        }
-    };
-
-    function getFeatureIcon(icon) {
-        const icons = {
-            devices: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="14" height="10" rx="2"/><rect x="8" y="15" width="14" height="7" rx="2"/></svg>',
-            layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></svg>',
-            search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
-            speed: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 1 8-8"/><path d="m12 12 4-4"/><path d="M6 18h.01"/></svg>',
-            mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
-            shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 7 4v6c0 5-3.5 7.5-7 8-3.5-.5-7-3-7-8V7l7-4Z"/><path d="m9.5 12 1.8 1.8L15 10"/></svg>',
-            palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><path d="M12 22a10 10 0 1 1 10-10c0 1.7-1.3 3-3 3h-2.2a2.3 2.3 0 0 0 0 4.6H18"/></svg>',
-            expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5"/><path d="m3 3 6 6"/><path d="M16 21h5v-5"/><path d="m21 21-6-6"/><path d="M21 8V3h-5"/><path d="m15 9 6-6"/><path d="M3 16v5h5"/><path d="m3 21 6-6"/></svg>',
-            edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="m16.5 3.5 4 4L8 20l-5 1 1-5L16.5 3.5Z"/></svg>',
-            chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 3-3 3 2 4-5"/></svg>',
-            building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h8"/></svg>',
-            social: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="m8 12 8-6"/><path d="m8 12 8 6"/></svg>',
-            calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
-            megaphone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2l12 4V7L3 11Z"/><path d="M15 9a6 6 0 0 1 0 6"/><path d="M7 14v4a2 2 0 0 0 2 2h1"/></svg>',
-            brand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V7l-8-5Z"/><path d="M9 12h6"/></svg>'
-        };
-
-        return icons[icon] || icons.chart;
-    }
-
-    function openPackageModal(packageName) {
-        const activeLang = document.documentElement.getAttribute("lang") === "en" ? "en" : "hu";
-        const sourceDetails = activeLang === "en" ? packageDetailsEn : packageDetails;
-        const details = sourceDetails[packageName];
-        if (!details) {
-            return;
-        }
-
-        packageModalTitle.textContent = details.displayName || packageName;
-        packageModalPrice.textContent = details.price;
-        packageModalDescription.textContent = details.description;
-        packageModalFeatures.innerHTML = "";
-
-        details.features.forEach((feature) => {
-            const item = document.createElement("li");
-            item.innerHTML = `
-                <span class="package-feature-icon" aria-hidden="true">${getFeatureIcon(feature.icon)}</span>
-                <div>
-                    <p class="package-feature-title">${feature.title}</p>
-                    <p class="package-feature-detail">${feature.detail}</p>
-                </div>
-            `;
-            packageModalFeatures.appendChild(item);
-        });
-
-        packageModal.classList.add("is-open");
-        packageModal.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-    }
-
-    function closePackageModal() {
-        packageModal.classList.remove("is-open");
-        packageModal.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-    }
-
-    packageInfoButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            openPackageModal(button.dataset.packageInfo || "");
-        });
-    });
-
-    closePackageModalBtn.addEventListener("click", closePackageModal);
-
-    packageModal.addEventListener("click", (event) => {
-        if (event.target === packageModal) {
-            closePackageModal();
-        }
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && packageModal.classList.contains("is-open")) {
-            closePackageModal();
-        }
-    });
-})();
-
-// Custom package builder
-(function() {
-    const openCustomPackageBtn = document.getElementById("openCustomPackageBuilder");
-    const closeCustomPackageBtn = document.getElementById("closeCustomPackageBuilder");
-    const customPackageBackdrop = document.getElementById("customPackageModalBackdrop");
-    const customPackageModal = document.getElementById("customPackageModal");
-    const pageCountInput = document.getElementById("pageCount");
-    const pageCountDisplay = document.getElementById("pageCountDisplay");
-    const featureInputs = document.querySelectorAll(".custom-features-list input[data-cost]");
-    const customFeaturesList = document.querySelector(".custom-features-list");
-    const pricePreview = document.getElementById("pricePreview");
-    const customBuilderNextBtn = document.getElementById("customBuilderNextBtn");
-    const customBuilderBackBtn = document.getElementById("customBuilderBackBtn");
-    const customBuilderStep1 = document.getElementById("customBuilderStep1");
-    const customBuilderStep2 = document.getElementById("customBuilderStep2");
-    const customPackageForm = document.querySelector(".custom-package-form");
-
-    if (!openCustomPackageBtn || !customPackageBackdrop || !customPackageModal || !pageCountInput || !pageCountDisplay || !pricePreview || !customFeaturesList || !customBuilderNextBtn || !customBuilderBackBtn || !customBuilderStep1 || !customBuilderStep2 || !customPackageForm) {
-        return;
-    }
-
-    const customPackagesCollection = collection(db, "custom_packages");
-    const customLocalKey = "webpro_last_custom_submit_at";
-    const customFormLoadedAt = Date.now();
-    const CUSTOM_SUBMIT_COOLDOWN_MS = 2 * 60 * 1000;
-
-    let currentStepData = {
-        pages: "1-5",
-        features: [],
-        price: 20000
-    };
-
-    const pageTiers = {
-        1: { label: "1-5", price: 20000 },
-        2: { label: "1-10", price: 40000 },
-        3: { label: "Korlátlan", price: 80000 }
-    };
-
-    function getSelectedPageTier() {
-        const sliderValue = parseInt(pageCountInput.value, 10) || 1;
-        return pageTiers[sliderValue] || pageTiers[1];
-    }
-
-    function calculatePrice() {
-        const selectedPageTier = getSelectedPageTier();
-        const basePrice = selectedPageTier.price;
-
-        let featuresPrice = 0;
-        const selectedFeatures = [];
-
-        featureInputs.forEach((input) => {
-            if (input.checked) {
-                const cost = parseInt(input.dataset.cost, 10) || 0;
-                featuresPrice += cost;
-                if (cost > 0) {
-                    selectedFeatures.push(input.value);
-                }
-            }
-        });
-
-        const total = basePrice + featuresPrice;
-        currentStepData.pages = selectedPageTier.label;
-        currentStepData.features = selectedFeatures;
-        currentStepData.price = total;
-
-        return total;
-    }
-
-    function formatPrice(price) {
-        return price.toLocaleString("hu-HU") + " Ft";
-    }
-
-    function updatePricePreview() {
-        const price = calculatePrice();
-        pricePreview.textContent = formatPrice(price);
-    }
-
-    function openModal() {
-        customPackageBackdrop.classList.add("is-open");
-        customPackageBackdrop.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-    }
-
-    function closeModal() {
-        customPackageBackdrop.classList.remove("is-open");
-        customPackageBackdrop.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-        pageCountDisplay.textContent = getSelectedPageTier().label;
-        updatePricePreview();
-        showStep(1);
-    }
-
-    function showStep(step) {
-        if (step === 1) {
-            customBuilderStep1.style.display = "block";
-            customBuilderStep2.style.display = "none";
-        } else if (step === 2) {
-            customBuilderStep1.style.display = "none";
-            customBuilderStep2.style.display = "block";
-        }
-    }
-    // Event listeners
-    openCustomPackageBtn.addEventListener("click", openModal);
-    closeCustomPackageBtn.addEventListener("click", closeModal);
-
-    customPackageBackdrop.addEventListener("click", (event) => {
-        if (event.target === customPackageBackdrop) {
-            closeModal();
-        }
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && customPackageBackdrop.classList.contains("is-open")) {
-            closeModal();
-        }
-    });
-
-    pageCountInput.addEventListener("input", () => {
-        pageCountDisplay.textContent = getSelectedPageTier().label;
-        updatePricePreview();
-    });
-
-    customFeaturesList.addEventListener("change", updatePricePreview);
-    customFeaturesList.addEventListener("input", updatePricePreview);
-
-    customBuilderNextBtn.addEventListener("click", () => {
-        showStep(2);
-    });
-
-    customBuilderBackBtn.addEventListener("click", () => {
-        showStep(1);
-    });
-
-    customPackageForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const name = normalizeText(document.getElementById("customName")?.value);
-        const email = normalizeText(document.getElementById("customEmail")?.value).toLowerCase();
-        const phone = normalizeText(document.getElementById("customPhone")?.value);
-        const details = normalizeText(document.getElementById("customDetails")?.value);
-
-        if (!email) {
-            alert("Kérlek add meg az email címet.");
-            return;
-        }
-
-        if (!isValidEmail(email)) {
-            alert("Érvénytelen email cím.");
-            return;
-        }
-
-        if (Date.now() - customFormLoadedAt < MIN_FORM_FILL_MS) {
-            alert("Túl gyors küldés. Kérlek ellenőrizd az adatokat.");
-            return;
-        }
-
-        const lastCustomSubmit = Number(localStorage.getItem(customLocalKey) || 0);
-        if (Date.now() - lastCustomSubmit < CUSTOM_SUBMIT_COOLDOWN_MS) {
-            alert("Kérlek várj legalább 2 percet a következő küldésig.");
-            return;
-        }
-
-        const submitBtn = customPackageForm.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Küldés...";
-        }
-
-        try {
-            await addDoc(customPackagesCollection, {
-                name: name.slice(0, 60),
-                email: email.slice(0, 100),
-                phone: phone.slice(0, 32),
-                details: details.slice(0, 1200),
-                pages: currentStepData.pages,
-                features: currentStepData.features,
-                price: currentStepData.price,
-                createdAt: serverTimestamp(),
-                source: "website_custom_package",
-                status: "new"
-            });
-
-            localStorage.setItem(customLocalKey, String(Date.now()));
-            alert("Az ajánlat sikeresen elmentve! Hamarosan felveszem veled a kapcsolatot.");
-            customPackageForm.reset();
-            closeModal();
-        } catch (error) {
-            console.error("Custom package save error:", error);
-            alert("Hiba történt az ajánlat mentésekor. Kérlek próbáld újra később.");
-        } finally {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Küldés";
-            }
-        }
-    });
-
-    updatePricePreview();
-})();
-
-const contactRequestsCollection = collection(db, "contact_requests");
-const contactLocalKey = "webpro_last_contact_submit_at";
-const contactFormLoadedAt = Date.now();
-
-const contactForm = document.getElementById("contactForm");
-if (contactForm) {
-    contactForm.addEventListener("submit", async function(e) {
-        e.preventDefault();
-
-        const submitButton = this.querySelector(".submit-button");
-        if (!submitButton) {
-            return;
-        }
-
-        const originalText = submitButton.textContent;
-        submitButton.textContent = "Kuldes...";
-        submitButton.disabled = true;
-
-        const formData = {
-            name: normalizeText(document.getElementById("name")?.value),
-            email: normalizeText(document.getElementById("email")?.value).toLowerCase(),
-            phone: normalizeText(document.getElementById("phone")?.value),
-            package: normalizeText(document.getElementById("package")?.value),
-            message: normalizeText(document.getElementById("message")?.value)
-        };
-
-        const websiteTrap = normalizeText(document.getElementById("website")?.value);
-        if (websiteTrap) {
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-            return;
-        }
-
-        if (Date.now() - contactFormLoadedAt < MIN_FORM_FILL_MS) {
-            alert("Tul gyors kuldes. Kerlek ellenorizd az adatokat es probald ujra.");
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-            return;
-        }
-
-        const lastContactSubmit = Number(localStorage.getItem(contactLocalKey) || 0);
-        if (Date.now() - lastContactSubmit < CONTACT_SUBMIT_COOLDOWN_MS) {
-            alert("Kerlek varj legalabb 2 percet a kovetkezo kuldesig.");
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-            return;
-        }
-
-        if (!formData.email) {
-            alert("Kerlek add meg az email cimet.");
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-            return;
-        }
-
-        if (!isValidEmail(formData.email)) {
-            alert("Ervenytelen email cim.");
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-            return;
-        }
-
-        if (formData.name.length > 80 ||
-            formData.package.length > 80 ||
-            formData.message.length > 1200 ||
-            formData.phone.length > 32) {
-            alert("A megadott adatok formaja nem megfelelo.");
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-            return;
-        }
-
-        try {
-            await addDoc(contactRequestsCollection, {
-                ...formData,
-                createdAt: serverTimestamp(),
-                source: "website_contact_form",
-                status: "new"
-            });
-
-            localStorage.setItem(contactLocalKey, String(Date.now()));
-
-            alert("Uzenet sikeresen elmentve! Hamarosan felveszem veled a kapcsolatot.");
-            contactForm.reset();
-        } catch (error) {
-            alert("Hiba tortent az uzenet mentesekor. Kerlek probald ujra kesobb.");
-            console.error("Contact form save error:", error);
-        } finally {
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-        }
-    });
-}
-
-document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener("click", function(e) {
-        const href = this.getAttribute("href");
-        if (!href || href === "#") {
-            return;
-        }
-
-        const target = document.querySelector(href);
-        if (target) {
-            e.preventDefault();
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-    });
+productGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-add-product]");
+  if (button) addToCart(button.dataset.addProduct);
+});
+cartItems.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-remove-product]");
+  if (button) removeFromCart(button.dataset.removeProduct);
 });
 
-(function() {
-    const reviewModal = document.getElementById("reviewModal");
-    const openReviewModalBtn = document.getElementById("openReviewModalBtn");
-    const closeReviewModalBtn = document.getElementById("closeReviewModalBtn");
-    const reviewForm = document.getElementById("reviewForm");
-    const reviewFeedback = document.getElementById("reviewFeedback");
-    const submitReviewBtn = document.getElementById("submitReviewBtn");
-    const reviewBubbles = document.getElementById("reviewBubbles");
-
-    if (!reviewModal || !openReviewModalBtn || !closeReviewModalBtn || !reviewForm || !reviewBubbles) {
-        return;
-    }
-
-    const reviewsCollection = collection(db, "reviews");
-    const localKey = "webpro_last_review_submit_at";
-    const activeBubbles = new Set();
-    const bubbleLayouts = new Map();
-    const activeReviewIds = new Set();
-    const reviewCooldownUntil = new Map();
-
-    const MAX_VISIBLE_BUBBLES = 2;
-    const REVIEW_COOLDOWN_MS = 10000;
-    const BUBBLE_VISIBLE_MS = 6200;
-    const BUBBLE_TICK_MS = 2200;
-
-    let reviewsCache = [];
-    let bubbleIntervalId = null;
-    let nextReviewCursor = 0;
-    let bubbleDragState = null;
-
-    function setFeedback(message, isError = false) {
-        if (!reviewFeedback) {
-            return;
-        }
-
-        reviewFeedback.textContent = message;
-        reviewFeedback.classList.toggle("is-error", isError);
-    }
-
-    function openModal() {
-        reviewModal.classList.add("is-open");
-        reviewModal.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-        const firstInput = document.getElementById("reviewName");
-        if (firstInput) {
-            firstInput.focus();
-        }
-    }
-
-    function closeModal() {
-        reviewModal.classList.remove("is-open");
-        reviewModal.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-    }
-
-    function randomInRange(min, max) {
-        return min + Math.random() * (max - min);
-    }
-
-    function getNavbarBlockedTopPercent(containerHeight) {
-        const navbar = document.getElementById("navbar");
-        const heroSection = document.getElementById("hero");
-
-        if (!navbar || !heroSection || !containerHeight) {
-            return 0;
-        }
-
-        const navRect = navbar.getBoundingClientRect();
-        const heroRect = heroSection.getBoundingClientRect();
-
-    // Keep bubbles below the navbar
-        const blockedPx = navRect.bottom - heroRect.top + 8;
-        if (blockedPx <= 0) {
-            return 0;
-        }
-
-        return Math.min(100, (blockedPx / containerHeight) * 100);
-    }
-
-    function computeBlockedZone() {
-        const heroSection = document.getElementById("hero");
-        const heroContent = document.querySelector(".hero-content");
-
-        if (!heroSection || !heroContent) {
-            return {
-                left: 26,
-                right: 74,
-                top: 22,
-                bottom: 78
-            };
-        }
-
-        const heroRect = heroSection.getBoundingClientRect();
-        const contentRect = heroContent.getBoundingClientRect();
-
-        if (!heroRect.width || !heroRect.height) {
-            return {
-                left: 26,
-                right: 74,
-                top: 22,
-                bottom: 78
-            };
-        }
-
-        const padX = 4;
-        const padY = 6;
-        const left = ((contentRect.left - heroRect.left) / heroRect.width) * 100 - padX;
-        const right = ((contentRect.right - heroRect.left) / heroRect.width) * 100 + padX;
-        const top = ((contentRect.top - heroRect.top) / heroRect.height) * 100 - padY;
-        const bottom = ((contentRect.bottom - heroRect.top) / heroRect.height) * 100 + padY;
-
-        return {
-            left: Math.max(0, left),
-            right: Math.min(100, right),
-            top: Math.max(0, top),
-            bottom: Math.min(100, bottom)
-        };
-    }
-
-    function isBlockedPosition(leftPct, topPct, blockedZone) {
-        return leftPct >= blockedZone.left &&
-            leftPct <= blockedZone.right &&
-            topPct >= blockedZone.top &&
-            topPct <= blockedZone.bottom;
-    }
-
-    function buildBubbleContent(review) {
-        const stars = "★".repeat(Math.max(1, Math.min(5, Number(review.rating) || 5)));
-        const message = String(review.message || "").slice(0, 95);
-        const author = String(review.name || "Vendeg").slice(0, 30);
-
-        return {
-            stars,
-            message,
-            author
-        };
-    }
-
-    function estimateBubbleSize(review) {
-        const content = buildBubbleContent(review);
-        const tempBubble = document.createElement("article");
-        tempBubble.className = "review-bubble";
-        tempBubble.style.visibility = "hidden";
-        tempBubble.style.opacity = "0";
-        tempBubble.style.left = "0";
-        tempBubble.style.top = "0";
-
-        const starsEl = document.createElement("div");
-        starsEl.className = "review-bubble-stars";
-        starsEl.textContent = content.stars;
-
-        const textEl = document.createElement("span");
-        textEl.className = "review-bubble-text";
-        textEl.textContent = `"${content.message}${content.message.length >= 95 ? "..." : ""}"`;
-
-        const authorEl = document.createElement("span");
-        authorEl.className = "review-bubble-author";
-        authorEl.textContent = `- ${content.author}`;
-
-        tempBubble.append(starsEl, textEl, authorEl);
-        reviewBubbles.appendChild(tempBubble);
-
-        const width = tempBubble.offsetWidth || 240;
-        const height = tempBubble.offsetHeight || 100;
-
-        tempBubble.remove();
-
-        return { width, height, content };
-    }
-
-    function toRect(leftPx, topPx, widthPx, heightPx) {
-        return {
-            left: leftPx,
-            top: topPx,
-            right: leftPx + widthPx,
-            bottom: topPx + heightPx,
-            width: widthPx,
-            height: heightPx
-        };
-    }
-
-    function overlapArea(rectA, rectB) {
-        const overlapWidth = Math.max(0, Math.min(rectA.right, rectB.right) - Math.max(rectA.left, rectB.left));
-        const overlapHeight = Math.max(0, Math.min(rectA.bottom, rectB.bottom) - Math.max(rectA.top, rectB.top));
-        return overlapWidth * overlapHeight;
-    }
-
-    function hasHeavyOverlap(candidateRect) {
-        for (const existingRect of bubbleLayouts.values()) {
-            const area = overlapArea(candidateRect, existingRect);
-            if (!area) {
-                continue;
-            }
-
-            const smallerArea = Math.max(1, Math.min(
-                candidateRect.width * candidateRect.height,
-                existingRect.width * existingRect.height
-            ));
-
-            if (area / smallerArea > 0.28) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    function getSafeBubblePosition(review) {
-        const measured = estimateBubbleSize(review);
-        const bubbleWidth = measured.width;
-        const bubbleHeight = measured.height;
-        const content = measured.content;
-        const containerWidth = reviewBubbles.clientWidth || window.innerWidth;
-        const containerHeight = reviewBubbles.clientHeight || window.innerHeight;
-        const heroSection = document.getElementById("hero");
-
-        const widthPct = (bubbleWidth / containerWidth) * 100;
-        const heightPct = (bubbleHeight / containerHeight) * 100;
-        const blockedZone = computeBlockedZone();
-        const navbarBlockedTopPct = getNavbarBlockedTopPercent(containerHeight);
-
-        const safeMarginX = 2;
-        const safeMarginY = 2;
-        const minLeftPct = safeMarginX;
-        const minTopPct = Math.max(safeMarginY, navbarBlockedTopPct);
-        const maxLeftPct = Math.max(minLeftPct, 100 - widthPct - safeMarginX);
-
-    // Limit bubbles to visible portion of hero
-        let visibleBottomPct = 100;
-        if (heroSection) {
-            const heroRect = heroSection.getBoundingClientRect();
-            const visibleBottomPx = Math.min(containerHeight, Math.max(0, window.innerHeight - heroRect.top - 10));
-            if (visibleBottomPx > 0) {
-                visibleBottomPct = (visibleBottomPx / containerHeight) * 100;
-            }
-        }
-
-        const maxTopByContainerPct = 100 - heightPct - safeMarginY;
-        const maxTopByVisiblePct = visibleBottomPct - heightPct - safeMarginY;
-        const maxTopPct = Math.max(minTopPct, Math.min(maxTopByContainerPct, maxTopByVisiblePct));
-
-        const zones = window.innerWidth < 768
-            ? [
-                // Mobile: corners only
-                { xMin: 3, xMax: 18, yMin: 18, yMax: 40 },
-                { xMin: 72, xMax: 95, yMin: 18, yMax: 40 },
-                { xMin: 3, xMax: 18, yMin: 62, yMax: 82 },
-                { xMin: 72, xMax: 95, yMin: 62, yMax: 82 }
-            ]
-            : [
-                { xMin: 2, xMax: 18, yMin: 16, yMax: 68 },
-                { xMin: 82, xMax: 96, yMin: 16, yMax: 68 },
-                { xMin: 20, xMax: 74, yMin: 3, yMax: 15 }
-            ];
-
-        for (let attempt = 0; attempt < 28; attempt += 1) {
-            const zone = zones[Math.floor(Math.random() * zones.length)];
-            const left = Math.min(maxLeftPct, Math.max(minLeftPct, randomInRange(zone.xMin, zone.xMax)));
-            const top = Math.min(maxTopPct, Math.max(minTopPct, randomInRange(zone.yMin, zone.yMax)));
-
-            const inBlockedZone = isBlockedPosition(left + widthPct / 2, top + heightPct / 2, blockedZone);
-            if (inBlockedZone) {
-                continue;
-            }
-
-            const candidateRect = toRect(
-                (left / 100) * containerWidth,
-                (top / 100) * containerHeight,
-                bubbleWidth,
-                bubbleHeight
-            );
-
-            if (!hasHeavyOverlap(candidateRect)) {
-                return { left, top, rect: candidateRect, content };
-            }
-        }
-
-        const fallbackLeft = minLeftPct;
-        const fallbackTop = minTopPct;
-        return {
-            left: fallbackLeft,
-            top: fallbackTop,
-            rect: toRect(
-                (fallbackLeft / 100) * containerWidth,
-                (fallbackTop / 100) * containerHeight,
-                bubbleWidth,
-                bubbleHeight
-            ),
-            content
-        };
-    }
-
-    function getNextEligibleReview() {
-        if (!reviewsCache.length) {
-            return null;
-        }
-
-        const now = Date.now();
-
-        for (let i = 0; i < reviewsCache.length; i += 1) {
-            const index = (nextReviewCursor + i) % reviewsCache.length;
-            const review = reviewsCache[index];
-            const cooldownEndsAt = reviewCooldownUntil.get(review.id) || 0;
-
-            if (activeReviewIds.has(review.id)) {
-                continue;
-            }
-
-            if (cooldownEndsAt > now) {
-                continue;
-            }
-
-            nextReviewCursor = (index + 1) % reviewsCache.length;
-            return review;
-        }
-
-        return null;
-    }
-
-    function findBubbleAtPoint(clientX, clientY) {
-        const bubbles = Array.from(reviewBubbles.querySelectorAll(".review-bubble")).reverse();
-
-        for (const bubble of bubbles) {
-            const rect = bubble.getBoundingClientRect();
-            if (
-                clientX >= rect.left &&
-                clientX <= rect.right &&
-                clientY >= rect.top &&
-                clientY <= rect.bottom
-            ) {
-                return bubble;
-            }
-        }
-
-        return null;
-    }
-
-    function startBubbleDrag(bubble, event) {
-        const bubbleRect = bubble.getBoundingClientRect();
-        const containerRect = reviewBubbles.getBoundingClientRect();
-
-        bubbleDragState = {
-            pointerId: event.pointerId,
-            bubble,
-            offsetX: event.clientX - bubbleRect.left,
-            offsetY: event.clientY - bubbleRect.top,
-            width: bubbleRect.width,
-            height: bubbleRect.height,
-            startClientX: event.clientX,
-            startClientY: event.clientY,
-            hasMoved: false
-        };
-
-        bubble.classList.add("is-dragging");
-        bubbleLayouts.set(
-            bubble,
-            toRect(
-                bubbleRect.left - containerRect.left,
-                bubbleRect.top - containerRect.top,
-                bubbleRect.width,
-                bubbleRect.height
-            )
-        );
-    }
-
-    function moveBubbleDrag(event) {
-        if (!bubbleDragState || event.pointerId !== bubbleDragState.pointerId) {
-            return;
-        }
-
-        event.preventDefault();
-
-        const dx = event.clientX - bubbleDragState.startClientX;
-        const dy = event.clientY - bubbleDragState.startClientY;
-        if (!bubbleDragState.hasMoved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
-            bubbleDragState.hasMoved = true;
-        }
-
-        const { bubble, offsetX, offsetY, width, height } = bubbleDragState;
-        if (!bubble.isConnected) {
-            bubbleDragState = null;
-            return;
-        }
-
-        const containerRect = reviewBubbles.getBoundingClientRect();
-        const maxLeft = Math.max(0, containerRect.width - width);
-        const maxTop = Math.max(0, containerRect.height - height);
-
-        const nextLeftPx = Math.min(
-            maxLeft,
-            Math.max(0, event.clientX - containerRect.left - offsetX)
-        );
-        const nextTopPx = Math.min(
-            maxTop,
-            Math.max(0, event.clientY - containerRect.top - offsetY)
-        );
-
-        const leftPct = containerRect.width ? (nextLeftPx / containerRect.width) * 100 : 0;
-        const topPct = containerRect.height ? (nextTopPx / containerRect.height) * 100 : 0;
-
-        bubble.style.left = `${leftPct}%`;
-        bubble.style.top = `${topPct}%`;
-        bubbleLayouts.set(bubble, toRect(nextLeftPx, nextTopPx, width, height));
-    }
-
-    function endBubbleDrag(event) {
-        if (!bubbleDragState || event.pointerId !== bubbleDragState.pointerId) {
-            return;
-        }
-
-        const wasTap = !bubbleDragState.hasMoved;
-
-        if (bubbleDragState.bubble?.isConnected) {
-            bubbleDragState.bubble.classList.remove("is-dragging");
-        }
-
-        bubbleDragState = null;
-
-        if (wasTap) {
-            openAllReviewsModal();
-        }
-    }
-
-    function makeBubbleDraggable(bubble) {
-        bubble.addEventListener("pointerdown", (event) => {
-            if (bubbleDragState) {
-                return;
-            }
-
-            if (event.pointerType === "mouse" && event.button !== 0) {
-                return;
-            }
-
-            startBubbleDrag(bubble, event);
-            event.preventDefault();
-        });
-    }
-
-    const heroSectionForDrag = document.getElementById("hero");
-    if (heroSectionForDrag) {
-        heroSectionForDrag.addEventListener("pointerdown", (event) => {
-            if (bubbleDragState) {
-                return;
-            }
-
-            if (event.pointerType === "mouse" && event.button !== 0) {
-                return;
-            }
-
-            const bubble = findBubbleAtPoint(event.clientX, event.clientY);
-            if (!bubble) {
-                return;
-            }
-
-            startBubbleDrag(bubble, event);
-            event.preventDefault();
-        }, true);
-    }
-
-    window.addEventListener("pointermove", moveBubbleDrag);
-    window.addEventListener("pointerup", endBubbleDrag);
-    window.addEventListener("pointercancel", endBubbleDrag);
-
-    function createReviewBubble(review) {
-        if (!review?.id) return;
-        if (activeBubbles.size >= MAX_VISIBLE_BUBBLES) return;
-        if (activeReviewIds.has(review.id)) return;
-        if ((reviewCooldownUntil.get(review.id) || 0) > Date.now()) return;
-
-        const position = getSafeBubblePosition(review);
-
-        const bubble = document.createElement("article");
-        bubble.className = "review-bubble";
-        bubble.style.left = `${position.left}%`;
-        bubble.style.top = `${position.top}%`;
-        bubble.style.setProperty("--bubble-float-duration", `${randomInRange(8.5, 13.5).toFixed(2)}s`);
-        bubble.style.setProperty("--bubble-drift-x", `${randomInRange(-22, 22).toFixed(2)}px`);
-        bubble.style.setProperty("--bubble-drift-y", `${randomInRange(-24, -10).toFixed(2)}px`);
-        bubble.style.setProperty("--bubble-float-delay", `${randomInRange(-4.5, 0).toFixed(2)}s`);
-
-        const starsEl = document.createElement("div");
-        starsEl.className = "review-bubble-stars";
-        starsEl.textContent = position.content.stars;
-
-        const textEl = document.createElement("span");
-        textEl.className = "review-bubble-text";
-        textEl.textContent = `"${position.content.message}${position.content.message.length >= 95 ? "..." : ""}"`;
-
-        const authorEl = document.createElement("span");
-        authorEl.className = "review-bubble-author";
-        authorEl.textContent = `- ${position.content.author}`;
-
-        bubble.append(starsEl, textEl, authorEl);
-        makeBubbleDraggable(bubble);
-        reviewBubbles.appendChild(bubble);
-        activeBubbles.add(bubble);
-        bubbleLayouts.set(bubble, position.rect);
-        activeReviewIds.add(review.id);
-
-        requestAnimationFrame(() => {
-            bubble.classList.add("is-visible");
-        });
-
-        window.setTimeout(() => {
-            bubble.classList.remove("is-visible");
-            window.setTimeout(() => {
-                bubble.remove();
-                activeBubbles.delete(bubble);
-                bubbleLayouts.delete(bubble);
-                activeReviewIds.delete(review.id);
-                reviewCooldownUntil.set(review.id, Date.now() + REVIEW_COOLDOWN_MS);
-            }, 1100);
-        }, BUBBLE_VISIBLE_MS);
-    }
-
-    function spawnNextBubble() {
-        if (activeBubbles.size >= MAX_VISIBLE_BUBBLES) {
-            return;
-        }
-
-        const review = getNextEligibleReview();
-        if (!review) {
-            return;
-        }
-
-        createReviewBubble(review);
-    }
-
-    function startBubbleLoop() {
-        if (bubbleIntervalId) {
-            clearInterval(bubbleIntervalId);
-        }
-
-        nextReviewCursor = 0;
-        spawnNextBubble();
-
-        bubbleIntervalId = window.setInterval(() => {
-            spawnNextBubble();
-        }, BUBBLE_TICK_MS);
-    }
-
-    async function loadReviews() {
-        try {
-            const reviewsQuery = query(reviewsCollection, orderBy("createdAt", "desc"), limit(16));
-            const snapshot = await getDocs(reviewsQuery);
-            reviewsCache = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-        } catch (error) {
-            console.error("Failed to load reviews:", error);
-            reviewsCache = [];
-        }
-
-        startBubbleLoop();
-    }
-
-    openReviewModalBtn.addEventListener("click", () => {
-        if (window.matchMedia("(max-width: 768px)").matches) {
-            openAllReviewsModal();
-            return;
-        }
-
-        openModal();
-    });
-    closeReviewModalBtn.addEventListener("click", closeModal);
-
-    reviewModal.addEventListener("click", (event) => {
-        if (event.target === reviewModal) {
-            closeModal();
-        }
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && reviewModal.classList.contains("is-open")) {
-            closeModal();
-        }
-    });
-
-    const allReviewsBackdrop = document.getElementById("allReviewsModal");
-    const allReviewsList = document.getElementById("allReviewsList");
-    const closeAllReviewsBtn = document.getElementById("closeAllReviewsModal");
-
-    async function openAllReviewsModal() {
-        if (!allReviewsBackdrop || !allReviewsList) return;
-
-        allReviewsList.innerHTML = "";
-
-        if (!reviewsCache.length) {
-            const loading = document.createElement("li");
-            loading.className = "all-reviews-empty";
-            loading.textContent = "Vélemények betöltése...";
-            allReviewsList.appendChild(loading);
-
-            await loadReviews();
-            allReviewsList.innerHTML = "";
-        }
-
-        if (!reviewsCache.length) {
-            const empty = document.createElement("li");
-            empty.className = "all-reviews-empty";
-            empty.textContent = "Még nincsenek vélemények. Legyél az első!";
-            allReviewsList.appendChild(empty);
-        } else {
-            reviewsCache.forEach((review) => {
-                const stars = "★".repeat(Math.max(1, Math.min(5, Number(review.rating) || 5)));
-                const li = document.createElement("li");
-                li.className = "all-review-item";
-                li.innerHTML = `
-                    <span class="all-review-item-stars">${stars}</span>
-                    <p class="all-review-item-text">"${String(review.message || "").slice(0, 320)}"</p>
-                    <span class="all-review-item-author">— ${String(review.name || "Névtelen").slice(0, 60)}</span>
-                `;
-                allReviewsList.appendChild(li);
-            });
-        }
-
-        allReviewsBackdrop.classList.add("is-open");
-        allReviewsBackdrop.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-    }
-
-    function closeAllReviewsModal() {
-        if (!allReviewsBackdrop) return;
-        allReviewsBackdrop.classList.remove("is-open");
-        allReviewsBackdrop.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-    }
-
-    if (closeAllReviewsBtn) {
-        closeAllReviewsBtn.addEventListener("click", closeAllReviewsModal);
-    }
-
-    if (allReviewsBackdrop) {
-        allReviewsBackdrop.addEventListener("click", (e) => {
-            if (e.target === allReviewsBackdrop) closeAllReviewsModal();
-        });
-    }
-
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && allReviewsBackdrop?.classList.contains("is-open")) {
-            closeAllReviewsModal();
-        }
-    });
-
-    const reviewFormLoadedAt = Date.now();
-
-    reviewForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const name = normalizeText(document.getElementById("reviewName")?.value);
-        const ratingValue = normalizeText(document.getElementById("reviewRating")?.value);
-        const message = normalizeText(document.getElementById("reviewMessage")?.value);
-        const rating = Number(ratingValue);
-        const reviewWebsiteTrap = normalizeText(document.getElementById("reviewWebsite")?.value);
-
-        if (reviewWebsiteTrap) {
-            return;
-        }
-
-        if (Date.now() - reviewFormLoadedAt < MIN_FORM_FILL_MS) {
-            setFeedback("Tul gyors kuldes. Ellenorizd az adatokat.", true);
-            return;
-        }
-
-        if (!name || !message || !ratingValue) {
-            setFeedback("Kerek minden kotelezo mezot kitolteni.", true);
-            return;
-        }
-
-        if (message.length < 10) {
-            setFeedback("A velemeny legalabb 10 karakter legyen.", true);
-            return;
-        }
-
-        if (Number.isNaN(rating) || rating < 1 || rating > 5) {
-            setFeedback("Ervenytelen ertekeles.", true);
-            return;
-        }
-
-        const now = Date.now();
-        const lastSubmit = Number(localStorage.getItem(localKey) || 0);
-        if (now - lastSubmit < REVIEW_SUBMIT_COOLDOWN_MS) {
-            setFeedback("Varj egy percet, mielott ujra kuldesz.", true);
-            return;
-        }
-
-        if (submitReviewBtn) {
-            submitReviewBtn.disabled = true;
-            submitReviewBtn.textContent = "Mentjuk...";
-        }
-
-        setFeedback("", false);
-
-        try {
-            const reviewRecord = {
-                name: name.slice(0, 60),
-                message: message.slice(0, 320),
-                rating,
-                createdAt: serverTimestamp()
-            };
-
-            const docRef = await addDoc(reviewsCollection, reviewRecord);
-            localStorage.setItem(localKey, String(now));
-
-            setFeedback("Koszonjuk! A velemenyed elmentve.");
-            reviewForm.reset();
-            closeModal();
-            createReviewBubble({
-                id: docRef.id,
-                name: reviewRecord.name,
-                message: reviewRecord.message,
-                rating: reviewRecord.rating
-            });
-            await loadReviews();
-        } catch (error) {
-            console.error("Failed to submit review:", error);
-            setFeedback("Mentesi hiba tortent. Ellenorizd a Firebase szabalyokat.", true);
-        } finally {
-            if (submitReviewBtn) {
-                submitReviewBtn.disabled = false;
-                submitReviewBtn.textContent = "Vélemény mentése";
-            }
-        }
-    });
-
-    loadReviews();
-})();
+document.getElementById("openCartButton")?.addEventListener("click", openCart);
+document.getElementById("closeCartButton")?.addEventListener("click", closeCart);
+drawerBackdrop.addEventListener("click", closeCart);
+startCheckoutButton.addEventListener("click", openCheckout);
+document.getElementById("closeCheckoutButton")?.addEventListener("click", closeCheckout);
+checkoutBackdrop.addEventListener("click", (event) => { if (event.target === checkoutBackdrop) closeCheckout(); });
+checkoutForm.addEventListener("submit", submitOrder);
+
+document.getElementById("navToggle")?.addEventListener("click", (event) => {
+  const nav = document.getElementById("mainNav");
+  const open = nav.classList.toggle("is-open");
+  event.currentTarget.setAttribute("aria-expanded", String(open));
+});
+document.querySelectorAll("#mainNav a").forEach((link) => link.addEventListener("click", () => {
+  document.getElementById("mainNav")?.classList.remove("is-open");
+  document.getElementById("navToggle")?.setAttribute("aria-expanded", "false");
+}));
+
+document.addEventListener("keydown", (event) => {
+  if(event.key==='Tab'){
+    const overlay=!checkoutBackdrop.hidden?checkoutBackdrop:cartDrawer.classList.contains('is-open')?cartDrawer:null;
+    if(overlay){const focusable=[...overlay.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled)')].filter(el=>el.tabIndex>=0&&!el.closest('.bot-trap'));
+      const first=focusable[0],last=focusable.at(-1);if(first&&(event.shiftKey&&document.activeElement===first||!event.shiftKey&&document.activeElement===last)){event.preventDefault();(event.shiftKey?last:first).focus();}}
+  }
+  if (event.key !== "Escape") return;
+  if (!checkoutBackdrop.hidden) closeCheckout();
+  else if (cartDrawer.classList.contains("is-open")) closeCart();
+});
+
+document.querySelectorAll(".catalog-tab").forEach(tab=>{const active=tab.dataset.category===state.category;tab.classList.toggle("is-active",active);tab.setAttribute("aria-selected",String(active));});
+renderCatalog();
+renderCart();
+renderReceipt();
+if(submission.pending)openCheckout();
+window.addEventListener('beforeunload',event=>{if(submission.pending){event.preventDefault();event.returnValue='';}});
+initCookieConsent();
+logAnalytics("page_view", "storefront");
+
+const paymentState = new URLSearchParams(location.search).get("payment");
+if (["success", "returned"].includes(paymentState)) showToast("Visszaérkeztél a fizetési oldalról. A fizetés állapotát a szolgáltató visszajelzése alapján ellenőrizzük.");
+if (paymentState === "cancelled") showToast("A fizetés megszakadt, a rendelésed nem veszett el.");

@@ -1,693 +1,327 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Weboldal Készítés és SEO | OVEXI</title>
-        <meta name="description" content="Professzionális weboldal készítés és SEO-optimalizálás vállalkozásoknak. Modern, gyors és konverzióra épített weboldalak az OVEXI csapatától.">
-        <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
-        <link rel="canonical" href="https://ovexi.hu/">
-        <meta property="og:type" content="website">
-        <meta property="og:site_name" content="OVEXI">
-        <meta property="og:locale" content="hu_HU">
-        <meta property="og:title" content="Weboldal Készítés és SEO | OVEXI">
-        <meta property="og:description" content="Modern, SEO-optimalizált weboldalak, amelyek eredményeket hoznak a vállalkozásodnak.">
-        <meta property="og:url" content="https://ovexi.hu/">
-        <meta property="og:image" content="https://ovexi.hu/assets/images/logo.png">
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="Weboldal Készítés és SEO | OVEXI">
-        <meta name="twitter:description" content="Professzionális weboldal készítés és SEO-optimalizálás vállalkozásoknak.">
-        <meta name="twitter:image" content="https://ovexi.hu/assets/images/logo.png">
-    <link rel="stylesheet" href="css/site.css">
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@graph": [
-                {
-                    "@type": "Organization",
-                    "@id": "https://ovexi.hu/#organization",
-                    "name": "OVEXI",
-                    "url": "https://ovexi.hu/",
-                    "logo": "https://ovexi.hu/assets/images/logo.png",
-                    "email": "ovexi@outlook.hu",
-                    "telephone": "+36705723437"
-                },
-                {
-                    "@type": "WebSite",
-                    "@id": "https://ovexi.hu/#website",
-                    "url": "https://ovexi.hu/",
-                    "name": "OVEXI",
-                    "publisher": {
-                        "@id": "https://ovexi.hu/#organization"
-                    },
-                    "inLanguage": "hu"
-                },
-                {
-                    "@type": "ProfessionalService",
-                    "@id": "https://ovexi.hu/#service",
-                    "name": "OVEXI Weboldal Készítés",
-                    "url": "https://ovexi.hu/",
-                    "image": "https://ovexi.hu/assets/images/logo.png",
-                    "description": "Weboldal készítés, SEO-optimalizálás és digitális jelenlét fejlesztése vállalkozásoknak.",
-                    "provider": {
-                        "@id": "https://ovexi.hu/#organization"
-                    },
-                    "areaServed": "HU",
-                    "availableLanguage": ["hu", "en"],
-                    "telephone": "+36705723437",
-                    "email": "ovexi@outlook.hu",
-                    "hasOfferCatalog": {
-                        "@type": "OfferCatalog",
-                        "name": "OVEXI csomagok",
-                        "itemListElement": [
-                            {
-                                "@type": "Offer",
-                                "name": "Alapcsomag"
-                            },
-                            {
-                                "@type": "Offer",
-                                "name": "Prémium Csomag"
-                            },
-                            {
-                                "@type": "Offer",
-                                "name": "Üzleti Csomag"
-                            }
-                        ]
-                    }
-                }
-            ]
-        }
-        </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weboldal készítés, marketing és karbantartás | OVEXI</title>
+  <meta name="description" content="Weboldal készítés kisvállalkozásoknak 39 990 Ft-tól, külön választható marketinggel és weboldal-karbantartással. Átlátható árak és jóváhagyható folyamat.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <link rel="canonical" href="https://ovexi.hu/">
+  <meta name="theme-color" content="#07111f">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OVEXI">
+  <meta property="og:locale" content="hu_HU">
+  <meta property="og:title" content="OVEXI — Weboldal. Marketing. Karbantartás.">
+  <meta property="og:description" content="Digitális jelenlét kisvállalkozásoknak, egyszerű rendelési folyamattal és elérhető havidíjakkal.">
+  <meta property="og:url" content="https://ovexi.hu/">
+  <meta property="og:image" content="https://ovexi.hu/assets/images/og-ovexi-1200.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="628">
+  <meta property="og:image:alt" content="OVEXI – weboldal, marketing és karbantartás">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OVEXI — Weboldal. Marketing. Karbantartás.">
+  <meta name="twitter:description" content="Weboldal 39 990 Ft-tól, marketing 4 990 Ft/hó-tól, karbantartás 2 990 Ft/hó-tól.">
+  <meta name="twitter:image" content="https://ovexi.hu/assets/images/og-ovexi-1200.jpg">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/images/favicon-48.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/icon-192.png">
+  <link rel="stylesheet" href="css/site.css?v=20260901-2">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["Organization", "ProfessionalService"],
+    "@id": "https://ovexi.hu/#organization",
+    "name": "OVEXI",
+    "legalName": "Turai Sándor Attila egyéni vállalkozó",
+    "url": "https://ovexi.hu/",
+    "logo": "https://ovexi.hu/assets/images/icon-192.png",
+    "email": "info@ovexi.hu",
+    "telephone": "+36705723437",
+    "areaServed": "HU",
+    "priceRange": "2990 Ft - 199990 Ft",
+    "serviceType": ["Weboldal készítés", "Online marketing", "Weboldal karbantartás"],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "OVEXI digitális szolgáltatások",
+      "itemListElement": [
+        {"@type":"OfferCatalog","name":"Weboldal készítés","url":"https://ovexi.hu/weboldal-keszites"},
+        {"@type":"OfferCatalog","name":"Marketing kisvállalkozásoknak","url":"https://ovexi.hu/marketing-kisvallalkozasoknak"},
+        {"@type":"OfferCatalog","name":"Weboldal karbantartás","url":"https://ovexi.hu/weboldal-karbantartas"}
+      ]
+    }
+  }
+  </script>
 </head>
 <body>
-    <nav id="navbar">
-        <div class="nav-container">
-            <a href="#" class="logo" aria-label="OVEXI kezdőlap">
-                <img src="assets/images/logo.png" alt="OVEXI logó">
-            </a>
-            
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#hero">Főoldal</a></li>
-                <li><a href="#services">Csomagok</a></li>
-                <li><a href="#contact">Kapcsolat</a></li>
-                <li><button type="button" class="nav-review-button" id="openReviewModalBtn">Vélemény</button></li>
-                <li class="lang-nav-item">
-                    <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Language selector">
-                        <button type="button" class="lang-pill is-active" data-lang="hu" aria-pressed="true">HU</button>
-                        <button type="button" class="lang-pill" data-lang="en" aria-pressed="false">EN</button>
-                    </div>
-                </li>
-            </ul>
-            <button class="nav-hamburger" id="navHamburger" aria-label="Menü megnyitása" aria-expanded="false" aria-controls="navLinks">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-        <div class="navbar-progress" id="navbarProgress" aria-hidden="true"></div>
-    </nav>
+  <a class="skip-link" href="#main">Ugrás a tartalomhoz</a>
 
-    <section class="hero" id="hero">
-        <div class="review-bubbles" id="reviewBubbles" aria-hidden="true"></div>
-        <div class="hero-content">
-            <h1>Professzionális Weboldal a Vállalkozásodnak</h1>
-            <p>Modern, SEO-optimalizált weboldalak, amelyek eredményeket hoznak. Segítek a digitális jelenlétedben, hogy több ügyfelet érj el.</p>
-            <a href="#services" class="cta-button">Csomagok megtekintése</a>
+  <header class="site-header" id="top">
+    <div class="nav-shell">
+      <a class="brand" href="#top" aria-label="OVEXI főoldal">
+        <img src="/assets/images/logo-256.png" width="256" height="60" alt="OVEXI">
+      </a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mainNav">Menü</button>
+      <nav class="main-nav" id="mainNav" aria-label="Fő navigáció">
+        <a href="#szolgaltatasok">Szolgáltatások</a>
+        <a href="#csomagok">Árak</a>
+        <a href="#folyamat">Hogyan működik?</a>
+        <a href="#garancia">Garanciák</a>
+        <a href="#gyik">GYIK</a>
+      </nav>
+      <button class="cart-button" id="openCartButton" type="button">
+        Kosár <span id="cartCount" aria-live="polite">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Digitális növekedés, felesleges körök nélkül</p>
+          <h1>Weboldal, marketing és karbantartás kisvállalkozásoknak.</h1>
+          <p class="hero-lead">Válaszd ki, mire van szükséged, töltsd ki a rövid briefet, és egy átlátható folyamatban elkészítjük. Külön-külön vagy együtt is rendelhető.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#csomagok">Csomagot választok</a>
+            <a class="button button-ghost" href="#folyamat">Megnézem a folyamatot</a>
+          </div>
+          <ul class="hero-proof">
+            <li>Átlátható árak</li>
+            <li>Nincs hosszú egyeztetés</li>
+            <li>Jóváhagyás nélkül semmi nem kerül ki</li>
+          </ul>
         </div>
+        <aside class="hero-panel" aria-label="Kezdőárak">
+          <p class="panel-kicker">Induló csomagok</p>
+          <div class="price-snapshot">
+            <span>Weboldal</span><strong>39 990 Ft-tól</strong>
+          </div>
+          <div class="price-snapshot">
+            <span>Marketing</span><strong>4 990 Ft / hó-tól</strong>
+          </div>
+          <div class="price-snapshot">
+            <span>Karbantartás</span><strong>2 990 Ft / hó-tól</strong>
+          </div>
+          <small>Minden ár fizetendő végösszeg. Alanyi adómentes szolgáltatás.</small>
+          <p class="checkout-note">A weboldal ára az elkészítés és átadás egyszeri díja. A domain, tárhely, e-mail és külső szolgáltatások folyamatos díjai külön költségek.</p>
+          <div class="panel-note">
+            <span class="status-dot"></span>
+            Új megrendeléseket fogadunk
+          </div>
+        </aside>
+      </div>
     </section>
 
-    <section class="why-choose-us">
-        <div class="container">
-            <h2>Miért válassz minket?</h2>
-            <div class="slider-wrapper">
-                <div class="slider-track" id="featureSlider">
-                    <div class="feature-item active" data-index="0">
-                        <h3>Professzionális Tervezés</h3>
-                        <p>Modern és egyedi weboldalakat készítünk, amelyek tükrözik a vállalkozásod egyediségét.</p>
-                    </div>
-                    <div class="feature-item" data-index="1">
-                        <h3>SEO Optimalizálás</h3>
-                        <p>Weboldalaink SEO-barátak, hogy előrébb kerülj a keresőmotorok találati listáján.</p>
-                    </div>
-                    <div class="feature-item" data-index="2">
-                        <h3>Gyors Betöltési Idő</h3>
-                        <p>Optimalizált kód és képek biztosítják, hogy weboldalad gyorsan betöltődjön minden eszközön.</p>
-                    </div>
-                    <div class="feature-item" data-index="3">
-                        <h3>Kiváló Ügyfélszolgálat</h3>
-                        <p>Mindig elérhetőek vagyunk, hogy segítsünk és válaszoljunk a kérdéseidre.</p>
-                    </div>
-                </div>
-                <div class="slider-dots">
-                    <span class="dot active" data-index="0"></span>
-                    <span class="dot" data-index="1"></span>
-                    <span class="dot" data-index="2"></span>
-                    <span class="dot" data-index="3"></span>
-                </div>
-            </div>
+    <section class="service-overview" id="szolgaltatasok">
+      <div class="container">
+        <p class="eyebrow">Három önálló szolgáltatás</p>
+        <h2>Digitális jelenlét egy átlátható rendszerben</h2>
+        <div class="service-overview-grid">
+          <article><h3>Weboldal készítés</h3><p>Mobilbarát bemutatkozó oldal, céges weboldal vagy webshop, világos csomagtartalommal és egyszeri fejlesztési díjjal.</p><a href="/weboldal-keszites">Weboldalcsomagok részletesen →</a></article>
+          <article><h3>Marketing kisvállalkozásoknak</h3><p>Jóváhagyható havi posztok, kreatívok és kampányszövegek önállóan vagy weboldal mellé.</p><a href="/marketing-kisvallalkozasoknak">Marketingcsomagok részletesen →</a></article>
+          <article><h3>Weboldal-karbantartás</h3><p>Elérhetőség- és SSL-figyelés, frissítések, ellenőrzések és csomagtól függő kisebb módosítások.</p><a href="/weboldal-karbantartas">Karbantartás részletesen →</a></article>
         </div>
+      </div>
     </section>
 
-    <section id="services">
-        <div class="container">
-            <div class="section-header">
-                <h2>Válassz a Csomagok Közül</h2>
-                <p>Minden csomag tartalmazza a professzionális tervezést és az Ön igényeire szabott megoldásokat</p>
-            </div>
-            
-            <div class="pricing-grid">
-                <div class="pricing-card">
-                    <div class="pricing-header">
-                        <h3>Alapcsomag</h3>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="price-amount">70,000</span>
-                        <span class="price-currency">Ft</span>
-                        <span class="price-period">Egyszeri díj</span>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>Reszponzív weboldal</li>
-                        <li>Gyors betöltési idő</li>
-                        <li>Mobilbarát dizájn</li>
-                        <li>SEO optimalizálás</li>
-                        <li>Kapcsolati űrlap</li>
-                        <li>SSL tanúsítvány</li>
-                        <li>1-5 aloldalig</li>
-                        <li>Alap dizájn</li>
-                        <li>Domain 1 évre</li>
-                        <li>1 GB E-mail tárhely (akár 5 e-mail cím) 1 évre</li>
-                        <li>1 GB Webtárhely 1 évre</li>
-                        <li>Karbantartás és Social media menedzsment opcionális</li>
-                    </ul>
-                    <div class="pricing-actions">
-                        <button type="button" class="package-info-button" data-package-info="Alapcsomag">Részletes információ</button>
-                        <button class="pricing-button" onclick="selectPackage('Alapcsomag')">Választom</button>
-                    </div>
-                </div>
-
-                <div class="pricing-card featured">
-                    <span class="pricing-badge">Népszerű</span>
-                    <div class="pricing-header">
-                        <h3>Prémium Csomag</h3>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="price-amount">150,000</span>
-                        <span class="price-currency">Ft</span>
-                        <span class="price-period">Egyszeri díj</span>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>Reszponzív weboldal</li>
-                        <li>Haladó SEO optimalizálás</li>
-                        <li>1-10 aloldal</li>
-                        <li>Gyors betöltési idő</li>
-                        <li>Esemény naptár integráció</li>
-                        <li>Mobilbarát dizájn</li>
-                        <li>Kapcsolati űrlap</li>
-                        <li>Review</li>
-                        <li>SSL tanúsítvány</li>
-                        <li>Többnyelvűség</li>
-                        <li>Komplex dizájn</li>
-                        <li>1 GB E-mail tárhely (akár 5 e-mail cím) 1 évre</li>
-                        <li>1 GB Webtárhely 1 évre</li>
-                        <li>Domain 1 évre</li>
-                        <li>Karbantartás és Social media menedzsment opcionális</li>
-                    </ul>
-                    <div class="pricing-actions">
-                        <button type="button" class="package-info-button" data-package-info="Prémium Csomag">Részletes információ</button>
-                        <button class="pricing-button" onclick="selectPackage('Prémium Csomag')">Választom</button>
-                    </div>
-                </div>
-
-                <div class="pricing-card">
-                    <div class="pricing-header">
-                        <h3>Üzleti Csomag</h3>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="price-amount">330,000</span>
-                        <span class="price-currency">Ft</span>
-                        <span class="price-period">Egyszeri díj</span>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>Reszponzív weboldal</li>
-                        <li>Haladó SEO optimalizálás</li>
-                        <li>Korlátlan aloldal</li>
-                        <li>Gyors betöltési idő</li>
-                        <li>Esemény naptár integráció</li>
-                        <li>Mobilbarát dizájn</li>
-                        <li>Kapcsolati űrlap</li>
-                        <li>Review</li>
-                        <li>SSL tanúsítvány</li>
-                        <li>Többnyelvűség</li>
-                        <li>Prémium dizájn</li>
-                        <li>Teljes admin felület</li>
-                        <li>Chatbot</li>
-                        <li>5 GB E-mail tárhely (akár 10 e-mail cím) 1 évre</li>
-                        <li>5 GB Webtárhely 1 évre</li>
-                        <li>Domain 1 évre</li>
-                        <li>Karbantartás és Social media menedzsment opcionális</li>
-                    </ul>
-                    <div class="pricing-actions">
-                        <button type="button" class="package-info-button" data-package-info="Üzleti Csomag">Részletes információ</button>
-                        <button class="pricing-button" onclick="selectPackage('Üzleti Csomag')">Választom</button>
-                    </div>
-                </div>
-
-                <div class="pricing-card custom-package-card">
-                    <div class="pricing-header">
-                        <h3>Saját Csomag</h3>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="price-amount">?</span>
-                        <span class="price-currency">Ft</span>
-                        <span class="price-period">Testreszabott</span>
-                    </div>
-                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; margin: 1rem 0;">
-                        <p style="color: var(--text-dark); text-align: center; font-size: 0.95rem;">
-                            Nem tudsz dönteni? Állítsd össze magadnak!
-                        </p>
-                    </div>
-                    <div class="pricing-actions">
-                        <button type="button" class="pricing-button" id="openCustomPackageBuilder">Tervezz most</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <section class="trust-strip" aria-label="Szolgáltatási jellemzők">
+      <div class="container trust-grid">
+        <span>Mobilbarát kivitelezés</span>
+        <span>SEO-alapok</span>
+        <span>Biztonságos folyamat</span>
+        <span>Magyar támogatás</span>
+      </div>
     </section>
 
-    <div class="custom-package-modal-backdrop" id="customPackageModalBackdrop" aria-hidden="true">
-        <div class="custom-package-modal" id="customPackageModal">
-            <button type="button" class="custom-package-modal-close" id="closeCustomPackageBuilder" aria-label="Bezárás">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-
-            <div class="custom-package-modal-content">
-                <div class="custom-builder-step" id="customBuilderStep1" style="display: block;">
-                    <h2>Weboldalad Konfigurálása</h2>
-                    <p class="custom-builder-subtitle">Válaszd ki, hány oldalra van szükséged és az alapvető funkciók közül.</p>
-
-                    <div class="custom-builder-section">
-                        <label class="custom-builder-label">Oldalak száma: <span id="pageCountDisplay">1-5</span></label>
-                        <input type="range" id="pageCount" min="1" max="3" step="1" value="1" class="custom-builder-range">
-                        <div class="custom-range-labels">
-                            <span>1-5</span>
-                            <span>1-10</span>
-                            <span>Korlátlan</span>
-                        </div>
-                    </div>
-
-                    <div class="custom-builder-section">
-                        <label class="custom-builder-label">Funkciók (válaszd ki a szükségeseket):</label>
-                        <div class="custom-features-list">
-                            <div class="custom-feature-group">
-                                <p class="custom-feature-group-title">SEO (egyet válassz):</p>
-                                <div class="custom-feature-row">
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="seoLevel" value="seo-none" data-cost="0" checked> SEO - nincs (+0 Ft)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="seoLevel" value="seo-basic" data-cost="20000"> SEO - Alap (+20,000 Ft)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="seoLevel" value="seo-advanced" data-cost="40000"> SEO - Haladó (+40,000 Ft)
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="custom-feature-group">
-                                <p class="custom-feature-group-title">Dizájn (egyet válassz):</p>
-                                <div class="custom-feature-row">
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="designLevel" value="design-none" data-cost="0" checked> Dizájn - nincs (+0 Ft)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="designLevel" value="design-basic" data-cost="30000"> Dizájn - Alap (+30,000 Ft)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="designLevel" value="design-complex" data-cost="50000"> Dizájn - Komplex (+50,000 Ft)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="designLevel" value="design-premium" data-cost="85000"> Dizájn - Prémium (+85,000 Ft)
-                                    </label>
-                                </div>
-                            </div>
-
-                            <label class="custom-feature-checkbox">
-                                <input type="checkbox" name="feature" value="multilang" data-cost="40000"> Többnyelvűség (+40,000 Ft / nyelv)
-                            </label>
-                            <label class="custom-feature-checkbox">
-                                <input type="checkbox" name="feature" value="ecommerce" data-cost="180000"> E-commerce / Online fizetési rendszer (+180,000 Ft)
-                            </label>
-                            <label class="custom-feature-checkbox">
-                                <input type="checkbox" name="feature" value="calendar" data-cost="25000"> Naptárkezelés (+25,000 Ft)
-                            </label>
-                            <label class="custom-feature-checkbox">
-                                <input type="checkbox" name="feature" value="admin" data-cost="40000"> Adminoldal (+40,000 Ft)
-                            </label>
-                            <label class="custom-feature-checkbox">
-                                <input type="checkbox" name="feature" value="users" data-cost="70000"> Felhasználói rendszer (+70,000 Ft)
-                            </label>
-                            <label class="custom-feature-checkbox">
-                                <input type="checkbox" name="feature" value="chatbot" data-cost="20000"> Chatbot / livechat (+20,000 Ft)
-                            </label>
-                            <label class="custom-feature-checkbox">
-                                <input type="checkbox" name="feature" value="domain" data-cost="5000"> Domain 1 évre (+5,000 Ft)
-                            </label>
-
-                            <div class="custom-feature-group">
-                                <p class="custom-feature-group-title">Tárhely (egyet válassz):</p>
-                                <div class="custom-feature-row">
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="hostingLevel" value="hosting-none" data-cost="0" checked> Tárhely - nincs (+0 Ft)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="hostingLevel" value="hosting-1gb" data-cost="16000"> Tárhely 1 évre - 1 GB (+16,000 Ft)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="hostingLevel" value="hosting-5gb" data-cost="25000"> Tárhely 1 évre - 5 GB (+25,000 Ft)
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="custom-feature-group">
-                                <p class="custom-feature-group-title">Karbantartás (egyet válassz):</p>
-                                <div class="custom-feature-row">
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="maintenanceLevel" value="maintenance-none" data-cost="0" checked> Karbantartás - nincs (+0 Ft / hó)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="maintenanceLevel" value="maintenance-basic" data-cost="20000"> Karbantartás - Alap (+20,000 Ft / hó)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="maintenanceLevel" value="maintenance-full" data-cost="30000"> Karbantartás - Átfogó (+30,000 Ft / hó)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="maintenanceLevel" value="maintenance-complex" data-cost="50000"> Karbantartás - Komplex (+50,000 Ft / hó)
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="custom-feature-group">
-                                <p class="custom-feature-group-title">Social media kezelés (egyet válassz):</p>
-                                <div class="custom-feature-row">
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="socialLevel" value="social-none" data-cost="0" checked> Social media kezelés - nincs (+0 Ft / hó)
-                                    </label>
-                                    <label class="custom-feature-checkbox custom-feature-choice">
-                                        <input type="radio" name="socialLevel" value="social-management" data-cost="55000"> Social media kezelés (Instagram, Facebook, TikTok) (+55,000 Ft / hó)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="custom-builder-price-preview">
-                        <p>Becsült ár: <strong id="pricePreview">20,000 Ft</strong></p>
-                    </div>
-
-                    <button type="button" class="custom-builder-button" id="customBuilderNextBtn">Következő</button>
-                </div>
-
-                <div class="custom-builder-step" id="customBuilderStep2" style="display: none;">
-                    <h2>Elérhetőséged</h2>
-                    <p class="custom-builder-subtitle">Add meg az adataidat, hogy felvehessek veled a kapcsolatot az ajánlattal.</p>
-
-                    <form class="custom-package-form">
-                        <div class="form-group">
-                            <label for="customName">Név</label>
-                            <input type="text" id="customName" name="name">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="customEmail">E-mail cím *</label>
-                            <input type="email" id="customEmail" name="email" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="customPhone">Telefonszám</label>
-                            <input type="tel" id="customPhone" name="phone">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="customDetails">Projekt leírása</label>
-                            <textarea id="customDetails" name="details" placeholder="Röviden írj a projektedről, célaidról..."></textarea>
-                        </div>
-
-                        <div class="custom-builder-buttons">
-                            <button type="button" class="custom-builder-button custom-builder-button-secondary" id="customBuilderBackBtn">Vissza</button>
-                            <button type="submit" class="custom-builder-button">Küldés</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <section class="catalog-section" id="csomagok">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Önállóan is megvásárolható modulok</p>
+            <h2>Állítsd össze, ami tényleg kell</h2>
+          </div>
+          <p>A weboldal, a marketing és a karbantartás külön is kérhető, és szabadon kombinálható. Jelenleg fizetés nélküli igényfogadás működik: a vállalt tartalmat, kezdést és a külön fenntartási költségeket írásban visszaigazoljuk. Az árak alanyi adómentes, fizetendő végösszegek.</p>
         </div>
-    </div>
 
-    <section class="contact-section" id="contact">
-        <div class="container">
-            <div class="section-header">
-                <h2>Lépj velünk kapcsolatba</h2>
-                <p>Töltsd ki az űrlapot és hamarosan felveszem veled a kapcsolatot</p>
-                <p class="phoneNum">A gyorsabb ügyintézés érdekében add meg a telefonszámod</p>
-
-            </div>
-            
-            <form class="contact-form" id="contactForm">
-                <div class="form-group">
-                    <label for="name">Név</label>
-                    <input type="text" id="name" name="name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">E-mail cím *</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="phone">Telefonszám</label>
-                    <input type="tel" id="phone" name="phone">
-                </div>
-                
-                <div class="form-group">
-                    <label for="package">Választott csomag</label>
-                    <select id="package" name="package">
-                        <option value="">Válassz csomagot...</option>
-                        <option value="Alapcsomag">Alapcsomag - 70,000 Ft</option>
-                        <option value="Prémium Csomag">Prémium Csomag - 150,000 Ft</option>
-                        <option value="Üzleti Csomag">Üzleti Csomag - 330,000 Ft</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="message">Üzenet / Részletek</label>
-                    <textarea id="message" name="message" placeholder="Írj pár szót a projektedről..."></textarea>
-                </div>
-
-                <div class="bot-trap" aria-hidden="true">
-                    <label for="website">Website</label>
-                    <input type="text" id="website" name="website" autocomplete="off" tabindex="-1">
-                </div>
-                
-                <button type="submit" class="submit-button">Üzenet küldése</button>
-            </form>
+        <div class="catalog-tabs" role="tablist" aria-label="Csomagkategóriák">
+          <button class="catalog-tab is-active" type="button" data-category="website" role="tab" aria-selected="true">Weboldalak</button>
+          <button class="catalog-tab" type="button" data-category="marketing" role="tab" aria-selected="false">Marketing</button>
+          <button class="catalog-tab" type="button" data-category="maintenance" role="tab" aria-selected="false">Karbantartás</button>
+          <button class="catalog-tab" type="button" data-category="oneoff" role="tab" aria-selected="false">Egyszeri csomagok</button>
         </div>
-    </section>
-    <section class="info-section" id="info-section">
-        <div class="container">
-            <h2>Ingyenes Konzultáció</h2>
-            <p class="info-subtitle">Nem vagy biztos benne, melyik csomag illik hozzád? Semmi gond! Foglalj egy ingyenes, kötelezettségmentes konzultációt, és közösen megtaláljuk a legjobb megoldást a vállalkozásodnak.</p>
 
-            <div class="info-cards">
-                <a href="mailto:ovexi@outlook.hu" class="info-card">
-                    <span class="info-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                    </span>
-                    <span class="info-card-label">Email</span>
-                    <span class="info-card-value">ovexi@outlook.hu</span>
-                </a>
-                <a href="tel:+36301234567" class="info-card">
-                    <span class="info-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    </span>
-                    <span class="info-card-label">Telefon</span>
-                    <span class="info-card-value">+36 70 572 3437</span>
-                </a>
-            </div>
+        <div class="product-grid" id="productGrid" aria-live="polite"></div>
 
-            <p class="info-note">Általában 24 órán belül válaszolok. Hétvégén is elérhető vagyok!</p>
+        <div class="bundle-banner">
+          <div>
+            <p class="eyebrow">Kombinálható</p>
+            <h3>Egyszeri elkészítés. Külön, átlátható üzemeltetés.</h3>
+            <p>A weboldal díja nem örök ingyenes működtetés. A domain, tárhely, e-mail és külső rendszerek díját a fizetés előtt írásban pontosítjuk. A marketing és karbantartás külön választható; a karbantartási csomag nem tárhely-előfizetés.</p>
+          </div>
+          <button class="button button-secondary" type="button" data-open-category="website">Weboldalt választok</button>
         </div>
+      </div>
     </section>
 
-    <a class="floating-consultation-button" href="#info-section" aria-label="Free consultation section">
-        Ingyenes konzultáció
-    </a>
-
-    <button type="button" class="back-to-top-button is-faded" id="backToTopBtn" aria-label="Vissza az oldal tetejére" title="Vissza fel">
-        ↑
-    </button>
-
-    <section class="partners-section" id="partners">
-        <div class="container">
-            <div class="section-header partners-header">
-                <h2>Partnereink</h2>
-                <p></p>
-            </div>
-
-            <div class="partners-grid">
-                <div class="partner-card">
-                    <span class="partner-mark">AAM</span>
-                    <span class="partner-name">AllAccessMap</span>
-                    <span class="partner-tag">Weboldal helyi éttermek kereséséhez</span>
-                </div>
-
-                <div class="partner-card">
-                    <span class="partner-mark">AAB</span>
-                    <span class="partner-name">AllAccessBudapest</span>
-                    <span class="partner-tag">Marketinglehetőség éttermeknek és extra jövedelem lakáskiadóknak</span>
-                </div>
-
-                <div class="partner-card">
-                    <span class="partner-mark">BHI</span>
-                    <span class="partner-name">BudapestHungary</span>
-                    <span class="partner-tag">Turisztikai és információs portál</span>
-                </div>
-
-                <div class="partner-card partner-card-muted" aria-hidden="true">
-                    <span class="partner-mark">...</span>
-                    <span class="partner-name">etc..</span>
-                    <span class="partner-tag">Légy te a következő!</span>
-                </div>
-            </div>
+    <section class="process-section" id="folyamat">
+      <div class="container">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Egyszerű rendelési folyamat</p>
+            <h2>Az ötlettől az átadásig</h2>
+          </div>
+          <p>Jelenleg fizetés nélküli igényfogadás működik. A beküldés után írásban egyeztetjük a vállalt tartalmat, határidőt és fenntartási költségeket. Az igényed azonosítót kap; az egyeztetés e-mailben történik.</p>
         </div>
+        <ol class="process-grid">
+          <li><span>01</span><h3>Csomagválasztás</h3><p>Tedd kosárba a különálló vagy kombinált szolgáltatásokat.</p></li>
+          <li><span>02</span><h3>Rövid brief</h3><p>Add meg a vállalkozást, célokat, hangnemet és a meglévő anyagokat.</p></li>
+          <li><span>03</span><h3>Első változat</h3><p>Elkészül az előnézet vagy a havi tartalomcsomag.</p></li>
+          <li><span>04</span><h3>Jóváhagyás</h3><p>Átnézed, és a csomagban lévő javítási körökben pontosítunk.</p></li>
+          <li><span>05</span><h3>Átadás</h3><p>Publikáljuk vagy átadjuk az anyagokat, és indulhat a folyamatos szolgáltatás.</p></li>
+        </ol>
+      </div>
     </section>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 OVEXI. Minden jog fenntartva.</p>
-            <p class="footer-legal-links">
-                <a href="pages/cookie-policy.html">Cookie tájékoztató</a>
-            </p>
+    <section class="guardrails-section" id="garancia">
+      <div class="container guardrails-grid">
+        <div>
+          <p class="eyebrow">Kiszámítható együttműködés</p>
+          <h2>Olcsóbb folyamat, kontrollált minőség</h2>
+          <p class="section-copy">A gyors munkafolyamat csökkenti az árat, de nem veszi ki a kezedből az irányítást. A végleges publikálás mindig jóváhagyáshoz kötött.</p>
         </div>
-    </footer>
+        <div class="guardrail-cards">
+          <article><strong>Jóváhagyás</strong><p>A marketinganyagok és weboldalak csak elfogadás után kerülnek ki.</p></article>
+          <article><strong>Rögzített keretek</strong><p>Minden csomagnál előre látható a tartalom, a módosítás és a havidíj.</p></article>
+          <article><strong>Adatvédelem</strong><p>Csak a teljesítéshez szükséges üzleti adatokat kérjük be és kezeljük.</p></article>
+          <article><strong>Könnyű váltás</strong><p>A havi modulok külön kezelhetők; csomagváltás bármikor kérhető.</p></article>
+        </div>
+      </div>
+    </section>
 
-    <div class="cookie-consent" id="cookieConsent" role="region" aria-label="Cookie hozzájárulás" aria-hidden="true">
-        <div class="cookie-consent-content">
-            <p class="cookie-consent-title">Cookie beállítások</p>
-            <p class="cookie-consent-text">
-                A weboldal működéséhez szükséges cookie-kat és tárolást mindig használunk. A kényelmi cookie-k (pl. nyelvi beállítás) csak hozzájárulás után aktívak.
-            </p>
-            <div class="cookie-consent-actions">
-                <button type="button" class="cookie-btn cookie-btn-secondary" id="cookieRejectBtn">Csak szükséges</button>
-                <button type="button" class="cookie-btn cookie-btn-ghost" id="cookieOpenSettingsBtn">Beállítások</button>
-                <button type="button" class="cookie-btn cookie-btn-primary" id="cookieAcceptBtn">Összes elfogadása</button>
-            </div>
+    <section class="faq-section" id="gyik">
+      <div class="container faq-grid">
+        <div>
+          <p class="eyebrow">Gyakori kérdések</p>
+          <h2>A rendelés előtt</h2>
+          <p class="section-copy">Ha nem találod a választ, írj az <a href="mailto:info@ovexi.hu">info@ovexi.hu</a> címre.</p>
         </div>
+        <div class="faq-list">
+          <details><summary>Mit tartalmaz a 69 990 Ft-os Céges weboldal?</summary><p>A tervezett csomag legfeljebb 6 aloldalt, egy szolgáltató online időpontfoglalását és foglaláskezelő felületét tartalmazza. Szakmától függetlenül, időpontra dolgozó vállalkozásoknak készül: például fodrászoknak, műkörmösöknek, autószerelőknek, masszőröknek vagy oktatóknak. A szolgáltatások, árak és foglalási időtartamok az adott vállalkozáshoz igazíthatók. A foglalórendszer fejlesztés alatt áll: jelenleg fizetés nélküli igényfelmérés kérhető, az elérhetőséget és átadási határidőt külön igazoljuk vissza.</p></details>
+          <details><summary>Az egyszeri ár örök ingyenes üzemeltetést jelent?</summary><p>Nem. Az egyszeri ár a megállapodott weboldal elkészítésére és átadására vonatkozik. A domain megújítása, tárhely, e-mail, adatbázis és esetleges külső foglalási vagy üzenetküldési szolgáltatások folyamatos költsége külön fizetendő. A szolgáltatókat, díjakat és használati korlátokat fizetés előtt egyeztetjük; új fizetős előfizetést nem indítunk külön jóváhagyás nélkül.</p></details>
+          <details><summary>Kötelező marketinget vagy karbantartást is vennem?</summary><p>Nem. Mindkettő önállóan választható. A karbantartás a csomagban leírt figyelési, frissítési és mentési munkát jelenti, nem tartalmaz automatikusan domaint, tárhelyet vagy harmadik fél előfizetési díját. Saját tárhely használata technikai egyeztetéssel lehetséges.</p></details>
+          <details><summary>Rendelhetek csak marketinget?</summary><p>Igen. A marketingcsomagok weboldal nélkül is megvásárolhatók. A briefben megadhatod a meglévő weboldalad és közösségi felületeid adatait.</p></details>
+          <details><summary>Más által készített oldalt is karbantartotok?</summary><p>Igen, előtte egyszeri technikai audit szükséges. Ez alapján tudjuk biztonságosan vállalni a frissítéseket és módosításokat.</p></details>
+          <details><summary>Mit jelent a kisebb tartalmi módosítás?</summary><p>Meglévő szöveg, kép, elérhetőség vagy nyitvatartás cseréjét. Új funkció és teljes aloldal külön fejlesztésnek számít.</p></details>
+          <details><summary>Mikor történik a fizetés?</summary><p>A brief beküldése önmagában nem terhel meg bankkártyát. A kész, automatikusan ellenőrizhető csomagoknál az éles fizetés bekapcsolása után közvetlenül Stripe fizetési oldal nyílhat meg. Az egyeztetést igénylő vagy fejlesztés alatt álló csomagokhoz előbb írásos visszaigazolás kell. Az egyszeri és ismétlődő díjak a fizetési oldalon külön láthatók.</p></details>
+          <details><summary>Lemondható a havi szolgáltatás?</summary><p>Igen. Az előfizetés a következő számlázási időszak előtt lemondható; a már megkezdett időszak végéig aktív marad.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="container final-cta-inner">
+        <div>
+          <p class="eyebrow">Kezdjük el</p>
+          <h2>Válaszd ki az első csomagod</h2>
+          <p>A brief kitöltése általában kevesebb mint öt perc.</p>
+        </div>
+        <a class="button button-primary" href="#csomagok">Csomagok megtekintése</a>
+      </div>
+    </section>
+    <section class="container order-receipt" id="orderReceipt" tabindex="-1" aria-live="polite" hidden></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <img src="/assets/images/logo-256.png" width="256" height="60" alt="OVEXI" class="footer-logo" loading="lazy" decoding="async">
+        <p>Weboldal, marketing és karbantartás kisvállalkozásoknak.</p>
+      </div>
+      <div>
+        <strong>Kapcsolat</strong>
+        <a href="mailto:info@ovexi.hu">info@ovexi.hu</a>
+        <a href="tel:+36705723437">+36&nbsp;70&nbsp;572&nbsp;3437</a>
+      </div>
+      <div>
+        <strong>Információk</strong>
+        <a href="/weboldal-keszites">Weboldal készítés</a>
+        <a href="/marketing-kisvallalkozasoknak">Marketing</a>
+        <a href="/weboldal-karbantartas">Karbantartás</a>
+        <a href="/cookie-policy">Cookie tájékoztató</a>
+        <button class="button button-ghost button-small" id="openCookieSettings" type="button">Cookie-beállítások</button>
+        <a href="/ugyfelter">Ügyféltér</a>
+        <a href="/adatkezeles">Adatkezelés</a>
+        <a href="/aszf">ÁSZF</a>
+      </div>
     </div>
+    <div class="container footer-bottom">© 2026 OVEXI. Minden jog fenntartva.</div>
+  </footer>
 
-    <button type="button" class="cookie-settings-fab" id="cookieSettingsFab" aria-label="Cookie beállítások megnyitása">
-        Cookie beállítások
-    </button>
-
-    <div class="cookie-settings-modal-backdrop" id="cookieSettingsModal" aria-hidden="true">
-        <div class="cookie-settings-modal" role="dialog" aria-modal="true" aria-labelledby="cookieSettingsTitle">
-            <h2 id="cookieSettingsTitle">Cookie beállítások</h2>
-            <p class="cookie-settings-intro">Az alábbi kategóriák között választhatsz. A szükséges cookie-k nélkül az oldal nem működik megfelelően.</p>
-
-            <div class="cookie-setting-row">
-                <div>
-                    <p class="cookie-setting-title">Szükséges</p>
-                    <p class="cookie-setting-help">Biztonsági, űrlap-küldési védelmi és működési funkciók.</p>
-                </div>
-                <label class="cookie-switch">
-                    <input type="checkbox" checked disabled>
-                    <span>Szükséges</span>
-                </label>
-            </div>
-
-            <div class="cookie-setting-row">
-                <div>
-                    <p class="cookie-setting-title">Kényelmi</p>
-                    <p class="cookie-setting-help">Nyelvi beállítás és használati preferenciák megjegyzése.</p>
-                </div>
-                <label class="cookie-switch">
-                    <input type="checkbox" id="cookiePrefToggle">
-                    <span>Engedélyezve</span>
-                </label>
-            </div>
-
-            <div class="cookie-setting-row">
-                <div>
-                    <p class="cookie-setting-title">Analitikai</p>
-                    <p class="cookie-setting-help">Forgalmi és használati statisztikák gyűjtése (pl. gombkattintások, forrás, oldalmegtekintések).</p>
-                </div>
-                <label class="cookie-switch">
-                    <input type="checkbox" id="cookieAnalyticsToggle">
-                    <span>Engedélyezve</span>
-                </label>
-            </div>
-
-            <p class="cookie-settings-links">
-                Részletek: <a href="pages/cookie-policy.html" target="_blank" rel="noopener noreferrer">Cookie tájékoztató</a>
-            </p>
-
-            <div class="cookie-settings-actions">
-                <button type="button" class="cookie-btn cookie-btn-secondary" id="cookieSettingsRejectBtn">Csak szükséges</button>
-                <button type="button" class="cookie-btn cookie-btn-primary" id="cookieSettingsSaveBtn">Beállítások mentése</button>
-            </div>
-        </div>
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="cart-drawer" id="cartDrawer" inert aria-labelledby="cartTitle">
+    <div class="drawer-header">
+      <div><p class="eyebrow">Megrendelés</p><h2 id="cartTitle">A kosarad</h2></div>
+      <button class="icon-button" id="closeCartButton" type="button" aria-label="Kosár bezárása">×</button>
     </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-summary" id="cartSummary"></div>
+    <button class="button button-primary button-full" id="startCheckoutButton" type="button">Tovább a briefhez</button>
+  </aside>
 
-    <div class="package-modal-backdrop" id="packageModal" aria-hidden="true">
-        <div class="package-modal" role="dialog" aria-modal="true" aria-labelledby="packageModalTitle">
-            <button type="button" class="package-modal-close" id="closePackageModalBtn" aria-label="Csomag információ bezárása">&times;</button>
-            <h2 id="packageModalTitle">Csomag részletek</h2>
-            <div class="package-modal-price" id="packageModalPrice"></div>
-            <p class="package-modal-description" id="packageModalDescription"></p>
-            <ul class="package-modal-features" id="packageModalFeatures"></ul>
+  <div class="modal-backdrop" id="checkoutBackdrop" hidden>
+    <section class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+      <div class="modal-header">
+        <div><p class="eyebrow">Megrendelés indítása</p><h2 id="checkoutTitle">Mesélj a vállalkozásodról</h2></div>
+        <button class="icon-button" id="closeCheckoutButton" type="button" aria-label="Ablak bezárása">×</button>
+      </div>
+      <form id="checkoutForm" class="checkout-form">
+        <div class="form-section">
+          <h3>Kapcsolattartás</h3>
+          <div class="form-grid">
+            <label>Kapcsolattartó neve<input type="text" name="contactName" autocomplete="name" minlength="2" maxlength="80" required></label>
+            <label>Cégnév<input type="text" name="companyName" autocomplete="organization" minlength="2" maxlength="120" required></label>
+            <label>E-mail<input type="email" name="email" autocomplete="email" maxlength="160" required></label>
+            <label>Telefonszám<input type="tel" name="phone" autocomplete="tel" maxlength="32"></label>
+          </div>
         </div>
-    </div>
-
-    <div class="all-reviews-modal-backdrop" id="allReviewsModal" aria-hidden="true">
-        <div class="all-reviews-modal" role="dialog" aria-modal="true" aria-labelledby="allReviewsTitle">
-            <button type="button" class="all-reviews-modal-close" id="closeAllReviewsModal" aria-label="Bezárás">&times;</button>
-            <h2 id="allReviewsTitle">Vélemények</h2>
-            <ul class="all-reviews-list" id="allReviewsList"></ul>
+        <div class="form-section">
+          <h3>Rövid brief</h3>
+          <div class="form-grid">
+            <label class="form-wide">Mivel foglalkozik a vállalkozás?<textarea name="businessDescription" minlength="10" maxlength="1200" placeholder="Írj legalább egy rövid mondatot a szolgáltatásaidról." required></textarea></label>
+            <label>Célcsoport<input type="text" name="targetAudience" maxlength="300" placeholder="Például budapesti kisvállalkozók"></label>
+            <label>Weboldal vagy közösségi oldal<input type="url" name="currentUrl" maxlength="300" placeholder="https://"></label>
+            <label>Elsődleges cél<select name="primaryGoal" required><option value="">Válassz…</option><option>Több ajánlatkérés</option><option>Online értékesítés</option><option>Ismertség növelése</option><option>Rendszeres kommunikáció</option><option>Technikai biztonság</option></select></label>
+            <label>Kommunikáció hangneme<select name="tone"><option>Professzionális</option><option>Közvetlen és barátságos</option><option>Prémium</option><option>Fiatalos</option><option>Oktató jellegű</option></select></label>
+            <label class="form-wide">Fontos részletek, kérések<textarea name="notes" maxlength="1600" placeholder="Színek, példaképek, határidő vagy bármilyen külön kérés"></textarea></label>
+          </div>
         </div>
-    </div>
+        <div class="order-review" id="checkoutReview"></div>
+        <p class="checkout-note">Az egyszeri weboldaldíj nem tartalmaz korlátlan üzemeltetést. A domain, tárhely, e-mail és külső szolgáltatások külön költségeit a fizetés előtt írásban egyeztetjük. Fejlesztés alatt álló csomagnál ez csak igényfelmérés.</p>
+        <label class="check-row"><input type="checkbox" name="termsAccepted" required><span>Elolvastam és elfogadom az <a href="/aszf" target="_blank">ÁSZF-et</a> és az <a href="/adatkezeles" target="_blank">adatkezelési tájékoztatót</a>.</span></label>
+        <label class="check-row"><input type="checkbox" name="operatingCostsAcknowledged" required><span>Tudomásul veszem, hogy az egyszeri ár nem örök ingyenes üzemeltetés: a domain, tárhely, e-mail és külső szolgáltatások díját fizetés előtt külön egyeztetjük.</span></label>
+        <label class="check-row"><input type="checkbox" name="marketingConsent"><span>Szeretnék hasznos tippeket és ajánlatokat kapni e-mailben. Ez nem feltétele a rendelésnek.</span></label>
+        <div class="bot-trap" aria-hidden="true"><label>Webhely<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <p class="form-status" id="checkoutStatus" aria-live="polite"></p>
+        <button class="button button-primary button-full" type="submit">Igény beküldése — fizetés nélkül</button>
+        <p class="checkout-note">Most nem történik fizetés és nem indul előfizetés. A részleteket e-mailben egyeztetjük. Bizonytalan kapcsolat esetén a beküldés ideiglenes adatait ebben a böngészőlapban megőrizzük a biztonságos újrapróbáláshoz.</p>
+      </form>
+    </section>
+  </div>
 
-    <div class="review-modal-backdrop" id="reviewModal" aria-hidden="true">
-        <div class="review-modal" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
-            <button type="button" class="review-modal-close" id="closeReviewModalBtn" aria-label="Vélemény popup bezárása">&times;</button>
-            <h2 id="reviewModalTitle">Írj véleményt</h2>
-            <p>Oszd meg a tapasztalatod. A jó véleményed felhőként megjelenik a főoldalon.</p>
-            <form id="reviewForm" class="review-form" novalidate>
-                <div class="form-group review-form-group">
-                    <label for="reviewName">Név *</label>
-                    <input type="text" id="reviewName" name="reviewName" required maxlength="60" placeholder="Pl. Kiss Anna">
-                </div>
-                <div class="form-group review-form-group">
-                    <label for="reviewRating">Értékelés *</label>
-                    <select id="reviewRating" name="reviewRating" required>
-                        <option value="">Válassz...</option>
-                        <option value="5">5 - Kiváló</option>
-                        <option value="4">4 - Nagyon jó</option>
-                        <option value="3">3 - Jó</option>
-                        <option value="2">2 - Közepes</option>
-                        <option value="1">1 - Fejlesztendő</option>
-                    </select>
-                </div>
-                <div class="form-group review-form-group">
-                    <label for="reviewMessage">Vélemény *</label>
-                    <textarea id="reviewMessage" name="reviewMessage" minlength="10" maxlength="320" required placeholder="Mit értékeltél a közös munkában?"></textarea>
-                </div>
-                <div class="bot-trap" aria-hidden="true">
-                    <label for="reviewWebsite">Website</label>
-                    <input type="text" id="reviewWebsite" name="reviewWebsite" autocomplete="off" tabindex="-1">
-                </div>
-                <p class="review-feedback" id="reviewFeedback" aria-live="polite"></p>
-                <button type="submit" class="submit-button" id="submitReviewBtn">Vélemény mentése</button>
-            </form>
-        </div>
-    </div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="js/lang.js" defer></script>
-    <script type="module" src="js/main.js"></script>
+  <div class="cookie-banner" id="cookieBanner" hidden>
+    <div>
+      <strong>Cookie-beállítások</strong>
+      <p>A szükséges tárolást az oldal működéséhez használjuk. A látogatottsági statisztika opcionális, és később is kikapcsolható.</p>
+    </div>
+    <div class="cookie-actions">
+      <button type="button" class="button button-ghost button-small" id="cookieReject">Csak szükséges</button>
+      <button type="button" class="button button-secondary button-small" id="cookieAccept">Elfogadom</button>
+    </div>
+  </div>
+
+  <noscript>Az online csomagválasztó használatához engedélyezd a JavaScriptet, vagy írj az info@ovexi.hu címre.</noscript>
+  <script type="module" src="js/main.js?v=20260902-1"></script>
 </body>
 </html>

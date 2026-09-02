@@ -1,4 +1,13 @@
 {
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22"
+  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
@@ -8,10 +17,26 @@
     "cleanUrls": true,
     "ignore": [
       "firebase.json",
+      ".firebaserc",
+      ".gitignore",
+      ".git/**",
+      ".firebase/**",
       "firestore.rules",
       "firestore.indexes.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/*.log",
+      "**/*.md",
+      "functions/**",
+      "tools/**",
+      "docs/**",
+      "ops/**",
+      "script.js",
+      "styles.css",
+      "pages/statistics.html",
+      "package.json",
+      "package-lock.json",
+      "SECURITY.md"
     ],
     "redirects": [
       {
@@ -23,15 +48,85 @@
         "source": "/pages/cookie-policy.html",
         "destination": "/cookie-policy",
         "type": 301
+      },
+      {
+        "source": "/pages/admin.html",
+        "destination": "/admin",
+        "type": 301
+      },
+      {
+        "source": "/pages/adatkezeles.html",
+        "destination": "/adatkezeles",
+        "type": 301
+      },
+      {
+        "source": "/pages/aszf.html",
+        "destination": "/aszf",
+        "type": 301
+      },
+      {
+        "source": "/pages/weboldal-keszites.html",
+        "destination": "/weboldal-keszites",
+        "type": 301
+      },
+      {
+        "source": "/pages/marketing-kisvallalkozasoknak.html",
+        "destination": "/marketing-kisvallalkozasoknak",
+        "type": 301
+      },
+      {
+        "source": "/pages/weboldal-karbantartas.html",
+        "destination": "/weboldal-karbantartas",
+        "type": 301
       }
     ],
     "rewrites": [
       {
+        "source": "/foglalas",
+        "destination": "/pages/foglalas.html"
+      },
+      {
         "source": "/cookie-policy",
         "destination": "/pages/cookie-policy.html"
+      },
+      {
+        "source": "/admin",
+        "destination": "/pages/admin.html"
+      },
+      {
+        "source": "/ugyfelter",
+        "destination": "/pages/ugyfelter.html"
+      },
+      {
+        "source": "/adatkezeles",
+        "destination": "/pages/adatkezeles.html"
+      },
+      {
+        "source": "/aszf",
+        "destination": "/pages/aszf.html"
+      },
+      {
+        "source": "/weboldal-keszites",
+        "destination": "/pages/weboldal-keszites.html"
+      },
+      {
+        "source": "/marketing-kisvallalkozasoknak",
+        "destination": "/pages/marketing-kisvallalkozasoknak.html"
+      },
+      {
+        "source": "/weboldal-karbantartas",
+        "destination": "/pages/weboldal-karbantartas.html"
       }
     ],
     "headers": [
+      {
+        "source": "/foglalas",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store" },
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+          { "key": "Referrer-Policy", "value": "no-referrer" }
+        ]
+      },
       {
         "source": "/pages/statistics.html",
         "headers": [
@@ -46,12 +141,45 @@
         ]
       },
       {
+        "source": "/admin",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store"
+          }
+        ]
+      },
+      {
+        "source": "/ugyfelter",
+        "headers": [
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+          { "key": "Cache-Control", "value": "no-store" },
+          { "key": "Referrer-Policy", "value": "no-referrer" }
+        ]
+      },
+      {
         "source": "**/*.@(js|mjs)",
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "public,max-age=300"
+            "value": "public,max-age=86400"
           }
+        ]
+      },
+      {
+        "source": "**/*.css",
+        "headers": [
+          { "key": "Cache-Control", "value": "public,max-age=86400" }
+        ]
+      },
+      {
+        "source": "/assets/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
         ]
       },
       {
@@ -72,6 +200,14 @@
           {
             "key": "Permissions-Policy",
             "value": "camera=(), microphone=(), geolocation=()"
+          },
+          {
+            "key": "Strict-Transport-Security",
+            "value": "max-age=31536000"
+          },
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "same-origin"
           }
         ]
       }

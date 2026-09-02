@@ -1,0 +1,14 @@
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+ops/
+functions/.env
+functions/.env.*
+!functions/.env.example
+
+firestore-debug.log
+
+**/node_modules/
+*.ovxb
+*.dpapi
+coverage/

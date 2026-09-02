@@ -1,0 +1,14 @@
+{
+  "name": "ovexi-storefront",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node tools/check-syntax.cjs",
+    "deploy:hosting": "npm run check && firebase deploy --only hosting --project ovexi-6ef38 && npm run seo:submit",
+    "seo:submit": "node tools/submit-indexnow.mjs",
+    "test": "npm --prefix functions test",
+    "check:release": "node tools/check-release.cjs",
+    "backup": "node tools/backup.cjs",
+    "readiness": "node tools/readiness.cjs"
+  }
+}
