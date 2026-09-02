@@ -51,7 +51,8 @@ function paymentGate(order, env = process.env) {
 }
 
 function assertKeyMode(key, mode) {
-  if (!["test", "live"].includes(mode) || !String(key).startsWith(`sk_${mode}_`)) throw new Error("A Stripe kulcs és a fizetési környezet nem egyezik.");
+  const prefix = String(key).split("_", 2).join("_");
+  if (!["test", "live"].includes(mode) || ![`sk_${mode}`, `rk_${mode}`].includes(prefix)) throw new Error("A Stripe kulcs és a fizetési környezet nem egyezik.");
 }
 
 function checkoutPayload(orderId, order) {

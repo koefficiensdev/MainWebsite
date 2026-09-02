@@ -35,6 +35,13 @@ test("instant checkout requires explicit product and service readiness", () => {
   assert.equal(d.paymentGate(checked, { INSTANT_PRODUCT_IDS: "marketing-launch", PAYMENTS_ENABLED: "true", PAYMENT_MODE: "test" }), null);
   assert.throws(() => d.assertKeyMode("sk_test_x", "live"));
 });
+test("Stripe key mode accepts standard and restricted keys only in the matching environment", () => {
+  assert.doesNotThrow(() => d.assertKeyMode("sk_test_x", "test"));
+  assert.doesNotThrow(() => d.assertKeyMode("rk_test_x", "test"));
+  assert.doesNotThrow(() => d.assertKeyMode("sk_live_x", "live"));
+  assert.doesNotThrow(() => d.assertKeyMode("rk_live_x", "live"));
+  for (const key of ["pk_live_x", "rk_test_x", "", null]) assert.throws(() => d.assertKeyMode(key, "live"));
+});
 test("mixed Checkout uses subscription mode but one-time items never recur", () => {
   const checked = { ...d.validateOrder({ ...input(), itemIds: ["website-onepage", "marketing-mini"] }), orderNumber: "OVX-TEST-TEST" };
   const session = d.checkoutPayload("abc", checked);
