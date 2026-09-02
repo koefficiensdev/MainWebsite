@@ -2,7 +2,7 @@
 
 const crypto = require("node:crypto");
 const { resolveProducts, calculateTotals } = require("./catalog");
-const TERMS_VERSION = "2026-08-30";
+const TERMS_VERSION = "2026-09-01";
 const SUPPORTED_EVENTS = ["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "checkout.session.expired", "invoice.paid", "invoice.payment_failed", "customer.subscription.updated", "customer.subscription.deleted"];
 
 function hufToMinor(amount) {

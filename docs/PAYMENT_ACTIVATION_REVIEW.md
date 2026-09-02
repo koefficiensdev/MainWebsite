@@ -1,6 +1,6 @@
 # Stripe és Billingo – aktiválási ellenőrzés, 2026-09-02
 
-A Stripe aktiválása az ellenőrző összesítőig jutott. Az opcionális Stripe Tax és Climate hozzájárulás kihagyva; az összesítő szerint mindkettő Off. Végleges beküldés nem történt.
+A Stripe aktiválása 2026-09-02-án véglegesen beküldve. A hivatalos cím az EVNY nyilvános adataival egyezőre javítva. Az opcionális Stripe Tax és Climate egyaránt Off. A Stripe API szerint a terhelések és kifizetések engedélyezettek, további adat vagy ellenőrzés nincs függőben.
 
 A vállalkozási forma Magyarország / egyéni vállalkozót is tartalmazó opció. Bankszámla megadva, kétlépcsős hitelesítés On. Az összesítőn Radar Standard bekapcsolva, feltüntetett díja 16 Ft / ellenőrzött tranzakció; ezt a felhasználó által beállított opciót nem módosítottuk.
 
@@ -10,8 +10,8 @@ A tulajdonos 2026-09-02-án megerősítette: a Stripe +36 20 398 9011 száma a p
 
 ## Tisztázandó adatok
 
-- A Billingo címe rövidebb a honlapon szereplő székhelynél. Nem biztos, hogy ugyanaz a hivatalos címformátum; a NAV/nyilvántartás adata alapján egységesítendő.
-- A Billingóban a nyilvántartási szám mező üres; a honlapon van érték, de ennek hatósági ellenőrzése még szükséges.
+- A Billingo címe rövidebb az EVNY-ben ellenőrzött hivatalos székhelynél; később egységesítendő.
+- A Billingóban a nyilvántartási szám mező üres; az EVNY-ben ellenőrzött érték: 62198448.
 - A honlap és a backend AAM státuszt használ. A Billingo SZJA szerinti átalányadózó jelölése nem igazolja önmagában az áfastátuszt. A jelenlegi AAM-státusz és a belföldi/külföldi ügyfélkör tisztázandó.
 
 ## Billingo
@@ -26,7 +26,7 @@ API-előfizetés nincs. Az API + tömeges Basic havi csomag kosara előkészítv
 
 A `billingo.js` jelenleg normál, kifizetett számlát készít, a `invoice-workflow.js` a fizetés rögzítésének napját adja át teljesítési és esedékességi dátumként. Ez nem igazolja előleg, későbbi teljesítés és időszakos elszámolás helyes kezelését; a szerződéses fizetési modellhez külön hozzá kell igazítani. Külföldi ügyleteknél az egységes AAM nem alkalmazható automatikus feltételezésként. Az éles fizetési/számlázási kapuk változatlanul zártak.
 
-A `commerce-domain.js` TERMS_VERSION értéke 2026-08-30, a publikus ÁSZF dátuma 2026-09-01. A végleges jogi szöveg és az elfogadás verziójának egységesítése még szükséges.
+A `commerce-domain.js` TERMS_VERSION értéke a publikus ÁSZF 2026-09-01 dátumával egységesítve. Az éles fizetés továbbra is zárt, amíg a számlázási folyamat és az AAM-státusz nincs véglegesítve.
 
 ## Források
 

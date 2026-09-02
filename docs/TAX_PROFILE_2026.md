@@ -2,7 +2,7 @@
 
 ## Kiinduló adatok
 
-A tulajdonos közlése: egyéni vállalkozó, SZJA szerinti átalányadózó, mellette 8–16 óráig főállásban dolgozik. A szerződéses heti óraszám, a vállalkozás indulása, az évközi jogviszonyváltozások és az AAM hatósági státusza még ellenőrizendő. A munkaidő-beosztás önmagában nem igazolja a heti legalább 36 órát.
+A tulajdonos közlése: egyéni vállalkozó, SZJA szerinti átalányadózó, heti 40 órás főállással, jelenleg nulla vállalkozói bevétellel és csak magyar ügyfélkörrel. A NAV EVNY 2026-09-02-i nyilvános lekérdezése szerint a vállalkozás 2026. április 20. óta működő, nem szünetel; főtevékenysége 621002 Egyedi szoftverfejlesztés. A székhely és a 12 további tevékenység is ellenőrizve. Az AAM választását tartalmazó belső NAV-törzsadat nem volt lekérhető, mert a KAÜ/DÁP azonosítás 500-as központi hibával leállt.
 
 ## Alkalmazandó szabályok
 
@@ -13,10 +13,10 @@ A tulajdonos közlése: egyéni vállalkozó, SZJA szerinti átalányadózó, me
 
 ## Stripe és későbbi Billingo
 
-A Stripe összesítőjét ismét ellenőriztük: Tax Off, Climate Off; végleges beküldés nem történt. A pénzügyi ügyfélszolgálati szám helyes, változatlan. A kikapcsolt Tax nem AAM-igazolás. A Stripe Tax az értékesítések forgalmi adóját kezeli; a magyar személyes adókat és kedvezményeket a nyilvántartásban/bevallásban kell kezelni. [Stripe Tax](https://docs.stripe.com/tax/set-up)
+A Stripe hivatalos címe az EVNY-adatokkal egyezőre javítva, majd az aktiválás 2026-09-02-án véglegesen beküldve. A Stripe API szerint az aktivált fiókban a terhelések és a kifizetések engedélyezettek, nincs esedékes vagy ellenőrzésre váró adat. Tax Off, Climate Off; a pénzügyi ügyfélszolgálati szám helyes. A kikapcsolt Tax nem AAM-igazolás. A Stripe Tax az értékesítések forgalmi adóját kezeli; a magyar személyes adókat és kedvezményeket a nyilvántartásban/bevallásban kell kezelni. [Stripe Tax](https://docs.stripe.com/tax/set-up)
 
 Billingo-beállítás és vásárlás most nem történt. Később az átalányadózó jelölést és a számlák áfajogcímét külön kell véglegesíteni. A meglévő AAM konfiguráció nem tekinthető ellenőrzöttnek. Az éles fizetési és számlázási kapuk zárva maradnak.
 
 ## A személyre szabott számításhoz még szükséges
 
-Szerződéses heti munkaidő és annak 2026-os változásai; vállalkozás indulási dátuma és szünetelése; AAM-státusz igazolása; bevételt hozó tevékenységek; 2026-ban befolyt vállalkozói bevétel és éves várakozás; bérből/más jövedelemből már felhasznált SZJA-kedvezmény; belföldi/külföldi ügyfélkör. A béradatokat és személyes igazolásokat nem kell a Git-repozitóriumba menteni.
+AAM-státusz belső NAV-törzsadattal történő igazolása; a főállás és a vállalkozás 2026-os esetleges változásai; a később befolyó vállalkozói bevétel; a bérből/más jövedelemből ténylegesen felhasznált SZJA-kedvezmény; a külföldi ügyfélkör indulása. A béradatokat és személyes igazolásokat nem kell a Git-repozitóriumba menteni.
