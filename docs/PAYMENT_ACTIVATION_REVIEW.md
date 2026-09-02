@@ -4,14 +4,19 @@ A Stripe aktiválása az ellenőrző összesítőig jutott. Az opcionális Strip
 
 A vállalkozási forma Magyarország / egyéni vállalkozót is tartalmazó opció. Bankszámla megadva, kétlépcsős hitelesítés On. Az összesítőn Radar Standard bekapcsolva, feltüntetett díja 16 Ft / ellenőrzött tranzakció; ezt a felhasználó által beállított opciót nem módosítottuk.
 
+## Megerősített kapcsolattartás
+
+A tulajdonos 2026-09-02-án megerősítette: a Stripe +36 20 398 9011 száma a pénzügyi ügyfélszolgálaté, a honlap +36 70 572 3437 száma az általános megkereséseké. A két szám szándékosan különbözik; nem egységesítendő.
+
 ## Tisztázandó adatok
 
-- A Stripe ügyfélszolgálati telefonszáma eltér a honlap jogi dokumentumainak telefonszámától. A hivatalos ügyfélszolgálati számot a tulajdonos erősítse meg.
 - A Billingo címe rövidebb a honlapon szereplő székhelynél. Nem biztos, hogy ugyanaz a hivatalos címformátum; a NAV/nyilvántartás adata alapján egységesítendő.
 - A Billingóban a nyilvántartási szám mező üres; a honlapon van érték, de ennek hatósági ellenőrzése még szükséges.
 - A honlap és a backend AAM státuszt használ. A Billingo SZJA szerinti átalányadózó jelölése nem igazolja önmagában az áfastátuszt. A jelenlegi AAM-státusz és a belföldi/külföldi ügyfélkör tisztázandó.
 
 ## Billingo
+
+A tulajdonos kérésére a Billingo munkái szünetelnek. Az alábbiak korábbi megfigyelések, nem újonnan elvégzett beállítások. A későbbi adózási egyeztetés alapja: [2026-os adózási előkészítés](TAX_PROFILE_2026.md).
 
 NAV-kapcsolat hiányzik, a technikai felhasználó négy mezője üres. A NAV Online Számla belépés DÁP/Ügyfélkapu+ azonosításig előkészítve. Személyes belépést a tulajdonos végzi.
 
