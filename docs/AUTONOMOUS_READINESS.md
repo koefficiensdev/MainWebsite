@@ -2,6 +2,8 @@
 
 Állapot: 2026-09-02. Ez a dokumentum az ezen a napon korábban írt státuszlapoknál frissebb. A rendszer most ellenőrizhető ügyfélanyagokat készít; az üzleti aktiválások és az ügyfél jóváhagyása külön lépések.
 
+Frissítés: az egyedi tervezésre, egyszerűbb adminra, foglalásra és SEO-ra vonatkozó aktuális állapotot a [BESPOKE_PRODUCTION.md](BESPOKE_PRODUCTION.md) tartalmazza. Az alábbi tesztszámok és kiadási bizonyítékok a korábbi kiadás történeti adatai.
+
 ## A kilenc munkaterület
 
 | Terület | Megvalósult | A következő éles lépés feltétele |
@@ -18,11 +20,11 @@
 
 ## Használat
 
-Admin → Automatizálás → Weboldal és marketinganyag készítése. Válassz rendelést, szükség szerint készíts AI-szövegeket, majd ellenőrizd a tartalmat és készítsd el az anyagokat. A részletes JSON szerkeszthető. Az AI-naplóban a korábban elkészült szöveg új hívás nélkül betölthető. A csomag a weboldalt, kreatívokat és tartalomnaptárt egy ZIP-ben adja át.
+Admin → Automatizálás → Weboldal és marketinganyag készítése. Válassz rendelést, szükség szerint készíts AI-szövegeket, majd ellenőrizd a tartalmat és készítsd el az anyagokat. A tartalom címkézett mezőkkel szerkeszthető; JSON-szerkesztés nem szükséges. Az AI-naplóban a korábban elkészült szöveg új hívás nélkül betölthető. A csomag a weboldalt, kreatívokat és tartalomnaptárt egy ZIP-ben adja át.
 
 Az elkészült változatból külön küldhető weboldal- vagy marketingelőnézet ügyfél-jóváhagyásra. A meglévő munkafolyamat megőrzi a brief és az előnézet verzióját. A végső átadás meglévő fizetési és jóváhagyási feltételei megmaradnak. A generálás önmagában nem jelent fizetést vagy teljesítést.
 
-Ugyanitt a Foglalási naptár beállítása alatt naptár készíthető és módosítható. A mintanyitvatartást és szolgáltatást a tényleges adatokkal kell kitölteni. Már létező Firebase-felhasználó azonosítója kell. A mentés nem kapcsolja be a publikus foglalórendszert. A régi foglalások ára, időtartama és időpontja beállításmódosításkor megmarad; egy bezárt nap meglévő vendégeit külön kell egyeztetni.
+Ugyanitt a Foglalási naptár beállítása alatt naptár készíthető és módosítható. A mintanyitvatartást és szolgáltatást a tényleges adatokkal kell kitölteni. Már létező felhasználó e-mail-címével választható tulajdonos; üresen az új naptár saját fiókhoz tartozik, meglévő naptár tulajdonosa megmarad. A mentés nem kapcsolja be a publikus foglalórendszert. A régi foglalások ára, időtartama és időpontja beállításmódosításkor megmarad; egy bezárt nap meglévő vendégeit külön kell egyeztetni.
 
 ## Ellenőrzött bizonyítékok
 
@@ -39,7 +41,7 @@ Ugyanitt a Foglalási naptár beállítása alatt naptár készíthető és mód
 
 ## Műszaki korlátok
 
-Az AI szövege tervezet: a mintában is volt további tényszerű ellenőrzést igénylő megfogalmazás. A darabszám-ellenőrzés nem igazolja az állítások helyességét. Az egyszerű alapgenerátor négy mintaposztja nem teljes havi marketingcsomag; a csomaghoz hiányzó anyagokat a manifest felsorolja. Saját fotózás, hirdetési fiókok bekötése és egyedi webshop nem áll elő a sablonból.
+Az AI szövege tervezet: a mintában is volt további tényszerű ellenőrzést igénylő megfogalmazás. A darabszám-ellenőrzés nem igazolja az állítások helyességét. Az aktuális egyedi generátor a csomaghoz hiányzó anyagokat a manifestben felsorolja. Saját fotózás, hirdetési fiókok bekötése és működő egyedi webshop külön feladat.
 
 Az előnézeti link birtokosa láthatja a tervezetet. A link visszavonható, automatikus lejárata nincs; keresőindexelés és gyorsítótárazás tiltott. Lezárás után az admin vonja vissza a szükségtelen előnézeteket.
 

@@ -2,9 +2,9 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {addDoc,collection,doc,getDocs,getFirestore,limit,orderBy,query,serverTimestamp,startAfter,updateDoc} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js";
-import {STATUS_LABELS as labels,SOURCE_NAMES,outreachReady,escapeHtml as e,safeUrl,dateMs,dayKey,inPeriod,money,providerSent,summarize,validateCampaign,validateExpense,csv} from "./admin-model.js?v=20260902-2";
-import {installBookingSettings} from "./booking-settings-ui.js?v=20260902-2";
-import {installProduction} from "./production-ui.js?v=20260902-2";
+import {STATUS_LABELS as labels,SOURCE_NAMES,outreachReady,escapeHtml as e,safeUrl,dateMs,dayKey,inPeriod,money,providerSent,summarize,validateCampaign,validateExpense,csv} from "./admin-model.js?v=20260902-3";
+import {installBookingSettings} from "./booking-settings-ui.js?v=20260902-3";
+import {installProduction} from "./production-ui.js?v=20260902-3";
 import {installWorkflows} from "./workflow-ui.js?v=20260902-1";
 import {installOutreach} from "./outreach-ui.js?v=20260831-4";
 
@@ -25,8 +25,8 @@ const options=(values,current)=>values.map(v=>`<option value="${e(v)}"${current=
 function resetData(){data=Object.fromEntries(sources.map(key=>[key,[]]));states=Object.fromEntries(sources.map(key=>[key,{status:"idle",more:false,cursor:null}]));}
 resetData();
 const outreach=installOutreach({functions,getData:()=>data,isAdmin:()=>isAdmin,refresh:()=>Promise.all(["outreach_messages","outreach_research","outreach_replies"].map(key=>loadSource(key))),messageRows,formatDate,badge,sourceEmpty});
-const workflows=installWorkflows({getData:()=>({...data,order_workflows:search(periodRows("order_workflows")),customer_requests:search(periodRows("customer_requests"))}),isAdmin:()=>isAdmin,identity:()=>auth.currentUser?.uid||"",getEpoch:()=>epoch,call:async(name,payload)=>(await httpsCallable(functions,name,{timeout:310000})(payload)).data,refresh:()=>Promise.all(["orders","order_workflows","customer_requests"].map(key=>loadSource(key))),notify:showToast});
-const production=installProduction({getData:()=>data,identity:()=>auth.currentUser?.uid||'',call:async(name,payload)=>(await httpsCallable(functions,name,{timeout:310000})(payload)).data,refresh:()=>Promise.all(['production_jobs','production_copy_jobs','order_workflows'].map(key=>loadSource(key))),notify:showToast});
+const workflows=installWorkflows({getData:()=>({...data,order_workflows:search(periodRows("order_workflows")),customer_requests:search(periodRows("customer_requests"))}),isAdmin:()=>isAdmin,identity:()=>auth.currentUser?.uid||"",getEpoch:()=>epoch,call:async(name,payload)=>(await httpsCallable(functions,name,{timeout:930000})(payload)).data,refresh:()=>Promise.all(["orders","order_workflows","customer_requests"].map(key=>loadSource(key))),notify:showToast});
+const production=installProduction({getData:()=>data,identity:()=>auth.currentUser?.uid||'',call:async(name,payload)=>(await httpsCallable(functions,name,{timeout:930000})(payload)).data,refresh:()=>Promise.all(['production_jobs','production_copy_jobs','order_workflows'].map(key=>loadSource(key))),notify:showToast});
 const bookingSettings=installBookingSettings({getData:()=>data,identity:()=>auth.currentUser?.uid||'',call:async(name,payload)=>(await httpsCallable(functions,name)(payload)).data,refresh:()=>loadSource('booking_tenants'),notify:showToast});
 onAuthStateChanged(auth,async user=>{
   production.reset();bookingSettings.reset();

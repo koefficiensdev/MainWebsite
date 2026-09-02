@@ -78,6 +78,16 @@
         "source": "/pages/weboldal-karbantartas.html",
         "destination": "/weboldal-karbantartas",
         "type": 301
+      },
+      {
+        "source": "/pages/weboldal-keszites-arak.html",
+        "destination": "/weboldal-keszites-arak",
+        "type": 301
+      },
+      {
+        "source": "/pages/weboldal-karbantartas-mit-tartalmaz.html",
+        "destination": "/weboldal-karbantartas-mit-tartalmaz",
+        "type": 301
       }
     ],
     "rewrites": [
@@ -116,15 +126,32 @@
       {
         "source": "/weboldal-karbantartas",
         "destination": "/pages/weboldal-karbantartas.html"
+      },
+      {
+        "source": "/weboldal-keszites-arak",
+        "destination": "/pages/weboldal-keszites-arak.html"
+      },
+      {
+        "source": "/weboldal-karbantartas-mit-tartalmaz",
+        "destination": "/pages/weboldal-karbantartas-mit-tartalmaz.html"
       }
     ],
     "headers": [
       {
         "source": "/foglalas",
         "headers": [
-          { "key": "Cache-Control", "value": "no-store" },
-          { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
-          { "key": "Referrer-Policy", "value": "no-referrer" }
+          {
+            "key": "Cache-Control",
+            "value": "no-store"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "no-referrer"
+          }
         ]
       },
       {
@@ -156,9 +183,18 @@
       {
         "source": "/ugyfelter",
         "headers": [
-          { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
-          { "key": "Cache-Control", "value": "no-store" },
-          { "key": "Referrer-Policy", "value": "no-referrer" }
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "no-referrer"
+          }
         ]
       },
       {
@@ -173,13 +209,19 @@
       {
         "source": "**/*.css",
         "headers": [
-          { "key": "Cache-Control", "value": "public,max-age=86400" }
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=86400"
+          }
         ]
       },
       {
         "source": "/assets/**",
         "headers": [
-          { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=31536000,immutable"
+          }
         ]
       },
       {

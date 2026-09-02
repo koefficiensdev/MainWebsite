@@ -19,8 +19,9 @@ export const getDocs=async value=>{const rows=await request('list',{collection:v
 export const addDoc=async()=>{throw Error('Fixture does not support this action');},updateDoc=async()=>{throw Error('Use the workflow form');};`;
 function rows(collection){return [...db.records.entries()].filter(([key])=>key.startsWith(collection+'/')&&key.split('/').length===2).map(([key,value])=>({...value,id:key.split('/')[1]}));}
 async function api(name,data){
-  if(name==='generateProductionArtifacts'){const result=await require('../functions/production-service').generate(db,data,'local-admin');const row=db.records.get('production_jobs/'+result.id);row.previewUrl='http://127.0.0.1:8879/fixture-preview?job='+result.id;row.marketingUrl=row.previewUrl+'&file=marketing.html';return {...result,previewUrl:row.previewUrl,marketingUrl:row.marketingUrl};}
-  const bookingMethods={bookingPublicConfig:'publicConfig',bookingAvailability:'availability',bookingCreate:'createBooking',bookingCancel:'cancelBooking',bookingOwnerDay:'ownerDay',bookingOwnerMove:'ownerMove',bookingOwnerStatus:'ownerStatus',bookingOwnerMoveSlots:'ownerMoveSlots'};
+  if(name==='generateProductionArtifacts')throw Object.assign(Error('A helyi naptárpróba nem hív AI-t. Az egyedi minták külön készülnek.'),{code:'failed-precondition'});
+  if(name==='bookingAdminSaveTenant')return require('../functions/booking-settings').save(db,data,'local-admin');
+  const bookingMethods={bookingGuestStatus:'guestStatus',bookingPublicConfig:'publicConfig',bookingAvailability:'availability',bookingCreate:'createBooking',bookingCancel:'cancelBooking',bookingOwnerDay:'ownerDay',bookingOwnerMove:'ownerMove',bookingOwnerStatus:'ownerStatus',bookingOwnerMoveSlots:'ownerMoveSlots'};
   if(bookingMethods[name])return require('../functions/booking-service')[bookingMethods[name]](db,data,...(name.startsWith('bookingOwner')?['local-admin']:[]));
   if(name==='list')return rows(data.collection);
   if(name==='requestCustomerAccess')return {accepted:true};
@@ -37,13 +38,14 @@ async function api(name,data){
 }
 http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');res.setHeader('Cache-Control','no-store');
+  const bespoke=url.pathname.match(/^\/bespoke-([12])\/((?:index|marketing)\.html|kreativ-\d+-(?:1080|1350)\.svg)$/);if(bespoke){const file=path.join(root,'ops','bespoke-'+bespoke[1],bespoke[2]);if(!fs.existsSync(file)){res.writeHead(404);return res.end();}res.setHeader('Content-Type',file.endsWith('.svg')?'image/svg+xml':'text/html');return res.end(fs.readFileSync(file));}
   if(url.pathname.startsWith('/sample/')){const name=url.pathname.slice(8);if(!/^[\w.-]+$/.test(name))return res.end();const file=path.join(root,'ops/production-sample',name);if(!fs.existsSync(file)){res.writeHead(404);return res.end();}res.setHeader('Content-Type',name.endsWith('.svg')?'image/svg+xml':name.endsWith('.html')?'text/html':'text/plain');return res.end(fs.readFileSync(file));}
   if(url.pathname==='/fixture-preview'){const row=db.records.get('production_jobs/'+url.searchParams.get('job'));const file=url.searchParams.get('file')||'index.html';res.setHeader('Content-Type','text/html');return res.end(row?.files?.[file]||'Missing preview');}
   if(url.pathname==='/js/booking-config.js'){res.setHeader('Content-Type','text/javascript');return res.end('export const BOOKING_CONFIG={liveEnabled:true,appCheckSiteKey:"local-fixture"};');}
   if(url.pathname==='/fixture-sdk.js'){res.setHeader('Content-Type','text/javascript');return res.end(sdk);}
   if(url.pathname==='/fixture-api'&&req.method==='POST'){let text='';for await(const part of req){text+=part;if(text.length>50000){res.writeHead(413);return res.end();}}try{const {name,data}=JSON.parse(text);res.setHeader('Content-Type','application/json');return res.end(JSON.stringify(await api(name,data)));}catch(error){res.writeHead(400,{'Content-Type':'application/json'});return res.end(JSON.stringify({code:error.code||'invalid-argument',message:error.message}));}}
-  const mapped={'/':'index.html','/admin':'pages/admin.html','/ugyfelter':'pages/ugyfelter.html','/foglalas':'pages/foglalas.html'}[url.pathname]||url.pathname.slice(1);
-  if(!['index.html','pages/admin.html','pages/ugyfelter.html','pages/foglalas.html'].includes(mapped)&&! /^(js|css|assets\/images)\/[\w.-]+$/.test(mapped)){res.writeHead(404);return res.end();}
+  const mapped={'/':'index.html','/admin':'pages/admin.html','/ugyfelter':'pages/ugyfelter.html','/foglalas':'pages/foglalas.html','/weboldal-keszites-arak':'pages/weboldal-keszites-arak.html','/weboldal-karbantartas-mit-tartalmaz':'pages/weboldal-karbantartas-mit-tartalmaz.html'}[url.pathname]||url.pathname.slice(1);
+  if(!['index.html','pages/admin.html','pages/ugyfelter.html','pages/foglalas.html','pages/weboldal-keszites-arak.html','pages/weboldal-karbantartas-mit-tartalmaz.html'].includes(mapped)&&! /^(js|css|assets\/images)\/[\w.-]+$/.test(mapped)){res.writeHead(404);return res.end();}
   const file=path.resolve(root,mapped);if(!file.startsWith(root+path.sep)||!fs.existsSync(file)){res.writeHead(404);return res.end();}
   const ext=path.extname(file),type={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.jpg':'image/jpeg'}[ext]||'application/octet-stream';res.setHeader('Content-Type',type);
   if(['.js','.html'].includes(ext)){let content=fs.readFileSync(file,'utf8').replace(/https:\/\/www\.gstatic\.com\/firebasejs\/10\.12\.5\/firebase-[\w-]+\.js/g,'/fixture-sdk.js');if(ext==='.html')content=content.replace('<body>','<body><div style="padding:12px;background:#fff0be;text-align:center">HELYI TESZT · kitalált adatok · nincs levélküldés vagy fizetés</div>');res.end(content);}else res.end(fs.readFileSync(file));

@@ -196,4 +196,9 @@ async function ownerMoveSlots(db, raw, uid, now = Date.now()) {
 }
 const ownerMove = (db, input, uid, now = Date.now()) => ownerMutation(db, input, uid, "move", now);
 const ownerStatus = (db, input, uid, now = Date.now()) => ownerMutation(db, input, uid, "status", now);
-module.exports = { availability, createBooking, cancelBooking, ownerDay, publicConfig, ownerMove, ownerStatus, ownerMoveSlots };
+async function guestStatus(db,{tenantId,bookingId,cancellationToken}){
+  const expected=domain.secretHash(cancellationToken),row=(await tenantRef(db,tenantId).collection('bookings').doc(domain.id(bookingId)).get()).data();
+  if(!row||typeof row.cancellationHash!=='string'||row.cancellationHash.length!==expected.length||!crypto.timingSafeEqual(Buffer.from(expected),Buffer.from(row.cancellationHash)))domain.fail('not-found','A foglalás nem található vagy a hozzáférési link érvénytelen.');
+  return domain.publicBooking(row);
+}
+module.exports = { availability, createBooking, cancelBooking, guestStatus, ownerDay, publicConfig, ownerMove, ownerStatus, ownerMoveSlots };

@@ -44,7 +44,7 @@ function handler(action, database = getFirestore, env = process.env) {
     }
   };
 }
-module.exports = { bookingAvailability: onCall(options, handler("availability")),
+module.exports = { bookingGuestStatus:onCall(options,handler("guestStatus")), bookingAvailability: onCall(options, handler("availability")),
   bookingCreate: onCall(options, handler("createBooking")), bookingCancel: onCall(options, handler("cancelBooking")),
   bookingPublicConfig: onCall(options, handler("publicConfig")), bookingOwnerMove: onCall(options, handler("ownerMove")),
   bookingOwnerStatus: onCall(options, handler("ownerStatus")),
@@ -54,6 +54,6 @@ module.exports = { bookingAvailability: onCall(options, handler("availability"))
 module.exports.bookingAdminSaveTenant=onCall({...options,enforceAppCheck:false},async request=>{
   if(request.auth?.token?.admin!==true)throw new HttpsError('permission-denied','Admin access required');
   if(Buffer.byteLength(JSON.stringify(request.data||{}))>50000)throw new HttpsError('invalid-argument','Túl nagy beállítás.');
-  try{await require('firebase-admin/auth').getAuth().getUser(request.data?.settings?.ownerUid);return await require('./booking-settings').save(getFirestore(),request.data,request.auth.uid);}
+  try{const settings={...request.data?.settings};const auth=require('firebase-admin/auth').getAuth();const owner=settings.ownerEmail?await auth.getUserByEmail(String(settings.ownerEmail).trim()):await auth.getUser(settings.ownerUid);settings.ownerUid=owner.uid;delete settings.ownerEmail;return await require('./booking-settings').save(getFirestore(),{...request.data,settings},request.auth.uid);}
   catch(error){if(error instanceof domain.BookingError)throw new HttpsError(error.code,error.message);throw new HttpsError('failed-precondition','Ellenőrizd a naptár tulajdonosát és beállításait.');}
 });

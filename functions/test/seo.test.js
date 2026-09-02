@@ -3,6 +3,8 @@ const test=require("node:test"),assert=require("node:assert/strict"),fs=require(
 const root=path.resolve(__dirname,"../..");
 const routes=[
   ["index.html","https://ovexi.hu/"],
+  ["pages/weboldal-keszites-arak.html","https://ovexi.hu/weboldal-keszites-arak"],
+  ["pages/weboldal-karbantartas-mit-tartalmaz.html","https://ovexi.hu/weboldal-karbantartas-mit-tartalmaz"],
   ["pages/weboldal-keszites.html","https://ovexi.hu/weboldal-keszites"],
   ["pages/marketing-kisvallalkozasoknak.html","https://ovexi.hu/marketing-kisvallalkozasoknak"],
   ["pages/weboldal-karbantartas.html","https://ovexi.hu/weboldal-karbantartas"]

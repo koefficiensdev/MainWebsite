@@ -26,9 +26,9 @@ Object.assign(exports, require("./housekeeping"));
 
 // Booking remains closed by default, independently of payment/AI switches.
 const booking = require("./booking");
-for (const name of ["bookingAvailability", "bookingCreate", "bookingCancel", "bookingOwnerDay", "bookingPublicConfig", "bookingOwnerMove", "bookingOwnerStatus", "bookingOwnerMoveSlots", "bookingAdminSaveTenant"]) exports[name] = booking[name];
+for (const name of ["bookingGuestStatus", "bookingAvailability", "bookingCreate", "bookingCancel", "bookingOwnerDay", "bookingPublicConfig", "bookingOwnerMove", "bookingOwnerStatus", "bookingOwnerMoveSlots", "bookingAdminSaveTenant"]) exports[name] = booking[name];
 
-exports.onOrderStatusChanged = onDocumentUpdated({ document: "orders/{orderId}", secrets: [OPENAI_API_KEY] }, async (event) => {
+exports.onOrderStatusChanged = onDocumentUpdated({ document: "orders/{orderId}", timeoutSeconds:540, secrets: [OPENAI_API_KEY] }, async (event) => {
   if (process.env.AI_PRODUCTION_ENABLED !== "true") return;
   const before = event.data?.before.data();
   const after = event.data?.after.data();
@@ -83,6 +83,6 @@ exports.generateLeadDraft = onCall({ secrets: [OPENAI_API_KEY] }, async (request
 
 async function createProductionJob(orderId, order, orderRef) {
   const requestId=crypto.createHash('sha256').update(orderId+':'+Number(order.briefRevision||0)).digest('hex').slice(0,36).padEnd(36,'0');
-  const result=await require('./production-service').generate(db,{orderId,requestId,briefRevision:Number(order.briefRevision||0)},'system');
+  const result=await require('./bespoke-production').generate(db,{orderId,requestId,briefRevision:Number(order.briefRevision||0)},'system',OPENAI_API_KEY.value(),new OpenAI({apiKey:OPENAI_API_KEY.value(),maxRetries:0,timeout:450000}).responses);
   await orderRef.update({productionJobId:result.id,updatedAt:FieldValue.serverTimestamp()});
 }
