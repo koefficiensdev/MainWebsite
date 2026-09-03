@@ -35,6 +35,7 @@ function workflowFor(order) {
   const missing = [];
   if (!String(order.businessDescription || "").trim()) missing.push("vállalkozás bemutatása");
   if (!String(order.targetAudience || "").trim()) missing.push("célközönség");
+  if (website && !["existing","domain_only","new","guidance"].includes(String(order.infrastructurePlan || ""))) missing.push("domain- és tárhelyhelyzet");
   if (maintenance && !String(order.currentUrl || "").trim()) missing.push("karbantartandó webcím");
   return {
     version:1, stage:missing.length ? "waiting_customer" : "intake", stageLabel:stageLabels[missing.length ? "waiting_customer" : "intake"],

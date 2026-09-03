@@ -3,7 +3,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const d = require("../commerce-domain");
 
-const input = () => ({ requestId: "e4a1bcdb-7b27-4655-a50a-1f59aaa0ff21", contactName: "Teszt Elek", companyName: "Teszt szalon", email: "teszt@example.com", itemIds: ["website-business"], businessDescription: "Időpont alapján dolgozó fodrászat.", primaryGoal: "Időpontfoglalás", termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true, hungarianBillingConfirmed: true });
+const input = () => ({ requestId: "e4a1bcdb-7b27-4655-a50a-1f59aaa0ff21", contactName: "Teszt Elek", companyName: "Teszt szalon", email: "teszt@example.com", itemIds: ["website-business"], infrastructurePlan: "new", businessDescription: "Időpont alapján dolgozó fodrászat.", primaryGoal: "Időpontfoglalás", termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true, hungarianBillingConfirmed: true });
 const order = () => ({ ...d.validateOrder(input()), orderNumber: "OVX-TEST-TEST", stripeCheckoutSessionId: "cs_test_123", stripeSubscriptionId: "sub_test", livemode: false });
 test("69990 HUF is sent as 6999000 Stripe minor units", () => {
   assert.equal(d.hufToMinor(69990), 6999000);
@@ -26,13 +26,22 @@ test("server ignores client prices/status; takes immutable catalog snapshot", ()
 test("rejects invalid data, forged consent and incompatible carts", () => {
   for (const patch of [{ termsAccepted: false }, { operatingCostsAcknowledged: false }, { businessPurchaseConfirmed: false }, { hungarianBillingConfirmed: false }, { requestId: "guess" }, { email: "bad" }, { businessDescription: "x" }, { itemIds: ["website-onepage", "website-business"] }, { itemIds: ["marketing-mini", "marketing-pro"] }, { website: "spam" }, { contactName: {} }]) assert.throws(() => d.validateOrder({ ...input(), ...patch }));
 });
-test("every catalogue product can be charged once it is on the approved live list", () => {
+test("every ready storefront product can be charged once it is on the approved live list", () => {
   const live = { PAYMENTS_ENABLED: "true", PAYMENT_MODE: "live", LIVE_PAYMENTS_APPROVED: "true", BILLINGO_ENABLED: "true", SMTP_ENABLED: "true", BILLINGO_BLOCK_ID: "1" };
-  for (const { id } of require("../catalog").products) {
+  for (const { id } of require("../catalog").products.filter(({id}) => !["website-business","quick-audit"].includes(id))) {
     const checked = d.validateOrder({ ...input(), itemIds: [id], currentUrl: "example.com" });
     assert.equal(d.paymentGate(checked, { ...live, INSTANT_PRODUCT_IDS: id }), null, id);
     assert.equal(d.paymentGate(checked, { ...live, INSTANT_PRODUCT_IDS: "" }), "scope_review", id);
   }
+});
+test("unfinished booking package stays payment-free even if mistakenly allowlisted", () => {
+  const checked = d.validateOrder(input());
+  assert.equal(d.paymentGate(checked, { INSTANT_PRODUCT_IDS:"website-business", PAYMENTS_ENABLED:"true", PAYMENT_MODE:"test" }), "booking_in_development");
+});
+test("website orders require a valid domain and hosting plan", () => {
+  for (const infrastructurePlan of ["existing","domain_only","new","guidance"]) assert.equal(d.validateOrder({ ...input(), infrastructurePlan }).infrastructurePlan, infrastructurePlan);
+  for (const infrastructurePlan of ["","not_applicable","forged"]) assert.throws(() => d.validateOrder({ ...input(), infrastructurePlan }), /domainnel/);
+  assert.equal(d.validateOrder({ ...input(), itemIds:["marketing-launch"], infrastructurePlan:"forged" }).infrastructurePlan, "not_applicable");
 });
 test("instant checkout requires explicit product and service readiness", () => {
   const checked = d.validateOrder({ ...input(), itemIds: ["marketing-launch"] });
@@ -61,6 +70,17 @@ test("mixed Checkout uses subscription mode but one-time items never recur", () 
   assert.equal(session.line_items[0].price_data.recurring, undefined);
   assert.deepEqual(session.line_items[1].price_data.recurring, { interval: "month" });
   assert.equal(session.subscription_data.metadata.app, "ovexi");
+});
+test("every ready package produces an exact HUF Checkout line item", () => {
+  const ready = require("../catalog").products.filter(({id}) => !["website-business","quick-audit"].includes(id));
+  for (const product of ready) {
+    const checked = { ...d.validateOrder({ ...input(), itemIds:[product.id], currentUrl:"example.com" }), orderNumber:"OVX-TEST-TEST" };
+    const payload = d.checkoutPayload("abc", checked);
+    assert.equal(payload.line_items.length, 1, product.id);
+    assert.equal(payload.line_items[0].price_data.unit_amount, product.price * 100, product.id);
+    assert.equal(payload.mode, product.billing === "monthly" ? "subscription" : "payment", product.id);
+    assert.deepEqual(payload.line_items[0].price_data.recurring, product.billing === "monthly" ? { interval:"month" } : undefined, product.id);
+  }
 });
 test("payment requires paid complete session, exact amount, identity and mode", () => {
   const paid = { id: "cs_test_123", metadata: { app: "ovexi" }, livemode: false, status: "complete", payment_status: "paid", currency: "huf", amount_total: 6999000 };

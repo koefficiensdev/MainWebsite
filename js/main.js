@@ -1,12 +1,12 @@
 import { STOREFRONT_CONFIG } from "./storefront-config.js?v=20260830-1";
-import {safeStorage,cleanCart,normalizeWebUrl,submissionManager} from "./checkout-model.js?v=20260903-5";
+import {safeStorage,cleanCart,normalizeWebUrl,submissionManager} from "./checkout-model.js?v=20260903-6";
 import {
   PRODUCT_CATALOG,
   CATEGORY_LABELS,
   billingLabel,
   formatPrice,
   getProduct
-} from "./catalog.js?v=20260903-5";
+} from "./catalog.js?v=20260903-6";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",
@@ -83,8 +83,16 @@ function updateCheckoutCopy() {
   const submitButton = checkoutForm?.querySelector("button[type='submit']");
   const note = document.getElementById("checkoutActionNote");
   const currentUrlField = checkoutForm?.elements.namedItem("currentUrl");
+  const infrastructurePlanField = checkoutForm?.elements.namedItem("infrastructurePlan");
+  const infrastructurePlanRow = document.getElementById("infrastructurePlanRow");
   const payment = canStartPayment();
+  const hasWebsite = state.cart.some((id) => id.startsWith("website-"));
   if (currentUrlField) currentUrlField.required = state.cart.some((id) => id.startsWith("maintenance-") || ["quick-audit", "external-audit"].includes(id));
+  if (infrastructurePlanRow) infrastructurePlanRow.hidden = !hasWebsite;
+  if (infrastructurePlanField) {
+    infrastructurePlanField.required = hasWebsite;
+    if (!hasWebsite) infrastructurePlanField.value = "";
+  }
   if (submitButton) submitButton.textContent = payment ? "Megrendelem és tovább a fizetéshez" : "Igény beküldése";
   if (note) note.textContent = payment
     ? "A beküldés után a Stripe biztonságos fizetési oldala nyílik meg. A kártyaadatokat az OVEXI nem látja és nem tárolja."
@@ -130,7 +138,7 @@ function renderCart() {
   cartSummary.innerHTML = `
     ${calculated.once ? `<div class="summary-line"><span>Egyszeri díj</span><strong>${formatPrice(calculated.once)}</strong></div>` : ""}
     ${calculated.monthly ? `<div class="summary-line"><span>Havi díj</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>` : ""}
-    ${hasWebsite ? `<p class="checkout-note">A weboldal egyszeri ára nem tartalmaz folyamatos tárhelyet, domainmegújítást vagy e-mail-szolgáltatást. Ezek díját fizetés előtt külön egyeztetjük.</p>` : ""}
+    ${hasWebsite ? `<p class="checkout-note">A weboldal egyszeri ára nem tartalmaz folyamatos tárhelyet, domainmegújítást vagy e-mail-szolgáltatást. Ezek díját a külső szolgáltatás elindítása előtt külön egyeztetjük.</p>` : ""}
     ${products.some((p) => p.availability === "request_only") ? `<p class="checkout-note">A kosárban egyeztetést igénylő csomag van. Erre fizetés nélküli igényfelmérést fogadunk.</p>` : ""}
   `;
   startCheckoutButton.disabled = products.length === 0;

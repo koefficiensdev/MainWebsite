@@ -1,7 +1,7 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict");
 const {buildCommerceEmail}=require("../commerce-email");
-const order={contactName:'Teszt <script>alert(1)</script>',orderNumber:'OVX-TEST-123',onceTotal:39990,monthlyTotal:5990,
+const order={contactName:'Teszt <script>alert(1)</script>',orderNumber:'OVX-TEST-123',onceTotal:39990,monthlyTotal:5990,infrastructurePlan:'new',
   products:[{name:'Egylapos weboldal',price:39990,billing:'once'},{name:'Karbantartás Basic',price:5990,billing:'monthly'}]};
 
 test("commerce email is branded, useful and escapes customer data",()=>{
@@ -19,6 +19,7 @@ test("commerce email itemises the cart and separates once from monthly totals",(
     assert.match(output,/39\s?990 Ft/);assert.match(output,/5\s?990 Ft/);
   }
   assert.match(mail.text,/Egyszeri díj: 39\s?990 Ft/);assert.match(mail.text,/Havi díj: 5\s?990 Ft \/ hó/);
+  assert.match(mail.text,/Új domain és tárhely szükséges/);assert.match(mail.html,/Domain és tárhely/);
   assert.match(mail.html,/Ami most következik/);
 });
 

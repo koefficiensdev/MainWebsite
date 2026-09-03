@@ -12,3 +12,4 @@ firestore-debug.log
 *.ovxb
 *.dpapi
 coverage/
+.claude/

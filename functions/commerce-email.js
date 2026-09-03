@@ -3,6 +3,7 @@
 const escapeHtml = (value) => String(value || "").replace(/[&<>"']/g, (character) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
 // Matches js/catalog.js formatPrice: group every thousand so 5 990 and 69 990 read alike.
 const formatHuf = (amount) => `${String(Math.round(Number(amount) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ")} Ft`;
+const INFRASTRUCTURE_LABELS = { existing:"Van domain és tárhely", domain_only:"Van domain, tárhely szükséges", new:"Új domain és tárhely szükséges", guidance:"Segítséget kér a választáshoz" };
 
 const THEME = { bg:"#07111f", card:"#0c192b", panel:"#101f33", line:"#26364a", text:"#c5d1df", soft:"#93a5bb", white:"#ffffff", cyan:"#37e2c2", ink:"#04130f" };
 
@@ -45,18 +46,20 @@ function buildCommerceEmail(type, order) {
   const items = lineItems(order);
   const once = Number(order.onceTotal || 0);
   const monthly = Number(order.monthlyTotal || 0);
+  const infrastructure = INFRASTRUCTURE_LABELS[order.infrastructurePlan] || "";
   const subject = `${message.subject} – ${number}`;
 
   const itemLines = items.length
     ? items.map((item) => `  • ${item.name} — ${formatHuf(item.price)}${item.monthly ? " / hó" : ""}`).join("\n")
     : "  • A kiválasztott OVEXI szolgáltatás";
-  const totalLines = [once > 0 ? `Egyszeri díj: ${formatHuf(once)}` : null, monthly > 0 ? `Havi díj: ${formatHuf(monthly)} / hó` : null].filter(Boolean).join("\n");
+  const totalLines = [once > 0 ? `Egyszeri díj: ${formatHuf(once)}` : null, monthly > 0 ? `Havi díj: ${formatHuf(monthly)} / hó` : null, infrastructure ? `Domain és tárhely: ${infrastructure}` : null].filter(Boolean).join("\n");
   const text = `Szia ${name}!\n\n${message.lead}\n\nRendelési azonosító: ${number}\n\nSzolgáltatások:\n${itemLines}\n\n${totalLines}\n\nAmi most következik:\n${message.steps.map((step, index) => `  ${index + 1}. ${step}`).join("\n")}\n\nÜgyféltér: https://ovexi.hu/ugyfelter\nKapcsolat: info@ovexi.hu\n\nOVEXI · Turai Sándor Attila egyéni vállalkozó\nAlanyi adómentes szolgáltatás, az árak fizetendő végösszegek.`;
 
   const itemRows = (items.length ? items : [{ name: "A kiválasztott OVEXI szolgáltatás", price: 0, monthly: false }]).map((item) => `<tr><td style="padding:10px 0;border-bottom:1px solid ${THEME.line};color:${THEME.text};font-size:15px">${escapeHtml(item.name)}</td><td style="padding:10px 0;border-bottom:1px solid ${THEME.line};color:${THEME.white};font-size:15px;font-weight:700;text-align:right;white-space:nowrap">${escapeHtml(formatHuf(item.price))}${item.monthly ? ' <span style="color:' + THEME.soft + ';font-weight:400">/ hó</span>' : ""}</td></tr>`).join("");
   const totalRows = [
     once > 0 ? `<tr><td style="padding:10px 0 0;color:${THEME.soft};font-size:14px">Egyszeri díj összesen</td><td style="padding:10px 0 0;color:${THEME.white};font-size:17px;font-weight:800;text-align:right;white-space:nowrap">${escapeHtml(formatHuf(once))}</td></tr>` : "",
-    monthly > 0 ? `<tr><td style="padding:6px 0 0;color:${THEME.soft};font-size:14px">Havi díj összesen</td><td style="padding:6px 0 0;color:${THEME.white};font-size:17px;font-weight:800;text-align:right;white-space:nowrap">${escapeHtml(formatHuf(monthly))} <span style="color:${THEME.soft};font-weight:400;font-size:14px">/ hó</span></td></tr>` : ""
+    monthly > 0 ? `<tr><td style="padding:6px 0 0;color:${THEME.soft};font-size:14px">Havi díj összesen</td><td style="padding:6px 0 0;color:${THEME.white};font-size:17px;font-weight:800;text-align:right;white-space:nowrap">${escapeHtml(formatHuf(monthly))} <span style="color:${THEME.soft};font-weight:400;font-size:14px">/ hó</span></td></tr>` : "",
+    infrastructure ? `<tr><td style="padding:10px 0 0;color:${THEME.soft};font-size:14px">Domain és tárhely</td><td style="padding:10px 0 0;color:${THEME.text};font-size:14px;font-weight:600;text-align:right">${escapeHtml(infrastructure)}</td></tr>` : ""
   ].join("");
   const stepRows = message.steps.map((step, index) => `<tr><td width="30" valign="top" style="padding:6px 10px 6px 0;color:${THEME.cyan};font-weight:800;font-size:14px">${index + 1}.</td><td valign="top" style="padding:6px 0;color:${THEME.text};font-size:15px;line-height:1.6">${escapeHtml(step)}</td></tr>`).join("");
 

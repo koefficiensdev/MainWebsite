@@ -19,6 +19,8 @@ export const PRODUCT_CATALOG = Object.freeze([
     billing: "once",
     featured: true,
     badge: "Foglalással együtt",
+    availability: "request_only",
+    availabilityNote: "Fejlesztés alatt · jelenleg fizetés nélküli igényfelmérés kérhető.",
     description: "Mobilbarát céges weboldal online időpontfoglalással és saját kezelőfelülettel, időpontra dolgozó vállalkozásoknak — szakmától függetlenül.",
     features: ["Legfeljebb 6 aloldal, egyedi szöveg és dizájn", "Online foglalás 1 szolgáltató naptárával", "Szolgáltatások, árak és időtartamok", "Foglalási naptár, ügyféladatok és státuszok", "Nyitvatartás, szünetek és lemondások kezelése", "E-mailes visszaigazolás, technikai SEO, 2 kör módosítás"]
   },

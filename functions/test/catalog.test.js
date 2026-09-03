@@ -27,11 +27,11 @@ test("business website includes booking at the agreed one-time price", async () 
   assert.deepEqual(calculateTotals(resolveProducts(["website-business"])), { once: 69990, monthly: 0 });
 });
 
-test("every product still offered on the storefront is directly payable", async () => {
+test("every offered product except the unfinished booking package is directly payable", async () => {
   const frontend = await import("../../js/catalog.js");
   const offered = frontend.PRODUCT_CATALOG.filter((product) => product.availability !== "retired");
   assert.ok(offered.length >= 16);
-  for (const product of offered) assert.equal(product.availability, undefined, product.id);
+  for (const product of offered) assert.equal(product.availability, product.id === "website-business" ? "request_only" : undefined, product.id);
 });
 
 test("unknown and duplicate product ids are rejected", () => {

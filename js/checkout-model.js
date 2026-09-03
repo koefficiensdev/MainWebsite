@@ -1,4 +1,4 @@
-import {getProduct} from './catalog.js?v=20260903-5';
+import {getProduct} from './catalog.js?v=20260903-6';
 export function safeStorage(getStorage){return {get(key){try{return getStorage().getItem(key);}catch{return null;}},set(key,value){try{getStorage().setItem(key,value);return true;}catch{return false;}},remove(key){try{getStorage().removeItem(key);}catch{}}};}
 export function cleanCart(ids){if(!Array.isArray(ids))return [];const result=[];for(const id of ids){const product=getProduct(id);if(!product||product.availability==='retired'||result.includes(id))continue;if(['website','marketing','maintenance'].includes(product.category)){const old=result.findIndex(x=>getProduct(x).category===product.category);if(old>=0)result.splice(old,1);}result.push(id);}return result.slice(0,12);}
 export function normalizeWebUrl(input){
@@ -20,6 +20,10 @@ export function orderInput(raw){
   out.email=out.email.toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(out.email))throw Error('Érvénytelen e-mail-cím.');
   out.currentUrl=normalizeWebUrl(out.currentUrl);
   if(out.itemIds.some(id=>id.startsWith('maintenance-')||['quick-audit','external-audit'].includes(id))&&!out.currentUrl)throw Error('Add meg a vizsgálandó vagy karbantartandó webcímet.');
+  const hasWebsite=out.itemIds.some(id=>id.startsWith('website-'));
+  const infrastructurePlan=String(raw.infrastructurePlan||'').trim();
+  if(hasWebsite&&!['existing','domain_only','new','guidance'].includes(infrastructurePlan))throw Error('Válaszd ki, hogy állsz a domainnel és a tárhellyel.');
+  out.infrastructurePlan=hasWebsite?infrastructurePlan:'not_applicable';
   if(raw.termsAccepted!==true||raw.operatingCostsAcknowledged!==true||raw.businessPurchaseConfirmed!==true||raw.hungarianBillingConfirmed!==true)throw Error('Fogadd el a feltételeket, és erősítsd meg az üzleti célú vásárlást, valamint a magyar számlázási címet.');
   return {...out,termsAccepted:true,operatingCostsAcknowledged:true,businessPurchaseConfirmed:true,hungarianBillingConfirmed:true,marketingConsent:raw.marketingConsent===true};
 }

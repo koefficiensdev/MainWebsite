@@ -43,6 +43,10 @@ function validateOrder(input) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(order.email)) throw new Error("Érvénytelen e-mail-cím.");
   order.currentUrl = normalizeWebUrl(order.currentUrl);
   if (products.some((product) => product.id.startsWith("maintenance-") || ["quick-audit", "external-audit"].includes(product.id)) && !order.currentUrl) throw new Error("Add meg a vizsgálandó vagy karbantartandó nyilvános webcímet.");
+  const hasWebsite = products.some((product) => product.id.startsWith("website-"));
+  const infrastructurePlan = String(input.infrastructurePlan || "").trim();
+  if (hasWebsite && !["existing", "domain_only", "new", "guidance"].includes(infrastructurePlan)) throw new Error("Válaszd ki, hogy állsz a domainnel és a tárhellyel.");
+  order.infrastructurePlan = hasWebsite ? infrastructurePlan : "not_applicable";
   const totals = calculateTotals(products);
   return { ...order, products, itemIds: products.map((p) => p.id), itemNames: products.map((p) => p.name), onceTotal: totals.once, monthlyTotal: totals.monthly,
     termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true, hungarianBillingConfirmed: true, termsVersion: TERMS_VERSION, marketingConsent: input.marketingConsent === true,
@@ -54,6 +58,7 @@ function fingerprint(order) {
 }
 
 function paymentGate(order, env = process.env) {
+  if (order.itemIds.includes("website-business")) return "booking_in_development";
   const approved = String(env.INSTANT_PRODUCT_IDS || "").split(",").map((id) => id.trim()).filter(Boolean);
   if (!order.itemIds.every((id) => approved.includes(id))) return "scope_review";
   if (env.PAYMENTS_ENABLED !== "true") return "payments_disabled";

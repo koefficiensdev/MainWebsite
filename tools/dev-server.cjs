@@ -14,7 +14,10 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=
 function resolveFile(pathname) {
   const requested = path.resolve(ROOT, `.${decodeURIComponent(pathname)}`);
   if (requested !== ROOT && !requested.startsWith(ROOT + path.sep)) return null;
-  for (const candidate of [requested, `${requested}.html`, path.join(requested, "index.html")]) {
+  const relative = path.relative(ROOT, requested);
+  const pageRequested = path.resolve(ROOT, "pages", relative);
+  for (const candidate of [requested, `${requested}.html`, path.join(requested, "index.html"), pageRequested, `${pageRequested}.html`]) {
+    if (candidate !== ROOT && !candidate.startsWith(ROOT + path.sep)) continue;
     if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate;
   }
   return null;
