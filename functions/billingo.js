@@ -25,16 +25,19 @@ function buildPartner(order, customerDetails = {}) {
   };
 }
 
-function buildInvoice({ partnerId, blockId, products, vat, vendorId, date = hungarianDate() }) {
+function buildInvoice({ partnerId, blockId, products, vat, vendorId, date = hungarianDate(), documentType = "invoice", servicePeriod, advanceInvoiceIds = [] }) {
   if (!Number.isInteger(Number(blockId)) || Number(blockId) < 1) throw new Error("Érvénytelen Billingo számlatömb azonosító.");
   if (!String(vat || "").trim()) throw new Error("A Billingo áfakulcs nincs beállítva.");
   if (!Array.isArray(products) || products.length === 0) throw new Error("Üres Billingo számla nem hozható létre.");
+  if (!["invoice", "advance"].includes(documentType)) throw new Error("Érvénytelen Billingo bizonylattípus.");
+  if (documentType === "advance" && advanceInvoiceIds.length) throw new Error("Előlegszámlához nem kapcsolható előlegszámla.");
   const vatCode = String(vat).trim();
+  const period = servicePeriod?.start && servicePeriod?.end ? `${servicePeriod.start} – ${servicePeriod.end}` : "";
   return {
     vendor_id: String(vendorId).slice(0, 100),
     partner_id: Number(partnerId),
     block_id: Number(blockId),
-    type: "invoice",
+    type: documentType,
     fulfillment_date: date,
     due_date: date,
     payment_method: "online_bankcard",
@@ -42,8 +45,10 @@ function buildInvoice({ partnerId, blockId, products, vat, vendorId, date = hung
     currency: "HUF",
     electronic: true,
     paid: true,
+    ...(advanceInvoiceIds.length ? { advance_invoice: advanceInvoiceIds.map(Number) } : {}),
+    ...(period ? { comment: `Elszámolási időszak: ${period}` } : {}),
     items: products.map((product) => ({
-      name: product.name,
+      name: documentType === "advance" ? `Előleg – ${product.name}` : `${product.name}${product.billing === "monthly" && period ? ` (${period})` : ""}`,
       unit_price: product.price,
       unit_price_type: "gross",
       quantity: 1,

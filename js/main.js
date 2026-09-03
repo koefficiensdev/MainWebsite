@@ -1,12 +1,12 @@
 import { STOREFRONT_CONFIG } from "./storefront-config.js?v=20260830-1";
-import {safeStorage,cleanCart,submissionManager} from "./checkout-model.js?v=20260831-1";
+import {safeStorage,cleanCart,normalizeWebUrl,submissionManager} from "./checkout-model.js?v=20260903-2";
 import {
   PRODUCT_CATALOG,
   CATEGORY_LABELS,
   billingLabel,
   formatPrice,
   getProduct
-} from "./catalog.js?v=20260830-3";
+} from "./catalog.js?v=20260903-2";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",
@@ -72,6 +72,23 @@ function totals() {
     else result.once += product.price;
     return result;
   }, { once: 0, monthly: 0 });
+}
+
+function canStartPayment() {
+  const products = cartProducts();
+  return products.length > 0 && products.every((product) => product.instantPayment === true);
+}
+
+function updateCheckoutCopy() {
+  const submitButton = checkoutForm?.querySelector("button[type='submit']");
+  const note = document.getElementById("checkoutActionNote");
+  const currentUrlField = checkoutForm?.elements.namedItem("currentUrl");
+  const payment = canStartPayment();
+  if (currentUrlField) currentUrlField.required = state.cart.includes("quick-audit");
+  if (submitButton) submitButton.textContent = payment ? "Megrendelem és tovább a fizetéshez" : "Igény beküldése";
+  if (note) note.textContent = payment
+    ? "A beküldés után a Stripe biztonságos fizetési oldala nyílik meg. A kártyaadatokat az OVEXI nem látja és nem tárolja."
+    : "Most nem történik fizetés és nem indul előfizetés. A részleteket e-mailben egyeztetjük.";
 }
 
 function renderCatalog() {
@@ -171,6 +188,7 @@ function openCheckout() {
   closeCart();
   overlayReturnFocus=document.getElementById('openCartButton');
   checkoutReview.innerHTML = orderSummaryMarkup();
+  updateCheckoutCopy();
   checkoutBackdrop.hidden = false;
   document.body.classList.add("is-locked");
   formLoadedAt = Date.now();
@@ -222,7 +240,7 @@ async function submitOrder(event) {
     if(Date.now()-formLoadedAt<2500){setFormStatus("Ellenőrizd az adatokat, majd küldd be az igényt.",true);return;}
     if(Date.now()-Number(local.get(ORDER_COOLDOWN_KEY)||0)<ORDER_COOLDOWN_MS){setFormStatus("Egy igényt már elküldtél. Új igény előtt várj két percet.",true);return;}
   }
-  const raw={...Object.fromEntries(formData),itemIds:[...state.cart],termsAccepted:formData.get("termsAccepted")==="on",operatingCostsAcknowledged:formData.get("operatingCostsAcknowledged")==="on",marketingConsent:formData.get("marketingConsent")==="on"};
+  const raw={...Object.fromEntries(formData),itemIds:[...state.cart],termsAccepted:formData.get("termsAccepted")==="on",operatingCostsAcknowledged:formData.get("operatingCostsAcknowledged")==="on",businessPurchaseConfirmed:formData.get("businessPurchaseConfirmed")==="on",marketingConsent:formData.get("marketingConsent")==="on"};
   lockCheckout(true);setFormStatus("Az igény rögzítése folyamatban…");
   let accepted=null;
   try{
@@ -232,7 +250,7 @@ async function submitOrder(event) {
     accepted=result;
     local.set(ORDER_COOLDOWN_KEY,String(Date.now()));
     state.cart=[];saveCart();renderCart();renderReceipt();
-    checkoutForm.reset();lockCheckout(false);submitButton.textContent='Igény beküldése — fizetés nélkül';closeCheckout();
+    checkoutForm.reset();lockCheckout(false);submitButton.textContent='Igény beküldése';closeCheckout();
     const receiptBox=document.getElementById("orderReceipt");
     receiptBox.scrollIntoView({behavior:"smooth",block:"center"});receiptBox.focus();
     logAnalytics("order_submitted",result.orderNumber);
@@ -248,7 +266,7 @@ async function submitOrder(event) {
       lockCheckout(true);submitButton.disabled=false;submitButton.textContent="Ugyanazon igény újraellenőrzése";
       setFormStatus("A beküldés eredménye bizonytalan. Az adataidat ehhez az igényhez megőriztük ebben a böngészőlapban. A gomb ugyanazt a kérést ellenőrzi újra; ne készíts új igényt.",true);
     }else{
-      lockCheckout(false);submitButton.textContent="Igény beküldése — fizetés nélkül";
+      lockCheckout(false);updateCheckoutCopy();
       const validation=error.code==="functions/invalid-argument"||!error.code;
       setFormStatus(validation?String(error.message||"Ellenőrizd a kötelező mezőket.").slice(0,300):"Most nem fogadható új igény. Próbáld később, vagy írj az info@ovexi.hu címre.",true);
     }
@@ -362,6 +380,7 @@ startCheckoutButton.addEventListener("click", openCheckout);
 document.getElementById("closeCheckoutButton")?.addEventListener("click", closeCheckout);
 checkoutBackdrop.addEventListener("click", (event) => { if (event.target === checkoutBackdrop) closeCheckout(); });
 checkoutForm.addEventListener("submit", submitOrder);
+checkoutForm.elements.namedItem("currentUrl")?.addEventListener("blur",(event)=>{try{event.target.value=normalizeWebUrl(event.target.value);}catch{}});
 
 document.getElementById("navToggle")?.addEventListener("click", (event) => {
   const nav = document.getElementById("mainNav");

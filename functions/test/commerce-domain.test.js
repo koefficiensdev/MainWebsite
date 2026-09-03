@@ -3,7 +3,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const d = require("../commerce-domain");
 
-const input = () => ({ requestId: "e4a1bcdb-7b27-4655-a50a-1f59aaa0ff21", contactName: "Teszt Elek", companyName: "Teszt szalon", email: "teszt@example.com", itemIds: ["website-business"], businessDescription: "Időpont alapján dolgozó fodrászat.", primaryGoal: "Időpontfoglalás", termsAccepted: true, operatingCostsAcknowledged: true });
+const input = () => ({ requestId: "e4a1bcdb-7b27-4655-a50a-1f59aaa0ff21", contactName: "Teszt Elek", companyName: "Teszt szalon", email: "teszt@example.com", itemIds: ["website-business"], businessDescription: "Időpont alapján dolgozó fodrászat.", primaryGoal: "Időpontfoglalás", termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true });
 const order = () => ({ ...d.validateOrder(input()), orderNumber: "OVX-TEST-TEST", stripeCheckoutSessionId: "cs_test_123", stripeSubscriptionId: "sub_test", livemode: false });
 test("69990 HUF is sent as 6999000 Stripe minor units", () => {
   assert.equal(d.hufToMinor(69990), 6999000);
@@ -13,6 +13,7 @@ test("69990 HUF is sent as 6999000 Stripe minor units", () => {
   const session = d.checkoutPayload("abc", order());
   assert.equal(session.line_items[0].price_data.unit_amount, 6999000);
   assert.equal(session.allow_promotion_codes, false);
+  assert.deepEqual(session.managed_payments, { enabled: false });
   assert.equal(session.mode, "payment");
 });
 test("server ignores client prices/status; takes immutable catalog snapshot", () => {
@@ -23,7 +24,7 @@ test("server ignores client prices/status; takes immutable catalog snapshot", ()
   assert.equal(checked.bundleMaintenanceGift, false);
 });
 test("rejects invalid data, forged consent and incompatible carts", () => {
-  for (const patch of [{ termsAccepted: false }, { operatingCostsAcknowledged: false }, { requestId: "guess" }, { email: "bad" }, { businessDescription: "x" }, { itemIds: ["website-onepage", "website-business"] }, { itemIds: ["marketing-mini", "marketing-pro"] }, { website: "spam" }, { contactName: {} }]) assert.throws(() => d.validateOrder({ ...input(), ...patch }));
+  for (const patch of [{ termsAccepted: false }, { operatingCostsAcknowledged: false }, { businessPurchaseConfirmed: false }, { requestId: "guess" }, { email: "bad" }, { businessDescription: "x" }, { itemIds: ["website-onepage", "website-business"] }, { itemIds: ["marketing-mini", "marketing-pro"] }, { website: "spam" }, { contactName: {} }]) assert.throws(() => d.validateOrder({ ...input(), ...patch }));
 });
 test("booking cannot be charged even when live gates are enabled", () => {
   assert.equal(d.paymentGate(order(), { INSTANT_PRODUCT_IDS: "website-business", PAYMENTS_ENABLED: "true", PAYMENT_MODE: "live", LIVE_PAYMENTS_APPROVED: "true", BILLINGO_ENABLED: "true", SMTP_ENABLED: "true", BILLINGO_BLOCK_ID: "1" }), "booking_in_development");
@@ -34,6 +35,12 @@ test("instant checkout requires explicit product and service readiness", () => {
   assert.equal(d.paymentGate(checked, { INSTANT_PRODUCT_IDS: "marketing-launch", PAYMENTS_ENABLED: "true", PAYMENT_MODE: "live" }), "live_configuration_incomplete");
   assert.equal(d.paymentGate(checked, { INSTANT_PRODUCT_IDS: "marketing-launch", PAYMENTS_ENABLED: "true", PAYMENT_MODE: "test" }), null);
   assert.throws(() => d.assertKeyMode("sk_test_x", "live"));
+});
+test("quick audit requires the website that will be reviewed", () => {
+  assert.throws(() => d.validateOrder({ ...input(), itemIds: ["quick-audit"], currentUrl: "" }), /webcímet/);
+  const checked = d.validateOrder({ ...input(), itemIds: ["quick-audit"], currentUrl: "example.com" });
+  assert.equal(checked.onceTotal, 990);
+  assert.equal(checked.currentUrl, "https://example.com/");
 });
 test("Stripe key mode accepts standard and restricted keys only in the matching environment", () => {
   assert.doesNotThrow(() => d.assertKeyMode("sk_test_x", "test"));

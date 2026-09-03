@@ -46,13 +46,14 @@ test('workflow: request replay creates one request and one notification; reply i
   requests=await f.db.collection('customer_requests').where('orderId','==',f.id).get();assert.equal(requests.docs[0].data().reply,'Pénteken küldjük az előnézetet.');assert.equal((await f.flow()).attentionRequired,false);
 });
 test('workflow: final handoff needs current approval, completed work and payment; changes commit atomically',async()=>{
-  const f=await fixture();await f.db.collection('orders').doc(f.id).set({...f.order,paymentStatus:'paid'});
+  const f=await fixture();await f.db.collection('orders').doc(f.id).set({...f.order,paymentStatus:'paid',onceTotal:69990,initialPaymentId:'pay_123'});
   const delivery={files:[{label:'Forráscsomag',url:'https://example.com/files.zip'}],instructions:'Töltsd le és őrizd meg a forráscsomagot.'};
   await assert.rejects(service.publishDelivery(f.db,await f.input(delivery),'admin'),{code:'failed-precondition'});
   await service.savePreview(f.db,await f.input(preview),'admin');await service.decidePreview(f.db,await f.input({previewVersion:1,decision:'approved',note:''}));
   await service.updateWorkflow(f.db,await f.input({stage:'ready',nextAction:'Átadásra előkészítve.',steps:(await f.flow()).steps.filter(x=>!['intake','customer-review','delivery'].includes(x.id)).map(x=>({id:x.id,done:true}))}),'admin');
   const raw=await f.input(delivery);await service.publishDelivery(f.db,raw,'admin');assert.deepEqual(await service.publishDelivery(f.db,raw,'admin'),{accepted:true});
   assert.equal((await f.flow()).stage,'completed');assert.equal((await f.flow()).delivery.previewVersion,1);assert.equal((await f.db.collection('orders').doc(f.id).get()).data().status,'completed');
+  assert.equal((await f.db.collection('commerce_tasks').doc('final-pay_123').get()).data().type,'final_invoice');
 });
 test('workflow: unrelated request, fabricated approval checkbox and unsafe links are rejected',async()=>{
   const f=await fixture(),other=await fixture();

@@ -2,7 +2,7 @@
 
 const crypto = require("node:crypto");
 const { resolveProducts, calculateTotals } = require("./catalog");
-const TERMS_VERSION = "2026-09-01";
+const TERMS_VERSION = "2026-09-03";
 const SUPPORTED_EVENTS = ["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "checkout.session.expired", "invoice.paid", "invoice.payment_failed", "customer.subscription.updated", "customer.subscription.deleted"];
 
 function hufToMinor(amount) {
@@ -10,11 +10,23 @@ function hufToMinor(amount) {
   return amount * 100;
 }
 
+function normalizeWebUrl(input) {
+  let value = String(input || "").trim().replace(/\\/g, "/");
+  if (!value) return "";
+  value = value.replace(/^(https?):\/+(?=[^/])/i, "$1://");
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(value)) value = `https://${value}`;
+  let url;
+  try { url = new URL(value); } catch { throw new Error("Érvénytelen webcím. Példa: ovexi.hu"); }
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || !url.hostname.includes(".")) throw new Error("Érvénytelen webcím. Példa: ovexi.hu");
+  url.hostname = url.hostname.replace(/\.$/, "");
+  return url.href;
+}
+
 function validateOrder(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Érvénytelen rendelés.");
   if (!/^[a-f0-9-]{32,36}$/i.test(input.requestId || "")) throw new Error("Érvénytelen kérésazonosító.");
   if (input.website) throw new Error("Érvénytelen kérés.");
-  if (input.termsAccepted !== true || input.operatingCostsAcknowledged !== true) throw new Error("Fogadd el a feltételeket és az üzemeltetési költségekről szóló tájékoztatást.");
+  if (input.termsAccepted !== true || input.operatingCostsAcknowledged !== true || input.businessPurchaseConfirmed !== true) throw new Error("Fogadd el a feltételeket, az üzemeltetési tájékoztatást és erősítsd meg az üzleti célú vásárlást.");
   const products = resolveProducts(input.itemIds).map((p) => ({ ...p }));
   for (const prefix of ["website-", "maintenance-"]) {
     if (products.filter((p) => p.id.startsWith(prefix)).length > 1) throw new Error("Egy kategóriából egy csomag választható.");
@@ -29,10 +41,11 @@ function validateOrder(input) {
   }
   order.email = order.email.toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(order.email)) throw new Error("Érvénytelen e-mail-cím.");
-  if (order.currentUrl && !/^https?:\/\//i.test(order.currentUrl)) throw new Error("Érvénytelen webcím.");
+  order.currentUrl = normalizeWebUrl(order.currentUrl);
+  if (products.some((product) => product.id === "quick-audit") && !order.currentUrl) throw new Error("A gyors weboldal-ellenőrzéshez add meg a vizsgálandó nyilvános webcímet.");
   const totals = calculateTotals(products);
   return { ...order, products, itemIds: products.map((p) => p.id), itemNames: products.map((p) => p.name), onceTotal: totals.once, monthlyTotal: totals.monthly,
-    termsAccepted: true, operatingCostsAcknowledged: true, termsVersion: TERMS_VERSION, marketingConsent: input.marketingConsent === true,
+    termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true, termsVersion: TERMS_VERSION, marketingConsent: input.marketingConsent === true,
     source: "ovexi_storefront", requestId: input.requestId.toLowerCase(), bundleMaintenanceGift: false };
 }
 
@@ -58,7 +71,7 @@ function assertKeyMode(key, mode) {
 function checkoutPayload(orderId, order) {
   const recurring = order.products.some((p) => p.billing === "monthly");
   const metadata = { orderId, orderNumber: order.orderNumber, app: "ovexi" };
-  return { mode: recurring ? "subscription" : "payment", locale: "hu", payment_method_types: ["card"], customer_email: order.email,
+  return { mode: recurring ? "subscription" : "payment", locale: "hu", payment_method_types: ["card"], managed_payments: { enabled: false }, customer_email: order.email,
     billing_address_collection: "required", tax_id_collection: { enabled: true }, allow_promotion_codes: false,
     client_reference_id: orderId, metadata, ...(recurring ? { subscription_data: { metadata } } : { customer_creation: "always", payment_intent_data: { metadata } }),
     line_items: order.products.map((p) => ({ quantity: 1, price_data: { currency: "huf", unit_amount: hufToMinor(p.price), product_data: { name: p.name, metadata: { ovexiProductId: p.id } }, ...(p.billing === "monthly" ? { recurring: { interval: "month" } } : {}) } })),
@@ -88,4 +101,4 @@ function verifySubscriptionInvoice(invoice, order) {
   return order.products.filter((p) => initial || p.billing === "monthly");
 }
 
-module.exports = { TERMS_VERSION, SUPPORTED_EVENTS, hufToMinor, validateOrder, fingerprint, paymentGate, assertKeyMode, checkoutPayload, verifyCheckout, invoiceSubscriptionId, verifySubscriptionInvoice };
+module.exports = { TERMS_VERSION, SUPPORTED_EVENTS, hufToMinor, normalizeWebUrl, validateOrder, fingerprint, paymentGate, assertKeyMode, checkoutPayload, verifyCheckout, invoiceSubscriptionId, verifySubscriptionInvoice };

@@ -32,6 +32,15 @@ test("unknown and duplicate product ids are rejected", () => {
   assert.throws(() => resolveProducts(["website-business", "website-business"]), /Duplicate/);
 });
 
+test("quick audit is a low-cost one-time deliverable", async () => {
+  const frontend = await import("../../js/catalog.js");
+  const product = frontend.getProduct("quick-audit");
+  assert.equal(product.price, 990);
+  assert.equal(product.billing, "once");
+  assert.equal(product.instantPayment, true);
+  assert.ok(product.features.some((feature) => feature.includes("3 munkanapon")));
+});
+
 test("lead CSV parser preserves quoted commas", () => {
   const rows = parseCsv('companyName,reason\n"Minta Kft.","Mobilon lassú, nincs CTA"\n');
   assert.deepEqual(rows, [["companyName", "reason"], ["Minta Kft.", "Mobilon lassú, nincs CTA"]]);

@@ -30,6 +30,21 @@ test("buildInvoice emits gross AAM invoice items", () => {
   assert.equal(invoice.items[0].entitlement, "AAM");
 });
 
+test("advance and periodic documents carry the legally relevant Billingo fields", () => {
+  const advance = buildInvoice({ partnerId: 42, blockId: 7, vat: "AAM", vendorId: "evt-advance", date: "2026-09-03",
+    documentType: "advance", products: [{ name: "Egylapos weboldal", price: 39990, billing: "once" }] });
+  assert.equal(advance.type, "advance");
+  assert.equal(advance.fulfillment_date, "2026-09-03");
+  assert.match(advance.items[0].name, /^Előleg/);
+  const periodic = buildInvoice({ partnerId: 42, blockId: 7, vat: "AAM", vendorId: "evt-periodic", date: "2026-09-03",
+    servicePeriod: { start: "2026-09-03", end: "2026-10-02" }, products: [{ name: "Marketing Mini", price: 4990, billing: "monthly" }] });
+  assert.equal(periodic.type, "invoice");
+  assert.match(periodic.comment, /2026-09-03.*2026-10-02/);
+  const final = buildInvoice({ partnerId: 42, blockId: 7, vat: "AAM", vendorId: "evt-final", date: "2026-09-20", advanceInvoiceIds: [123],
+    products: [{ name: "Egylapos weboldal", price: 39990, billing: "once" }] });
+  assert.deepEqual(final.advance_invoice, [123]);
+});
+
 test("hungarianDate is stable around UTC day boundary", () => {
   assert.equal(hungarianDate(new Date("2026-01-01T23:30:00Z")), "2026-01-02");
 });

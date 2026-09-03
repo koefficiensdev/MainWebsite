@@ -16,6 +16,7 @@ const products = [
   ["marketing-launch", "Induló marketingcsomag", 14990, "once"],
   ["marketing-month", "30 napos tartalomcsomag", 19990, "once"],
   ["marketing-campaign", "Kampánycsomag", 39990, "once"],
+  ["quick-audit", "Gyors weboldal-ellenőrzés", 990, "once"],
   ["external-audit", "Külső weboldal audit", 9990, "once"]
 ].map(([id, name, price, billing]) => ({ id, name, price, billing }));
 

@@ -26,7 +26,7 @@ function workflowFor(order) {
   const ids = Array.isArray(order.itemIds) ? order.itemIds : [];
   const website = ids.some(id => id.startsWith("website-"));
   const marketing = ids.some(id => id.startsWith("marketing-"));
-  const maintenance = ids.some(id => id.startsWith("maintenance-") || id === "external-audit");
+  const maintenance = ids.some(id => id.startsWith("maintenance-") || ["quick-audit", "external-audit"].includes(id));
   const steps = [{ id:"intake", label:"Igény rögzítve", note:"Az igény beérkezett; ez nem fizetés és nem az üzleti tartalom jóváhagyása.", done:true }];
   if (website) steps.push({ id:"site-plan", label:"Oldalstruktúra és tartalom", note:"A szükséges oldalak, szövegek és funkciók előkészítése.", done:false },{ id:"site-build", label:"Weboldal elkészítése", note:"Mobilnézet, funkciók és mérés beállítása.", done:false });
   if (marketing) steps.push({ id:"marketing-plan", label:"Marketinganyagok előkészítése", note:"Tartalom- és kampányterv az elfogadott briefből.", done:false });

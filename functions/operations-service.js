@@ -95,7 +95,11 @@ async function publishDelivery(db,raw,uid){
     if(flow.steps.some(s=>!["delivery","customer-review"].includes(s.id)&&!s.done))fail("failed-precondition","Előbb zárd le az előkészítési ellenőrzőpontokat.");
     saveFlow(tx,flowRef,flow,{delivery:{...delivery,previewVersion:flow.preview.version,publishedAt:now,publishedBy:uid},stage:"completed",stageLabel:d.stageLabels.completed,
       steps:stepsFor(flow,{delivery:true}),nextAction:"Az átadási anyagok és az útmutató lent elérhetők.",attentionRequired:false},now,order);
-    tx.update(orderRef,{status:"completed",updatedAt:now});
+    tx.update(orderRef,{status:"completed",completedAt:now,finalInvoiceStatus:order.onceTotal>0?"pending":order.finalInvoiceStatus||"not_required",updatedAt:now});
+    if(order.onceTotal>0&&order.initialPaymentId){
+      const taskRef=db.collection("commerce_tasks").doc(`final-${order.initialPaymentId}`);
+      tx.create(taskRef,{type:"final_invoice",orderId:raw.orderId,paymentId:order.initialPaymentId,status:"pending",attempts:0,nextAttemptAt:now,createdAt:now,updatedAt:now});
+    }
     return {accepted:true};
   });
 }

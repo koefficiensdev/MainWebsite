@@ -6,7 +6,7 @@
 
 ## Aktuális prioritás: OVEXI fő rendelési folyamat – 2026-08-31
 
-A foglalási bemutató a felhasználó kérésére háttérbe került, kiemelt adminlinkje eltávolítva. A kosár tárolási hibakezelése, ismétlődésmentes igénybeküldés és munkamenet-helyreállítás, megmaradó visszaigazolás, egyértelmű fizetés nélküli feliratok és cookie-beállítások javítva. Részletek: [MAIN_FLOW.md](MAIN_FLOW.md). A Stripe/Billingo aktiválás, tényleges teljesítés és teljes éles folyamatpróba továbbra is hátravan; nem állítjuk, hogy az egész rendszer hibátlan vagy kész.
+A foglalási bemutató a felhasználó kérésére háttérbe került, kiemelt adminlinkje eltávolítva. A kosár tárolási hibakezelése, ismétlődésmentes igénybeküldés és munkamenet-helyreállítás, megmaradó visszaigazolás, fizetési állapothoz igazodó feliratok és cookie-beállítások javítva. Részletek: [MAIN_FLOW.md](MAIN_FLOW.md). A Stripe/Billingo integráció aktív, de valódi ügyfélfizetésből származó teljes éles folyamatpróba még nem történt.
 
 ## Legújabb fejlesztés: foglalási felület és napi naptár – 2026-08-31
 
@@ -32,20 +32,20 @@ A tulajdonos az okmányos/szelfis ellenőrzést későbbre halasztotta. Ezért a
 
 Ellenőrzés: 53/53 automatikus teszt sikeres, ebből 23 új foglalási teszt; frontend- és backend-szintaktikai ellenőrzés sikeres. Az ütközésvédelem tranzakciós tesztadatbázison ellenőrizve; valódi Firestore-emulátoros teszt még hátravan.
 
-Fiókellenőrzés 2026-09-03-i frissítése: a Stripe aktiválása kész. A Billingo API Basic előfizetés aktív; a V3 írási kulcs Firebase Secret Managerbe került, és a 330792-es számlatömböt az API visszaigazolta. A külön NAV technikai felhasználó és az Online Számla összekötés elkészült. A NAV ONYA a 2026-04-20-tól érvényes alanyi adómentességet igazolta. A Billingo háttérintegráció engedélyezett; az ügyfélfizetés külön kapuja zárt. A tulajdonos az igény-visszaigazoló e-mail megérkezését visszaigazolta; a spam-besorolásról nincs külön ellenőrzési eredmény.
+Fiókellenőrzés 2026-09-03-i frissítése: a Stripe aktiválása kész. A Billingo API Basic előfizetés aktív; a V3 írási kulcs Firebase Secret Managerbe került, és a 330792-es számlatömböt az API visszaigazolta. A külön NAV technikai felhasználó és az Online Számla összekötés elkészült. A NAV ONYA a 2026-04-20-tól érvényes alanyi adómentességet igazolta. A Billingo háttérintegráció engedélyezett; a közvetlen ügyfélfizetés csak a 990 Ft-os Gyors weboldal-ellenőrzés csomagnál aktív. A tulajdonos az igény-visszaigazoló e-mail megérkezését visszaigazolta; a spam-besorolásról nincs külön ellenőrzési eredmény.
 
 ## Korábban telepített állapot
 
-Az oldal jelenlegi üzemi módja fizetés nélküli igényfogadás. Nem teljesen automata szolgáltatás. A 69 990 Ft-os foglalós csomag fejlesztés alatt áll; az egyszeri ár nem tartalmaz örök ingyenes üzemeltetést. Domain, tárhely, e-mail és külső rendszerek költségeit fizetés előtt írásban kell rendezni.
+Az oldal az engedélyezett, 990 Ft-os Gyors weboldal-ellenőrzés csomagnál éles Stripe-fizetést indít; minden más csomagnál fizetés nélküli igényfogadás működik. Nem teljesen automata szolgáltatás. A 69 990 Ft-os foglalós csomag fejlesztés alatt áll; az egyszeri ár nem tartalmaz örök ingyenes üzemeltetést. Domain, tárhely, e-mail és külső rendszerek költségeit fizetés előtt írásban kell rendezni.
 
 ## A hat munkaterület
 
 1. **Rendelés:** szerveroldali validáció, rögzített katalógusárak, ismételt beküldés elleni védelem és óránkénti kéréskorlát elkészült. A publikált oldal ehhez kapcsolódik. Próba: `OVX-MTG4GWQ2-21C261`, „OVEXI technikai teszt – nem ügyfél”; ismételt beküldés ugyanazt az azonosítót adta, pénzmozgás és e-mail nélkül.
-2. **Fizetés:** Checkout-előkészítés, HUF egységkezelés, összeg/mód/aláírás-ellenőrzés és ismételt Stripe-események kezelése megírva. A fizetés tiltott; éles fiók és teljes tesztkártyás próba még kell. A teszt webhookon a kódban szereplő nyolc eseményt mind engedélyezni kell; a korábbi beállítás csak `checkout.session.completed` eseményt tartalmazott.
-3. **Számlázás:** Billingo-partner és számla létrehozása, külön küldése, visszakeresése és bizonytalan válasz utáni védelem megírva és izoláltan tesztelve. A `BILLINGO_API_KEY`, a 330792-es számlatömb és a NAV Online Számla kapcsolat beállítva; könyvelői dátumellenőrzés és ellenőrzött próbaszámla kell. Valódi Billingo-számla még nem készült.
+2. **Fizetés:** Checkout-előkészítés, HUF egységkezelés, összeg/mód/aláírás-ellenőrzés és ismételt Stripe-események kezelése megírva. Az éles fizetés csak a `quick-audit` csomagnál aktív. A Stripe webhook aktív, mind a nyolc szükséges eseményre figyel; az aláírási titok egyezik a Firebase-titokkal, és az aláírt technikai próba HTTP 200 választ adott. Valódi ügyfélkártyás próba még nem történt.
+3. **Számlázás:** Billingo-partner, előlegszámla, havi időszaki számla és átadáskori végszámla létrehozása, külön küldése, visszakeresése és bizonytalan válasz utáni védelem megírva és tesztelve. Vegyes kosárnál az egyszeri és havi tételek külön bizonylatra kerülnek. A `BILLINGO_API_KEY`, a 330792-es számlatömb és a NAV Online Számla kapcsolat beállítva; ellenőrzött éles próbaszámla kell. Valódi Billingo-számla még nem készült.
 4. **E-mailek:** `SMTP_PASS` beállítva, SMTP-hitelesítés sikeres, `SMTP_ENABLED=true` telepítve. Az éles igénybeküldési folyamat saját címre küldött próbája: `OVX-MTG572QZ-3C0755`, címzett `info@ovexi.hu`; az e-mail-feladat első próbálkozásra `done`, a levelezőszerver elfogadta a küldést. A postafiókbeli megérkezést és spam-besorolást a tulajdonosnak még ellenőriznie kell. SPF rekord létezik; DKIM ellenőrzése és a hiányzó DMARC rendezése hátravan. A fizetéshez kapcsolódó levélágak a fizetés tiltása miatt még nem voltak végponttól végpontig tesztelve. Az admin e-mailes hibariasztása még nincs kész; hibák jelenleg az admin felületen láthatók.
 5. **Havi modulok:** a vegyes kosár egyszeri tétele csak az első számlán szerepel; megújulás, fizetési hiba és lemondás eseménykezelése megírva. Ügyfélportál admin végpont előkészítve; Stripe-portál beállítás és ügyfél számára biztonságos hozzáférés még kell. Csomagváltás/proráció külön kézi ellenőrzést igényel.
-6. **Biztonság, ellenőrzés, üzem:** pénzügyi mezők kliensoldali írása tiltva; hibák és újrapróbálások admin listája elkészült. 29 automatikus teszt sikeres. Érvénytelen igény és aláíratlan webhook a telepített végponton HTTP 400. Mobilos kosár/brief megnyitása és rejtett sütisáv javítva. Teljes fizetés→számla→e-mail próba, jogosultsági integrációs tesztek, mentés/visszaállítás és riasztási próba még szükséges.
+6. **Biztonság, ellenőrzés, üzem:** pénzügyi mezők kliensoldali írása tiltva; hibák és újrapróbálások admin listája elkészült. 144 automatikus teszt sikeres. Érvénytelen igény és aláíratlan webhook a telepített végponton HTTP 400; helyes aláírású technikai próba HTTP 200. Mobilos kosár/brief megnyitása és rejtett sütisáv javítva. Teljes valódi fizetés→számla→e-mail próba, mentés/visszaállítás és riasztási próba még szükséges.
 
 ## Biztonságos indulási sorrend
 
@@ -61,7 +61,7 @@ Az oldal jelenlegi üzemi módja fizetés nélküli igényfogadás. Nem teljesen
 
 Nulla állandó példány; legfeljebb két példány függvényenként. Újrapróbálás 30 percenként, kis adagokban, legfeljebb öt automatikus próbával. A Cloud Run buildképek hét nap után automatikusan törlődnek a költségcsökkentő szabály szerint; ez nem törli az ügyféladatokat vagy a helyi forráskódot.
 
-A korábbi 25 USD felhőriasztás és 10 USD AI-keret nem közös, garantált 50 EUR költési plafon. Az árfolyam, külső szolgáltatók, levélküldés és számlázó díja is számít. A Billingo API Basic havi csomag bruttó 3 035 Ft-ért aktív. Az ügyfélfizetés és automatikus AI-gyártás továbbra is tiltva marad.
+A korábbi 25 USD felhőriasztás és 10 USD AI-keret nem közös, garantált 50 EUR költési plafon. Az árfolyam, külső szolgáltatók, levélküldés és számlázó díja is számít. A Billingo API Basic havi csomag bruttó 3 035 Ft-ért aktív. Az ügyfélfizetés csak a 990 Ft-os Gyors weboldal-ellenőrzés csomagnál aktív; az automatikus AI-gyártás továbbra is tiltva marad.
 
 ## SMTP-bekötés ellenőrzése
 

@@ -140,7 +140,7 @@
             <p class="eyebrow">Önállóan is megvásárolható modulok</p>
             <h2>Állítsd össze, ami tényleg kell</h2>
           </div>
-          <p>A weboldal, a marketing és a karbantartás külön is kérhető, és szabadon kombinálható. Jelenleg fizetés nélküli igényfogadás működik: a vállalt tartalmat, kezdést és a külön fenntartási költségeket írásban visszaigazoljuk. Az árak alanyi adómentes, fizetendő végösszegek.</p>
+          <p>A weboldal, a marketing és a karbantartás külön is kérhető, és szabadon kombinálható. A közvetlen fizetésre megjelölt, kész csomag a beküldés után Stripe-on rendezhető; a többi igénynél előbb írásban visszaigazoljuk a vállalt tartalmat, kezdést és a külön fenntartási költségeket. Az árak alanyi adómentes, fizetendő végösszegek.</p>
         </div>
 
         <div class="catalog-tabs" role="tablist" aria-label="Csomagkategóriák">
@@ -170,7 +170,7 @@
             <p class="eyebrow">Egyszerű rendelési folyamat</p>
             <h2>Az ötlettől az átadásig</h2>
           </div>
-          <p>Jelenleg fizetés nélküli igényfogadás működik. A beküldés után írásban egyeztetjük a vállalt tartalmat, határidőt és fenntartási költségeket. Az igényed azonosítót kap; az egyeztetés e-mailben történik.</p>
+          <p>A közvetlen fizetésre megjelölt csomagnál a beküldés után a Stripe fizetési oldala nyílik meg. Más csomagoknál fizetés nélkül rögzítjük az igényt, majd írásban egyeztetjük a tartalmat, határidőt és fenntartási költségeket. Minden igény azonosítót kap.</p>
         </div>
         <ol class="process-grid">
           <li><span>01</span><h3>Csomagválasztás</h3><p>Tedd kosárba a különálló vagy kombinált szolgáltatásokat.</p></li>
@@ -289,7 +289,7 @@
           <div class="form-grid">
             <label class="form-wide">Mivel foglalkozik a vállalkozás?<textarea name="businessDescription" minlength="10" maxlength="1200" placeholder="Írj legalább egy rövid mondatot a szolgáltatásaidról." required></textarea></label>
             <label>Célcsoport<input type="text" name="targetAudience" maxlength="300" placeholder="Például budapesti kisvállalkozók"></label>
-            <label>Weboldal vagy közösségi oldal<input type="url" name="currentUrl" maxlength="300" placeholder="https://"></label>
+            <label>Weboldal vagy közösségi oldal<input type="text" inputmode="url" autocomplete="url" name="currentUrl" maxlength="300" placeholder="például ovexi.hu"></label>
             <label>Elsődleges cél<select name="primaryGoal" required><option value="">Válassz…</option><option>Több ajánlatkérés</option><option>Online értékesítés</option><option>Ismertség növelése</option><option>Rendszeres kommunikáció</option><option>Technikai biztonság</option></select></label>
             <label>Kommunikáció hangneme<select name="tone"><option>Professzionális</option><option>Közvetlen és barátságos</option><option>Prémium</option><option>Fiatalos</option><option>Oktató jellegű</option></select></label>
             <label class="form-wide">Fontos részletek, kérések<textarea name="notes" maxlength="1600" placeholder="Színek, példaképek, határidő vagy bármilyen külön kérés"></textarea></label>
@@ -299,11 +299,13 @@
         <p class="checkout-note">Az egyszeri weboldaldíj nem tartalmaz korlátlan üzemeltetést. A domain, tárhely, e-mail és külső szolgáltatások külön költségeit a fizetés előtt írásban egyeztetjük. Fejlesztés alatt álló csomagnál ez csak igényfelmérés.</p>
         <label class="check-row"><input type="checkbox" name="termsAccepted" required><span>Elolvastam és elfogadom az <a href="/aszf" target="_blank">ÁSZF-et</a> és az <a href="/adatkezeles" target="_blank">adatkezelési tájékoztatót</a>.</span></label>
         <label class="check-row"><input type="checkbox" name="operatingCostsAcknowledged" required><span>Tudomásul veszem, hogy az egyszeri ár nem örök ingyenes üzemeltetés: a domain, tárhely, e-mail és külső szolgáltatások díját fizetés előtt külön egyeztetjük.</span></label>
+        <label class="check-row"><input type="checkbox" name="businessPurchaseConfirmed" required><span>Megerősítem, hogy a szolgáltatást vállalkozási vagy szakmai tevékenységemhez rendelem meg, és jogosult vagyok a megadott vállalkozás képviseletére.</span></label>
         <label class="check-row"><input type="checkbox" name="marketingConsent"><span>Szeretnék hasznos tippeket és ajánlatokat kapni e-mailben. Ez nem feltétele a rendelésnek.</span></label>
         <div class="bot-trap" aria-hidden="true"><label>Webhely<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <p class="form-status" id="checkoutStatus" aria-live="polite"></p>
-        <button class="button button-primary button-full" type="submit">Igény beküldése — fizetés nélkül</button>
-        <p class="checkout-note">Most nem történik fizetés és nem indul előfizetés. A részleteket e-mailben egyeztetjük. Bizonytalan kapcsolat esetén a beküldés ideiglenes adatait ebben a böngészőlapban megőrizzük a biztonságos újrapróbáláshoz.</p>
+        <button class="button button-primary button-full" type="submit">Igény beküldése</button>
+        <p class="checkout-note" id="checkoutActionNote">Most nem történik fizetés és nem indul előfizetés. A részleteket e-mailben egyeztetjük.</p>
+        <p class="checkout-note">Bizonytalan kapcsolat esetén a beküldés ideiglenes adatait ebben a böngészőlapban megőrizzük a biztonságos újrapróbáláshoz.</p>
       </form>
     </section>
   </div>
@@ -322,6 +324,6 @@
   </div>
 
   <noscript>Az online csomagválasztó használatához engedélyezd a JavaScriptet, vagy írj az info@ovexi.hu címre.</noscript>
-  <script type="module" src="js/main.js?v=20260902-1"></script>
+  <script type="module" src="js/main.js?v=20260903-3"></script>
 </body>
 </html>

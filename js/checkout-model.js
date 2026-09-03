@@ -1,6 +1,16 @@
-import {getProduct} from './catalog.js?v=20260830-3';
+import {getProduct} from './catalog.js?v=20260903-2';
 export function safeStorage(getStorage){return {get(key){try{return getStorage().getItem(key);}catch{return null;}},set(key,value){try{getStorage().setItem(key,value);return true;}catch{return false;}},remove(key){try{getStorage().removeItem(key);}catch{}}};}
 export function cleanCart(ids){if(!Array.isArray(ids))return [];const result=[];for(const id of ids){const product=getProduct(id);if(!product||result.includes(id))continue;if(['website','marketing','maintenance'].includes(product.category)){const old=result.findIndex(x=>getProduct(x).category===product.category);if(old>=0)result.splice(old,1);}result.push(id);}return result.slice(0,12);}
+export function normalizeWebUrl(input){
+  let value=String(input||'').trim().replace(/\\/g,'/');
+  if(!value)return '';
+  value=value.replace(/^(https?):\/+(?=[^/])/i,'$1://');
+  if(!/^[a-z][a-z0-9+.-]*:/i.test(value))value=`https://${value}`;
+  let url;try{url=new URL(value);}catch{throw Error('Érvénytelen webcím. Példa: ovexi.hu');}
+  if(!['http:','https:'].includes(url.protocol)||url.username||url.password||!url.hostname.includes('.'))throw Error('Érvénytelen webcím. Példa: ovexi.hu');
+  url.hostname=url.hostname.replace(/\.$/,'');
+  return url.href;
+}
 export function orderInput(raw){
   const out={itemIds:cleanCart(raw.itemIds)};
   if(!out.itemIds.length)throw Error('A kosár üres.');
@@ -8,9 +18,10 @@ export function orderInput(raw){
     const value=String(raw[key]||'').replace(/\s+/g,' ').trim();if(value.length<min||value.length>max)throw Error(`Ellenőrizd ezt a mezőt: ${label}.`);out[key]=value;
   }
   out.email=out.email.toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(out.email))throw Error('Érvénytelen e-mail-cím.');
-  if(out.currentUrl){let url;try{url=new URL(out.currentUrl);}catch{throw Error('A webcím https:// vagy http:// kezdetű teljes cím legyen.');}if(!['http:','https:'].includes(url.protocol)||url.username||url.password)throw Error('Érvénytelen webcím.');}
-  if(raw.termsAccepted!==true||raw.operatingCostsAcknowledged!==true)throw Error('Fogadd el a feltételeket és az üzemeltetési költségekről szóló tájékoztatást.');
-  return {...out,termsAccepted:true,operatingCostsAcknowledged:true,marketingConsent:raw.marketingConsent===true};
+  out.currentUrl=normalizeWebUrl(out.currentUrl);
+  if(out.itemIds.includes('quick-audit')&&!out.currentUrl)throw Error('A gyors weboldal-ellenőrzéshez add meg a vizsgálandó webcímet.');
+  if(raw.termsAccepted!==true||raw.operatingCostsAcknowledged!==true||raw.businessPurchaseConfirmed!==true)throw Error('Fogadd el a feltételeket, az üzemeltetési tájékoztatást és erősítsd meg az üzleti célú vásárlást.');
+  return {...out,termsAccepted:true,operatingCostsAcknowledged:true,businessPurchaseConfirmed:true,marketingConsent:raw.marketingConsent===true};
 }
 const PENDING='ovexi_pending_request_v1',RECEIPT='ovexi_last_receipt_v1';
 export function submissionManager(store){

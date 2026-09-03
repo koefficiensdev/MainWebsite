@@ -170,6 +170,19 @@ export const PRODUCT_CATALOG = Object.freeze([
     features: ["Kampánykoncepció", "Landing oldal szöveg", "12 kreatív", "Hirdetés- és e-mail szövegek"]
   },
   {
+    id: "quick-audit",
+    category: "oneoff",
+    name: "Gyors weboldal-ellenőrzés",
+    shortName: "Gyors ellenőrzés",
+    price: 990,
+    billing: "once",
+    instantPayment: true,
+    badge: "Kipróbáláshoz",
+    availabilityNote: "Közvetlenül fizethető · egy nyilvános magyar vállalkozói weboldalhoz.",
+    description: "Rövid, egyedi technikai átnézés egy megadott nyilvános webcímről.",
+    features: ["Mobilnézet és HTTPS", "Betöltési alapellenőrzés", "Fő technikai hibák", "3 konkrét javítási javaslat", "Átadás 3 munkanapon belül"]
+  },
+  {
     id: "external-audit",
     category: "oneoff",
     name: "Külső weboldal audit",

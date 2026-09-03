@@ -80,17 +80,18 @@ exports.submitOrder = onCall(callableOptions, async (request) => {
   }
 });
 
-async function recordPayment(event, orderRef, paymentId, products, details, initial) {
+async function recordPayment(event, orderRef, paymentId, products, details, initial, context = {}) {
   const paymentRef = db.collection("payments").doc(paymentId);
   await db.runTransaction(async (tx) => {
     const [payment, orderSnap] = await Promise.all([tx.get(paymentRef), tx.get(orderRef)]);
     if (payment.exists) return;
     if (!orderSnap.exists) throw new Error("Order missing");
     const order = orderSnap.data();
-    tx.create(paymentRef, { orderId: orderRef.id, eventId: event.id, products, customerDetails: details, livemode: event.livemode, status: "paid", invoiceStatus: "pending", createdAt: new Date() });
+    tx.create(paymentRef, { orderId: orderRef.id, eventId: event.id, products, customerDetails: details, livemode: event.livemode, status: "paid", invoiceStatus: "pending",
+      createdAt: context.paidAt || new Date(Number(event.created || Date.now() / 1000) * 1000), ...(context.servicePeriod ? { servicePeriod: context.servicePeriod } : {}) });
     // First Checkout and invoice.paid events can arrive in either order.
     // Never regress a fulfilled order when the next monthly payment arrives.
-    tx.update(orderRef, { ...(initial && !order.paidAt ? { status: "paid", paidAt: new Date() } : {}), paymentStatus: "paid", invoiceStatus: "pending", lastPaymentId: paymentId, updatedAt: new Date() });
+    tx.update(orderRef, { ...(initial && !order.paidAt ? { status: "paid", paidAt: new Date(), initialPaymentId: paymentId } : {}), paymentStatus: "paid", invoiceStatus: "pending", lastPaymentId: paymentId, updatedAt: new Date() });
     tx.create(taskRef(`invoice-${paymentId}`), task("invoice", { orderId: orderRef.id, paymentId }));
     tx.create(taskRef(`paid-${paymentId}`), task("payment_received", { orderId: orderRef.id, paymentId }));
   });
@@ -163,7 +164,10 @@ async function applyPaidInvoice(event, invoice, ref) {
   const order = (await ref.get()).data();
   const products = domain.verifySubscriptionInvoice(invoice, order);
   const details = { name: invoice.customer_name, email: invoice.customer_email, address: invoice.customer_address, tax_ids: invoice.customer_tax_ids || [] };
-  await recordPayment(event, ref, invoice.id, products, details, invoice.billing_reason === "subscription_create");
+  const periods = (invoice.lines?.data || []).map((line) => line.period).filter((period) => period?.start && period?.end);
+  const servicePeriod = periods.length ? { start: billing.hungarianDate(new Date(Math.min(...periods.map((p) => p.start)) * 1000)), end: billing.hungarianDate(new Date((Math.max(...periods.map((p) => p.end)) - 1) * 1000)) } : undefined;
+  const paidAt = invoice.status_transitions?.paid_at ? new Date(invoice.status_transitions.paid_at * 1000) : undefined;
+  await recordPayment(event, ref, invoice.id, products, details, invoice.billing_reason === "subscription_create", { servicePeriod, paidAt });
 }
 
 exports.stripeWebhook = onRequest({ secrets: [stripeKey, webhookKey], cors: false, timeoutSeconds: 120, maxInstances: 2 }, async (req, res) => {
@@ -220,7 +224,8 @@ async function invoiceTask(ref, data, order) {
   if (!payment) throw new Error("Payment missing");
   // Never access an unbound secret when invoicing is disabled.
   const apiKey = process.env.BILLINGO_ENABLED === "true" ? billingoKey.value() : "";
-  return require("./invoice-workflow").processInvoice({ payment, data, order, env: process.env,
+  const method = data.type === "final_invoice" ? "processFinalInvoice" : "processInvoice";
+  return require("./invoice-workflow")[method]({ payment, data, order, env: process.env,
     updateTask: (patch) => ref.update(patch), updatePayment: (patch) => payRef.update(patch),
     updateOrder: (patch) => db.collection("orders").doc(data.orderId).update(patch),
     api: {
@@ -249,7 +254,7 @@ async function runTask(ref) {
   try {
     const order = (await db.collection("orders").doc(data.orderId).get()).data();
     if (!order) throw new Error("Order missing");
-    const result = data.type === "invoice" ? await invoiceTask(ref, data, order) : await mailTask(ref.id, data, order);
+    const result = ["invoice", "final_invoice"].includes(data.type) ? await invoiceTask(ref, data, order) : await mailTask(ref.id, data, order);
     await ref.update({ ...result, leaseUntil: new Date(0), updatedAt: new Date() });
   } catch {
     const latest=(await ref.get()).data();
