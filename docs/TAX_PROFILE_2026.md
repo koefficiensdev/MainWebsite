@@ -2,7 +2,7 @@
 
 ## Kiinduló adatok
 
-A tulajdonos közlése: egyéni vállalkozó, SZJA szerinti átalányadózó, heti 40 órás főállással, jelenleg nulla vállalkozói bevétellel és csak magyar ügyfélkörrel. A NAV EVNY 2026-09-02-i nyilvános lekérdezése szerint a vállalkozás 2026. április 20. óta működő, nem szünetel; főtevékenysége 621002 Egyedi szoftverfejlesztés. A székhely és a 12 további tevékenység is ellenőrizve. Az AAM választását tartalmazó belső NAV-törzsadat nem volt lekérhető, mert a KAÜ/DÁP azonosítás 500-as központi hibával leállt.
+A tulajdonos közlése: egyéni vállalkozó, SZJA szerinti átalányadózó, heti 40 órás főállással, jelenleg nulla vállalkozói bevétellel és csak magyar ügyfélkörrel. A NAV EVNY 2026-09-02-i nyilvános lekérdezése szerint a vállalkozás 2026. április 20. óta működő, nem szünetel; főtevékenysége 621002 Egyedi szoftverfejlesztés. A székhely és a 12 további tevékenység is ellenőrizve. A NAV ONYA belső nyilvántartása 2026-09-03-án igazolta az áfamentességi kód 2 szerinti alanyi adómentességet, 2026-04-20-i kezdettel.
 
 ## Alkalmazandó szabályok
 
@@ -15,8 +15,8 @@ A tulajdonos közlése: egyéni vállalkozó, SZJA szerinti átalányadózó, he
 
 A Stripe hivatalos címe az EVNY-adatokkal egyezőre javítva, majd az aktiválás 2026-09-02-án véglegesen beküldve. A Stripe beállítási összesítője az aktiválást késznek jelzi. Tax Off, Climate Off; a pénzügyi ügyfélszolgálati szám helyes. A kikapcsolt Tax nem AAM-igazolás. A Stripe Tax az értékesítések forgalmi adóját kezeli; a magyar személyes adókat és kedvezményeket a nyilvántartásban/bevallásban kell kezelni. [Stripe Tax](https://docs.stripe.com/tax/set-up)
 
-A Billingo API Basic előfizetés 2026-09-03-án aktiválva, a V3 API-kulcs biztonságosan bekötve és a 330792-es számlatömb API-n ellenőrizve. A Billingo alapértelmezett áfakulcsa AAM, az egységár bruttó; ez továbbra sem helyettesíti az AAM belső NAV-törzsadattal történő igazolását. A NAV Online Számla kapcsolat elkészültéig az éles fizetési és számlázási kapuk zárva maradnak.
+A Billingo API Basic előfizetés 2026-09-03-án aktiválva, a V3 API-kulcs biztonságosan bekötve és a 330792-es számlatömb API-n ellenőrizve. A Billingo alapértelmezett áfakulcsa AAM, az egységár bruttó. A külön NAV technikai felhasználó és az Online Számla kapcsolat elkészült; a Billingo háttérintegráció engedélyezve. Az ügyfélfizetés külön kapuja zárva marad.
 
 ## A személyre szabott számításhoz még szükséges
 
-AAM-státusz belső NAV-törzsadattal történő igazolása; a főállás és a vállalkozás 2026-os esetleges változásai; a később befolyó vállalkozói bevétel; a bérből/más jövedelemből ténylegesen felhasznált SZJA-kedvezmény; a külföldi ügyfélkör indulása. A béradatokat és személyes igazolásokat nem kell a Git-repozitóriumba menteni.
+A főállás és a vállalkozás 2026-os esetleges változásai; a később befolyó vállalkozói bevétel; a bérből/más jövedelemből ténylegesen felhasznált SZJA-kedvezmény; a külföldi ügyfélkör indulása. A NAV Ügyfélportál 2026-09-03-i lekérdezése szerint hiányzik a 2026. II. negyedévi `2658` járulékbevallás (eredeti esedékesség: 2026-07-13); ezt pótolni kell. A béradatokat és személyes igazolásokat nem kell a Git-repozitóriumba menteni.

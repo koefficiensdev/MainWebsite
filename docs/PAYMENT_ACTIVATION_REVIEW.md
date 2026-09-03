@@ -10,13 +10,13 @@ A tulajdonos 2026-09-02-án megerősítette: a Stripe +36 20 398 9011 száma a p
 
 ## Tisztázandó adatok
 
-- A honlap és a backend AAM státuszt használ. A Billingo SZJA szerinti átalányadózó jelölése nem igazolja önmagában az áfastátuszt. A jelenlegi AAM-státuszt a NAV belső törzsadatával még igazolni kell.
+- A NAV ONYA belső nyilvántartása 2026-09-03-án igazolta: áfamentességi kód 2, „Alanyi adómentességet választok”, érvényesség kezdete 2026-04-20.
 
 ## Billingo
 
 Az API + tömeges Basic havi csomag 2026-09-03-án aktiválva. A `OVEXI Firebase Production` V3 API-kulcs olvasási és írási jogosultsággal létrejött, Firebase Secret Managerbe került, és a Billingo API 200-as válasszal igazolta a 330792-es `Számlák` tömböt. A hivatalos cím, a 62198448 nyilvántartási szám, az AAM alapértelmezés és a bruttó egységár beállítása mentve.
 
-A NAV Online Számla kapcsolat még hiányzik; a technikai felhasználó, jelszó, XML aláírókulcs és XML cserekulcs megadása szükséges. Emiatt a Billingo és az ügyfélfizetés futásidejű kapuja zárva marad.
+A NAV Online Számla kapcsolat 2026-09-03-án elkészült külön Billingo technikai felhasználóval, számlakezelési és lekérdezési jogosultsággal. A Billingo futásidejű integráció engedélyezve; az ügyfélfizetés külön kapuja továbbra is zárva marad.
 
 ## Kódban ellenőrzendő az éles fizetés előtt
 
