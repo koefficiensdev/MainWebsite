@@ -1,12 +1,12 @@
 import { STOREFRONT_CONFIG } from "./storefront-config.js?v=20260830-1";
-import {safeStorage,cleanCart,normalizeWebUrl,submissionManager} from "./checkout-model.js?v=20260903-7";
+import {safeStorage,cleanCart,normalizeWebUrl,normalizePromoCode,submissionManager} from "./checkout-model.js?v=20260903-8";
 import {
   PRODUCT_CATALOG,
   CATEGORY_LABELS,
   billingLabel,
   formatPrice,
   getProduct
-} from "./catalog.js?v=20260903-7";
+} from "./catalog.js?v=20260903-8";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",
@@ -45,10 +45,14 @@ const checkoutBackdrop = document.getElementById("checkoutBackdrop");
 const checkoutForm = document.getElementById("checkoutForm");
 const checkoutReview = document.getElementById("checkoutReview");
 const checkoutStatus = document.getElementById("checkoutStatus");
+const promoSection = document.getElementById("promoSection");
+const promoStatus = document.getElementById("promoStatus");
+const applyPromoButton = document.getElementById("applyPromoButton");
 const toast = document.getElementById("toast");
 let toastTimer = null;
 let formLoadedAt = Date.now();
 let overlayReturnFocus=null,drawerCloseTimer=null;
+let verifiedPromo=null;
 
 function readCart() {
   try {
@@ -93,6 +97,8 @@ function updateCheckoutCopy() {
     infrastructurePlanField.required = hasWebsite;
     if (!hasWebsite) infrastructurePlanField.value = "";
   }
+  if (promoSection) promoSection.hidden = !hasWebsite;
+  if (!hasWebsite) clearPromoVerification(true);
   if (submitButton) submitButton.textContent = payment ? "Megrendelem és tovább a fizetéshez" : "Igény beküldése";
   if (note) note.textContent = payment
     ? "A beküldés után a Stripe biztonságos fizetési oldala nyílik meg. A kártyaadatokat az OVEXI nem látja és nem tárolja."
@@ -205,6 +211,35 @@ function openCheckout() {
   (pending?checkoutForm.querySelector('[type="submit"]'):checkoutForm.querySelector("input"))?.focus();
 }
 
+function clearPromoVerification(clearField=false) {
+  verifiedPromo=null;
+  if(promoStatus){promoStatus.textContent="";promoStatus.classList.remove("is-error");}
+  if(clearField&&checkoutForm?.elements.namedItem("promoCode"))checkoutForm.elements.namedItem("promoCode").value="";
+}
+
+async function checkPromoCode() {
+  const field=checkoutForm?.elements.namedItem("promoCode");
+  if(!field||!applyPromoButton)return;
+  clearPromoVerification();
+  let promoCode;
+  try{promoCode=normalizePromoCode(field.value);}catch(error){promoStatus.textContent=error.message;promoStatus.classList.add("is-error");return;}
+  if(!promoCode){promoStatus.textContent="Írd be a kapott promókódot.";promoStatus.classList.add("is-error");return;}
+  field.value=promoCode;applyPromoButton.disabled=true;promoStatus.textContent="A kód ellenőrzése…";
+  try{
+    const [app,{getFunctions,httpsCallable}]=await functionsSdk();
+    const check=httpsCallable(getFunctions(app,"europe-west1"),"checkPromoCode",{timeout:20000});
+    const result=(await check({promoCode,itemIds:[...state.cart]})).data;
+    if(result?.valid!==true||result.code!==promoCode)throw Error("A promókód ellenőrzése nem sikerült.");
+    verifiedPromo={code:result.code,label:String(result.label||"")};
+    promoStatus.textContent=`Érvényes kód: ${verifiedPromo.label}`;
+    checkoutReview.innerHTML=orderSummaryMarkup();
+    logAnalytics("promo_applied",verifiedPromo.code);
+  }catch(error){
+    promoStatus.textContent=String(error.message||"A promókód nem használható.").replace(/^Firebase:\s*/i,"").slice(0,240);
+    promoStatus.classList.add("is-error");
+  }finally{applyPromoButton.disabled=false;}
+}
+
 function closeCheckout() {
   if(submission.busy)return;
   checkoutBackdrop.hidden = true;
@@ -222,6 +257,7 @@ function orderSummaryMarkup() {
     ${cartProducts().map((product) => `<div class="summary-line"><span>${escapeHtml(product.name)}</span><span>${formatPrice(product.price)} ${product.billing === "monthly" ? "/ hó" : ""}</span></div>`).join("")}
     ${calculated.once ? `<div class="summary-line summary-total"><span>Egyszeri összesen</span><strong>${formatPrice(calculated.once)}</strong></div>` : ""}
     ${calculated.monthly ? `<div class="summary-line summary-total"><span>Havonta összesen</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>` : ""}
+    ${verifiedPromo ? `<div class="summary-line promo-summary"><span>Promókód: ${escapeHtml(verifiedPromo.code)}</span><strong>Érvényes</strong></div><p class="checkout-note">${escapeHtml(verifiedPromo.label)}</p>` : ""}
     <p class="checkout-note">${calculated.monthly ? "A havi összeg csak a kosárba tett havi modulokat tartalmazza. " : ""}A külső szolgáltatók üzemeltetési díjai ezen felül, külön egyeztetés szerint fizetendők.</p>
   `;
 }
@@ -258,7 +294,7 @@ async function submitOrder(event) {
     accepted=result;
     local.set(ORDER_COOLDOWN_KEY,String(Date.now()));
     state.cart=[];saveCart();renderCart();renderReceipt();
-    checkoutForm.reset();lockCheckout(false);submitButton.textContent='Igény beküldése';closeCheckout();
+    checkoutForm.reset();clearPromoVerification();lockCheckout(false);submitButton.textContent='Igény beküldése';closeCheckout();
     const receiptBox=document.getElementById("orderReceipt");
     receiptBox.scrollIntoView({behavior:"smooth",block:"center"});receiptBox.focus();
     logAnalytics("order_submitted",result.orderNumber);
@@ -389,6 +425,8 @@ document.getElementById("closeCheckoutButton")?.addEventListener("click", closeC
 checkoutBackdrop.addEventListener("click", (event) => { if (event.target === checkoutBackdrop) closeCheckout(); });
 checkoutForm.addEventListener("submit", submitOrder);
 checkoutForm.elements.namedItem("currentUrl")?.addEventListener("blur",(event)=>{try{event.target.value=normalizeWebUrl(event.target.value);}catch{}});
+checkoutForm.elements.namedItem("promoCode")?.addEventListener("input",()=>{clearPromoVerification();checkoutReview.innerHTML=orderSummaryMarkup();});
+applyPromoButton?.addEventListener("click",checkPromoCode);
 
 document.getElementById("navToggle")?.addEventListener("click", (event) => {
   const nav = document.getElementById("mainNav");

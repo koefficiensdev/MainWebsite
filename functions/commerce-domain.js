@@ -2,7 +2,8 @@
 
 const crypto = require("node:crypto");
 const { resolveProducts, calculateTotals } = require("./catalog");
-const TERMS_VERSION = "2026-09-03";
+const { resolvePromotion } = require("./promo-domain");
+const TERMS_VERSION = "2026-09-03-promo-1";
 const SUPPORTED_EVENTS = ["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "checkout.session.expired", "invoice.paid", "invoice.payment_failed", "customer.subscription.updated", "customer.subscription.deleted"];
 
 function hufToMinor(amount) {
@@ -22,7 +23,7 @@ function normalizeWebUrl(input) {
   return url.href;
 }
 
-function validateOrder(input) {
+function validateOrder(input, env = process.env) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Érvénytelen rendelés.");
   if (!/^[a-f0-9-]{32,36}$/i.test(input.requestId || "")) throw new Error("Érvénytelen kérésazonosító.");
   if (input.website) throw new Error("Érvénytelen kérés.");
@@ -47,10 +48,12 @@ function validateOrder(input) {
   const infrastructurePlan = String(input.infrastructurePlan || "").trim();
   if (hasWebsite && !["existing", "domain_only", "new", "guidance"].includes(infrastructurePlan)) throw new Error("Válaszd ki, hogy állsz a domainnel és a tárhellyel.");
   order.infrastructurePlan = hasWebsite ? infrastructurePlan : "not_applicable";
+  const promotion = resolvePromotion(input.promoCode, products, env);
   const totals = calculateTotals(products);
   return { ...order, products, itemIds: products.map((p) => p.id), itemNames: products.map((p) => p.name), onceTotal: totals.once, monthlyTotal: totals.monthly,
     termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true, hungarianBillingConfirmed: true, termsVersion: TERMS_VERSION, marketingConsent: input.marketingConsent === true,
-    source: "ovexi_storefront", requestId: input.requestId.toLowerCase(), bundleMaintenanceGift: false };
+    source: "ovexi_storefront", requestId: input.requestId.toLowerCase(), bundleMaintenanceGift: false,
+    promoCode: promotion?.code || "", promotion };
 }
 
 function fingerprint(order) {
@@ -73,7 +76,7 @@ function assertKeyMode(key, mode) {
 
 function checkoutPayload(orderId, order) {
   const recurring = order.products.some((p) => p.billing === "monthly");
-  const metadata = { orderId, orderNumber: order.orderNumber, app: "ovexi" };
+  const metadata = { orderId, orderNumber: order.orderNumber, app: "ovexi", ...(order.promoCode ? { promoCode: order.promoCode } : {}) };
   return { mode: recurring ? "subscription" : "payment", locale: "hu", payment_method_types: ["card"], managed_payments: { enabled: false }, customer_email: order.email,
     billing_address_collection: "required", tax_id_collection: { enabled: true }, allow_promotion_codes: false,
     client_reference_id: orderId, metadata, ...(recurring ? { subscription_data: { metadata } } : { customer_creation: "always", payment_intent_data: { metadata } }),
@@ -83,6 +86,7 @@ function checkoutPayload(orderId, order) {
 
 function verifyCheckout(session, order) {
   if (session.id !== order.stripeCheckoutSessionId || session.metadata?.app !== "ovexi") throw new Error("Checkout mismatch");
+  if (String(session.metadata?.promoCode || "") !== String(order.promoCode || "")) throw new Error("Checkout promotion mismatch");
   if (session.livemode !== order.livemode) throw new Error("Payment mode mismatch");
   if (session.payment_status !== "paid" || session.status !== "complete") return false;
   if (session.currency !== "huf" || session.amount_total !== hufToMinor(order.onceTotal + order.monthlyTotal)) throw new Error("Payment amount mismatch");

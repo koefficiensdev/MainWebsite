@@ -24,7 +24,7 @@
   <meta name="twitter:image" content="https://ovexi.hu/assets/images/og-ovexi-1200.jpg">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/images/favicon-48.png">
   <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/icon-192.png">
-  <link rel="stylesheet" href="css/site.css?v=20260903-7">
+  <link rel="stylesheet" href="css/site.css?v=20260903-8">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -208,6 +208,7 @@
         <div class="faq-list">
           <details><summary>Mit tartalmaz a 69 990 Ft-os Céges weboldal?</summary><p>Legfeljebb 6 aloldalt és egy, a vállalkozáshoz illő alap üzleti modult. Ez lehet például egy szolgáltató naptárával működő időpontkérés, strukturált ajánlatkérés vagy igényfelvétel. A brief alapján együtt választjuk ki a legjobban illő megoldást. Több felhasználó, online fizetés, SMS és külső rendszerintegráció külön egyeztetendő.</p></details>
           <details><summary>Az egyszeri ár örök ingyenes üzemeltetést jelent?</summary><p>Nem. Az egyszeri ár a megállapodott weboldal elkészítésére és átadására vonatkozik. A domain megújítása, tárhely, e-mail, adatbázis és külső szolgáltatások folyamatos költsége külön fizetendő. A választást és a díjakat a külső szolgáltatás elindítása előtt egyeztetjük; új fizetős előfizetést nem indítunk külön jóváhagyás nélkül.</p></details>
+          <details><summary>Mit ad a domain- és tárhely-promókód?</summary><p>Sikeresen kifizetett weboldalcsomagnál egy standard .hu domain első regisztrációját vagy soron következő megújítását és 1 GB webtárhely első 12 hónapját az OVEXI állja. A kódot a rendelés elküldése előtt kell megadni. A domain és a tárhelyfiók a te neveden marad; a második évtől a megújítás díja téged terhel. E-mail, prémium domain és további külső szolgáltatás nem része az ajánlatnak.</p></details>
           <details><summary>Kötelező marketinget vagy karbantartást is vennem?</summary><p>Nem. Mindkettő önállóan választható. A karbantartás a csomagban leírt figyelési, frissítési és mentési munkát jelenti, nem tartalmaz automatikusan domaint, tárhelyet vagy harmadik fél előfizetési díját. Saját tárhely használata technikai egyeztetéssel lehetséges.</p></details>
           <details><summary>Rendelhetek csak marketinget?</summary><p>Igen. A marketingcsomagok weboldal nélkül is megvásárolhatók. A briefben megadhatod a meglévő weboldalad és közösségi felületeid adatait.</p></details>
           <details><summary>Más által készített oldalt is karbantartotok?</summary><p>Igen, előtte egyszeri technikai audit szükséges. Ez alapján tudjuk biztonságosan vállalni a frissítéseket és módosításokat.</p></details>
@@ -296,10 +297,19 @@
             <label class="form-wide">Fontos részletek, kérések<textarea name="notes" maxlength="1600" placeholder="Színek, példaképek, határidő vagy bármilyen külön kérés"></textarea></label>
           </div>
         </div>
+        <div class="form-section promo-section" id="promoSection" hidden>
+          <h3>Promókód</h3>
+          <p>Ha e-mailben vagy hirdetésben kaptál kódot, itt érvényesítheted. A weboldalcsomag ára nem változik; az aktív ajánlat az első éves domain- és tárhelyköltségre vonatkozik.</p>
+          <div class="promo-control">
+            <label>Promókód<input type="text" name="promoCode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Például: KOD123"></label>
+            <button class="button button-ghost" id="applyPromoButton" type="button">Kód ellenőrzése</button>
+          </div>
+          <p class="promo-status" id="promoStatus" role="status" aria-live="polite"></p>
+        </div>
         <div class="order-review" id="checkoutReview"></div>
-        <p class="checkout-note">Az egyszeri weboldaldíj a fejlesztésre és az átadásra szól. Ha domainre vagy tárhelyre is szükséged van, segítünk a saját neveden létrehozni; a választott szolgáltató díja külön fizetendő.</p>
+        <p class="checkout-note">Az egyszeri weboldaldíj a fejlesztésre és az átadásra szól. Ha domainre vagy tárhelyre is szükséged van, segítünk a saját neveden létrehozni. Ezek díja alapesetben külön fizetendő; érvényes promókódnál az ÁSZF szerinti első éves ajánlat érvényes.</p>
         <label class="check-row"><input type="checkbox" name="termsAccepted" required><span>Elolvastam és elfogadom az <a href="/aszf" target="_blank">ÁSZF-et</a> és az <a href="/adatkezeles" target="_blank">adatkezelési tájékoztatót</a>.</span></label>
-        <label class="check-row"><input type="checkbox" name="operatingCostsAcknowledged" required><span>Tudomásul veszem, hogy az egyszeri ár nem tartalmazza automatikusan a domain, tárhely, e-mail és külső szolgáltatások díját; ezeket csak külön írásos jóváhagyásom után indítjuk.</span></label>
+        <label class="check-row"><input type="checkbox" name="operatingCostsAcknowledged" required><span>Tudomásul veszem, hogy az egyszeri ár alapesetben nem tartalmazza a domain, tárhely, e-mail és külső szolgáltatások díját. Érvényes promókód esetén kizárólag az ÁSZF-ben leírt első éves domain- és tárhelyajánlat az eltérés.</span></label>
         <label class="check-row"><input type="checkbox" name="businessPurchaseConfirmed" required><span>Megerősítem, hogy a szolgáltatást vállalkozási vagy szakmai tevékenységemhez rendelem meg, és jogosult vagyok a megadott vállalkozás képviseletére.</span></label>
         <label class="check-row"><input type="checkbox" name="hungarianBillingConfirmed" required><span>Megerősítem, hogy a számlázási cím Magyarországon van. A Stripe fizetési oldalán ugyanezt a valós számlázási címet adom meg.</span></label>
         <label class="check-row"><input type="checkbox" name="marketingConsent"><span>Szeretnék hasznos tippeket és ajánlatokat kapni e-mailben. Ez nem feltétele a rendelésnek.</span></label>
@@ -326,6 +336,6 @@
   </div>
 
   <noscript>Az online csomagválasztó használatához engedélyezd a JavaScriptet, vagy írj az info@ovexi.hu címre.</noscript>
-  <script type="module" src="js/main.js?v=20260903-7"></script>
+  <script type="module" src="js/main.js?v=20260903-8"></script>
 </body>
 </html>

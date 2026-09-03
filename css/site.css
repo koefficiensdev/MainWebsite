@@ -219,6 +219,14 @@ textarea { min-height: 105px; resize: vertical; }
 .form-status { min-height: 1.5rem; margin: .8rem 0; color: var(--cyan); font-size: .86rem; }
 .form-status.is-error { color: var(--danger); }
 .checkout-note { margin: .75rem 0 0; color: var(--muted); font-size: .76rem; text-align: center; }
+.promo-section { margin-top: 1.25rem; padding: 1rem; border: 1px solid rgba(55,226,194,.28); border-radius: 14px; background: rgba(55,226,194,.055); }
+.promo-section > p { margin: .4rem 0 .9rem; color: var(--muted); font-size: .82rem; line-height: 1.55; }
+.promo-control { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: .75rem; align-items: end; }
+.promo-control label { display: grid; gap: .45rem; color: #c2cfdd; font-size: .84rem; font-weight: 600; }
+.promo-control input { text-transform: uppercase; letter-spacing: .08em; }
+.promo-control .button { min-height: 46px; white-space: nowrap; }
+.promo-status { min-height: 1.35rem; margin: .65rem 0 0 !important; color: var(--cyan) !important; font-weight: 700; }
+.promo-status.is-error { color: var(--danger) !important; }
 .success-state { padding: 3rem 1rem; text-align: center; }
 .success-state h3 { font-size: 2rem; }
 .success-state strong { color: var(--cyan); }
@@ -287,6 +295,7 @@ textarea { min-height: 105px; resize: vertical; }
   .cookie-actions { flex-direction:column; }
   .check-row { overflow-wrap:anywhere; gap:.85rem; }
   .check-row input { width:22px; height:22px; flex:0 0 auto; }
+  .promo-control { grid-template-columns: 1fr; }
   .brand { min-height:44px; }
   .button-small { min-height:44px; }
   .remove-item { padding:.6rem 0 .2rem; }

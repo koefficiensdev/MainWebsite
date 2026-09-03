@@ -9,6 +9,7 @@ const { defineSecret } = require("firebase-functions/params");
 const Stripe = require("stripe");
 const nodemailer = require("nodemailer");
 const domain = require("./commerce-domain");
+const promo = require("./promo-domain");
 const billing = require("./billingo");
 const configuredSecrets = require("./integration-config");
 
@@ -19,6 +20,7 @@ const smtpKey = configuredSecrets.smtpSecretConfigured ? defineSecret("SMTP_PASS
 const billingoKey = configuredSecrets.billingoSecretConfigured ? defineSecret("BILLINGO_API_KEY") : { value: () => "" };
 const workerSecrets = [...(configuredSecrets.smtpSecretConfigured ? [smtpKey] : []), ...(configuredSecrets.billingoSecretConfigured ? [billingoKey] : [])];
 const callableOptions = { cors: ["https://ovexi.hu", "https://www.ovexi.hu", "https://ovexi-6ef38.web.app"], secrets: [stripeKey], timeoutSeconds: 60, maxInstances: 2 };
+const publicCallableOptions = { cors: callableOptions.cors, timeoutSeconds: 15, maxInstances: 2 };
 const hash = (value) => crypto.createHash("sha256").update(value).digest("hex");
 const stripeClient = () => new Stripe(stripeKey.value(), { maxNetworkRetries: 2, timeout: 20000 });
 const taskRef = (id) => db.collection("commerce_tasks").doc(id);
@@ -38,20 +40,29 @@ async function reserveRequest(order, rawRequest) {
   const window = Math.floor(now.getTime() / 3600000);
   const rateIds = [hash(`ip:${rawRequest.ip || "unknown"}:${window}`), hash(`email:${order.email}:${window}`), `global-${window}`];
   const refs = rateIds.map((key) => db.collection("request_limits").doc(key));
+  const promoClaimRef = order.promotion ? db.collection("promo_claims").doc(hash(`${order.promotion.id}:${order.email}`)) : null;
   return db.runTransaction(async (tx) => {
     const existing = await tx.get(ref);
     if (existing.exists) {
       if (existing.data().requestFingerprint !== domain.fingerprint(order)) throw new HttpsError("already-exists", "A beküldés azonosítója más adatokhoz tartozik. Frissítsd az oldalt.");
       return { ref, order: existing.data() };
     }
-    const limits = await Promise.all(refs.map((r) => tx.get(r)));
+    const [limits, promoClaim] = await Promise.all([
+      Promise.all(refs.map((r) => tx.get(r))),
+      promoClaimRef ? tx.get(promoClaimRef) : Promise.resolve(null)
+    ]);
     if (limits.some((s, i) => Number(s.data()?.count || 0) >= (i === 2 ? 100 : 5))) throw new HttpsError("resource-exhausted", "Túl sok beküldés. Kérlek, próbáld később.");
+    const promoExpiry = promoClaim?.data()?.expiresAt?.toMillis?.() || new Date(promoClaim?.data()?.expiresAt || 0).getTime();
+    if (promoClaim?.exists && (promoClaim.data().status === "redeemed" || promoExpiry > now.getTime())) {
+      throw new HttpsError("already-exists", "Ezt a promóciót ezzel az e-mail-címmel már igénybe vetted vagy egy folyamatban lévő rendeléshez lefoglaltad.");
+    }
     const block = domain.paymentGate(order);
     const saved = { ...order, orderNumber: `OVX-${now.getTime().toString(36).toUpperCase()}-${id.slice(0, 6).toUpperCase()}`, requestFingerprint: domain.fingerprint(order),
       status: block ? "needs_review" : "checkout_pending", reviewReason: block || "", livemode: process.env.PAYMENT_MODE === "live", createdAt: now, updatedAt: now };
     tx.create(ref, saved);
     tx.create(db.collection("order_workflows").doc(id), {orderId:id,orderNumber:saved.orderNumber,companyName:saved.companyName,...require("./operations-domain").workflowFor(saved),createdAt:now,updatedAt:now});
     limits.forEach((s, i) => tx.set(refs[i], { count: Number(s.data()?.count || 0) + 1, expiresAt: new Date(now.getTime() + 86400000) }));
+    if (promoClaimRef) tx.set(promoClaimRef, { orderId:id, promoId:order.promotion.id, code:order.promoCode, emailHash:hash(order.email), status:"reserved", expiresAt:new Date(now.getTime()+25*3600000), createdAt:now, updatedAt:now });
     tx.create(taskRef(`request-${id}`), task("order_received", { orderId: id }));
     return { ref, order: saved };
   });
@@ -80,6 +91,18 @@ exports.submitOrder = onCall(callableOptions, async (request) => {
   }
 });
 
+exports.checkPromoCode = onCall(publicCallableOptions, async (request) => {
+  if (Buffer.byteLength(JSON.stringify(request.data || {})) > 2000) throw new HttpsError("invalid-argument", "Túl nagy kérés.");
+  try {
+    const products = require("./catalog").resolveProducts(request.data?.itemIds);
+    const promotion = promo.resolvePromotion(request.data?.promoCode, products);
+    if (!promotion) throw new Error("Adj meg egy promókódot.");
+    return { valid: true, code: promotion.code, label: promotion.label };
+  } catch (error) {
+    throw new HttpsError("invalid-argument", error.message);
+  }
+});
+
 async function recordPayment(event, orderRef, paymentId, products, details, initial, context = {}) {
   const paymentRef = db.collection("payments").doc(paymentId);
   await db.runTransaction(async (tx) => {
@@ -92,6 +115,10 @@ async function recordPayment(event, orderRef, paymentId, products, details, init
     // First Checkout and invoice.paid events can arrive in either order.
     // Never regress a fulfilled order when the next monthly payment arrives.
     tx.update(orderRef, { ...(initial && !order.paidAt ? { status: "paid", paidAt: new Date(), initialPaymentId: paymentId } : {}), paymentStatus: "paid", invoiceStatus: "pending", lastPaymentId: paymentId, updatedAt: new Date() });
+    if (initial && order.promotion?.id) {
+      const promoClaimRef=db.collection("promo_claims").doc(hash(`${order.promotion.id}:${order.email}`));
+      tx.set(promoClaimRef,{orderId:orderRef.id,promoId:order.promotion.id,code:order.promoCode,emailHash:hash(order.email),status:"redeemed",redeemedAt:new Date(),updatedAt:new Date()},{merge:true});
+    }
     tx.create(taskRef(`invoice-${paymentId}`), task("invoice", { orderId: orderRef.id, paymentId }));
     tx.create(taskRef(`paid-${paymentId}`), task("payment_received", { orderId: orderRef.id, paymentId }));
   });

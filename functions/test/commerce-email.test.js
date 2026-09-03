@@ -27,6 +27,11 @@ test("commerce email omits a total block that does not apply",()=>{
   const mail=buildCommerceEmail("order_received",{...order,monthlyTotal:0,products:[order.products[0]]});
   assert.doesNotMatch(mail.text,/Havi díj/);assert.doesNotMatch(mail.html,/Havi díj összesen/);
 });
+test("commerce email confirms the non-cash first-year infrastructure promotion",()=>{
+  const promoted={...order,promoCode:"OVEXI1EV",promotion:{id:"first-year-domain-hosting",code:"OVEXI1EV",label:"Az első 12 hónap standard .hu domain- és 1 GB webtárhelydíját az OVEXI vállalja."}};
+  const mail=buildCommerceEmail("payment_received",promoted);
+  for(const output of [mail.text,mail.html]){assert.match(output,/OVEXI1EV/);assert.match(output,/első 12 hónap/);}
+});
 
 test("every commerce email type stays branded and actionable",()=>{
   for(const type of ["order_received","payment_received","payment_failed","subscription_cancelled"]){

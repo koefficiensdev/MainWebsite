@@ -23,6 +23,13 @@ test("server ignores client prices/status; takes immutable catalog snapshot", ()
   assert.equal(checked.products[0].price, 69990);
   assert.equal(checked.bundleMaintenanceGift, false);
 });
+test("server attaches a configured infrastructure promotion without changing Stripe totals",()=>{
+  const checked=d.validateOrder({...input(),promoCode:"ovexi-1ev"},{PROMO_CODES:"OVEXI1EV"});
+  assert.equal(checked.promoCode,"OVEXI1EV");assert.equal(checked.promotion.months,12);assert.equal(checked.onceTotal,69990);
+  const session=d.checkoutPayload("abc",{...checked,orderNumber:"OVX-TEST-TEST"});
+  assert.equal(session.metadata.promoCode,"OVEXI1EV");assert.equal(session.line_items[0].price_data.unit_amount,6999000);
+  assert.throws(()=>d.validateOrder({...input(),promoCode:"NINCS"},{PROMO_CODES:"OVEXI1EV"}),/érvénytelen/);
+});
 test("rejects invalid data, forged consent and incompatible carts", () => {
   for (const patch of [{ termsAccepted: false }, { operatingCostsAcknowledged: false }, { businessPurchaseConfirmed: false }, { hungarianBillingConfirmed: false }, { requestId: "guess" }, { email: "bad" }, { businessDescription: "x" }, { itemIds: ["website-onepage", "website-business"] }, { itemIds: ["marketing-mini", "marketing-pro"] }, { website: "spam" }, { contactName: {} }]) assert.throws(() => d.validateOrder({ ...input(), ...patch }));
 });
@@ -87,6 +94,13 @@ test("payment requires paid complete session, exact amount, identity and mode", 
   assert.equal(d.verifyCheckout(paid, order()), true);
   assert.equal(d.verifyCheckout({ ...paid, payment_status: "unpaid" }, order()), false);
   for (const patch of [{ id: "cs_other" }, { currency: "eur" }, { amount_total: 69990 }, { livemode: true }, { metadata: {} }]) assert.throws(() => d.verifyCheckout({ ...paid, ...patch }, order()));
+});
+test("payment verification binds the validated promotion to Checkout metadata",()=>{
+  const checked=d.validateOrder({...input(),promoCode:"OVEXI1EV"},{PROMO_CODES:"OVEXI1EV"});
+  const promoted={...checked,orderNumber:"OVX-TEST-TEST",stripeCheckoutSessionId:"cs_test_123",livemode:false};
+  const paid={id:"cs_test_123",metadata:{app:"ovexi",promoCode:"OVEXI1EV"},livemode:false,status:"complete",payment_status:"paid",currency:"huf",amount_total:6999000};
+  assert.equal(d.verifyCheckout(paid,promoted),true);
+  assert.throws(()=>d.verifyCheckout({...paid,metadata:{app:"ovexi",promoCode:"MASIK"}},promoted),/promotion/);
 });
 test("monthly renewal invoices only recurring products at frozen prices", () => {
   const checked = { ...order(), ...d.validateOrder({ ...input(), itemIds: ["website-onepage", "marketing-mini"] }) };

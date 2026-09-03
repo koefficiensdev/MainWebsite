@@ -1,4 +1,4 @@
-import {getProduct} from './catalog.js?v=20260903-7';
+import {getProduct} from './catalog.js?v=20260903-8';
 export function safeStorage(getStorage){return {get(key){try{return getStorage().getItem(key);}catch{return null;}},set(key,value){try{getStorage().setItem(key,value);return true;}catch{return false;}},remove(key){try{getStorage().removeItem(key);}catch{}}};}
 export function cleanCart(ids){if(!Array.isArray(ids))return [];const result=[];for(const id of ids){const product=getProduct(id);if(!product||product.availability==='retired'||result.includes(id))continue;if(['website','marketing','maintenance'].includes(product.category)){const old=result.findIndex(x=>getProduct(x).category===product.category);if(old>=0)result.splice(old,1);}result.push(id);}return result.slice(0,12);}
 export function normalizeWebUrl(input){
@@ -10,6 +10,12 @@ export function normalizeWebUrl(input){
   if(!['http:','https:'].includes(url.protocol)||url.username||url.password||!url.hostname.includes('.'))throw Error('Érvénytelen webcím. Példa: ovexi.hu');
   url.hostname=url.hostname.replace(/\.$/,'');
   return url.href;
+}
+export function normalizePromoCode(input){
+  const code=String(input||'').toUpperCase().replace(/[\s-]+/g,'').trim();
+  if(!code)return '';
+  if(!/^[A-Z0-9]{4,24}$/.test(code))throw Error('A promókód formátuma érvénytelen.');
+  return code;
 }
 export function orderInput(raw){
   const out={itemIds:cleanCart(raw.itemIds)};
@@ -24,6 +30,7 @@ export function orderInput(raw){
   const infrastructurePlan=String(raw.infrastructurePlan||'').trim();
   if(hasWebsite&&!['existing','domain_only','new','guidance'].includes(infrastructurePlan))throw Error('Válaszd ki, hogy állsz a domainnel és a tárhellyel.');
   out.infrastructurePlan=hasWebsite?infrastructurePlan:'not_applicable';
+  out.promoCode=normalizePromoCode(raw.promoCode);
   if(raw.termsAccepted!==true||raw.operatingCostsAcknowledged!==true||raw.businessPurchaseConfirmed!==true||raw.hungarianBillingConfirmed!==true)throw Error('Fogadd el a feltételeket, és erősítsd meg az üzleti célú vásárlást, valamint a magyar számlázási címet.');
   return {...out,termsAccepted:true,operatingCostsAcknowledged:true,businessPurchaseConfirmed:true,hungarianBillingConfirmed:true,marketingConsent:raw.marketingConsent===true};
 }

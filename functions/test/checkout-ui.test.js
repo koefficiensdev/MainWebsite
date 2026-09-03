@@ -13,6 +13,11 @@ test('checkout: short and mistyped website addresses are normalized',async()=>{
   assert.equal(orderInput({...raw(),itemIds:['external-audit'],currentUrl:'ovexi.hu'}).currentUrl,'https://ovexi.hu/');
   assert.throws(()=>orderInput({...raw(),itemIds:['external-audit'],currentUrl:''}),/webcímet/);
 });
+test('checkout: promo code is normalized and preserved in the frozen request',async()=>{
+  const {orderInput}=await model;
+  assert.equal(orderInput({...raw(),promoCode:' ovexi-1ev '}).promoCode,'OVEXI1EV');
+  assert.throws(()=>orderInput({...raw(),promoCode:'rossz!'}),/promókód/);
+});
 test('checkout: standalone marketing and maintenance pass the server contract',async()=>{
   const {orderInput}=await model,{validateOrder}=require('../commerce-domain');
   for(const itemIds of [['marketing-mini'],['maintenance-basic'],['marketing-launch'],['website-onepage','marketing-start','maintenance-basic']]){
@@ -47,6 +52,7 @@ test('checkout: validation failure permits corrected data; ambiguous or malforme
 test('checkout: no direct order write fallback, server receipt ID and hidden demo navigation',()=>{
   const root=path.resolve(__dirname,'../..'),main=fs.readFileSync(path.join(root,'js/main.js'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),admin=fs.readFileSync(path.join(root,'pages/admin.html'),'utf8');
   assert.doesNotMatch(main,/addDoc\(collection\(db,\s*"orders"/);assert.match(main,/logAnalytics\("order_submitted",result.orderNumber\)/);assert.match(main,/event.key==='Tab'/);assert.match(html,/id="orderReceipt"/);assert.match(html,/businessPurchaseConfirmed/);assert.match(main,/Megrendelem és tovább a fizetéshez/);assert.doesNotMatch(admin,/class="module-preview"/);
+  assert.match(html,/id="promoSection"/);assert.match(main,/checkPromoCode/);
 });
 test('checkout: cookie choice can be reopened and analytics excludes query/hash data',()=>{
   const root=path.resolve(__dirname,'../..'),main=fs.readFileSync(path.join(root,'js/main.js'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),policy=fs.readFileSync(path.join(root,'pages/cookie-policy.html'),'utf8');
