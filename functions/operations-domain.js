@@ -28,7 +28,11 @@ function workflowFor(order) {
   const marketing = ids.some(id => id.startsWith("marketing-"));
   const maintenance = ids.some(id => id.startsWith("maintenance-") || ["quick-audit", "external-audit"].includes(id));
   const steps = [{ id:"intake", label:"Igény rögzítve", note:"Az igény beérkezett; ez nem fizetés és nem az üzleti tartalom jóváhagyása.", done:true }];
-  if (website) steps.push({ id:"site-plan", label:"Oldalstruktúra és tartalom", note:"A szükséges oldalak, szövegek és funkciók előkészítése.", done:false },{ id:"site-build", label:"Weboldal elkészítése", note:"Mobilnézet, funkciók és mérés beállítása.", done:false });
+  if (website) {
+    steps.push({ id:"site-plan", label:"Oldalstruktúra és tartalom", note:"A szükséges oldalak, szövegek és funkciók előkészítése.", done:false });
+    if (order.promotion?.id === "first-year-domain-hosting") steps.push({ id:"promo-infrastructure", label:"Promóciós domain és tárhely", note:"A standard .hu domain és az 1 GB webtárhely első 12 hónapjának aktiválása, a megrendelő tulajdonában.", done:false });
+    steps.push({ id:"site-build", label:"Weboldal elkészítése", note:"Mobilnézet, funkciók és mérés beállítása.", done:false });
+  }
   if (marketing) steps.push({ id:"marketing-plan", label:"Marketinganyagok előkészítése", note:"Tartalom- és kampányterv az elfogadott briefből.", done:false });
   if (maintenance) steps.push({ id:"maintenance-baseline", label:"Karbantartási alapállapot", note:"Hozzáférések és ellenőrzési pontok rögzítése.", done:false });
   steps.push({ id:"customer-review", label:"Ügyfél-jóváhagyás", note:"Publikálás előtt minden ügyfélanyag ellenőrizhető.", done:false },{ id:"delivery", label:"Átadás és indulás", note:"Átadás, dokumentálás és az aktív modulok indítása.", done:false });
