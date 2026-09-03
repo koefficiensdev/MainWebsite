@@ -1,6 +1,6 @@
 # Stripe és Billingo – aktiválási ellenőrzés, 2026-09-02
 
-A Stripe aktiválása 2026-09-02-án véglegesen beküldve. A hivatalos cím az EVNY nyilvános adataival egyezőre javítva. Az opcionális Stripe Tax és Climate egyaránt Off. A Stripe API szerint a terhelések és kifizetések engedélyezettek, további adat vagy ellenőrzés nincs függőben.
+A Stripe aktiválása 2026-09-02-án véglegesen beküldve. A hivatalos cím az EVNY nyilvános adataival egyezőre javítva. Az opcionális Stripe Tax és Climate egyaránt Off. A Stripe beállítási összesítője az e-mail-ellenőrzést és a fizetési aktiválást késznek jelzi. A korlátozott éles API-kulcs szándékosan nem jogosult a teljes fiók- és kifizetési állapot lekérésére.
 
 A vállalkozási forma Magyarország / egyéni vállalkozót is tartalmazó opció. Bankszámla megadva, kétlépcsős hitelesítés On. Az összesítőn Radar Standard bekapcsolva, feltüntetett díja 16 Ft / ellenőrzött tranzakció; ezt a felhasználó által beállított opciót nem módosítottuk.
 
@@ -10,17 +10,13 @@ A tulajdonos 2026-09-02-án megerősítette: a Stripe +36 20 398 9011 száma a p
 
 ## Tisztázandó adatok
 
-- A Billingo címe rövidebb az EVNY-ben ellenőrzött hivatalos székhelynél; később egységesítendő.
-- A Billingóban a nyilvántartási szám mező üres; az EVNY-ben ellenőrzött érték: 62198448.
-- A honlap és a backend AAM státuszt használ. A Billingo SZJA szerinti átalányadózó jelölése nem igazolja önmagában az áfastátuszt. A jelenlegi AAM-státusz és a belföldi/külföldi ügyfélkör tisztázandó.
+- A honlap és a backend AAM státuszt használ. A Billingo SZJA szerinti átalányadózó jelölése nem igazolja önmagában az áfastátuszt. A jelenlegi AAM-státuszt a NAV belső törzsadatával még igazolni kell.
 
 ## Billingo
 
-A tulajdonos kérésére a Billingo munkái szünetelnek. Az alábbiak korábbi megfigyelések, nem újonnan elvégzett beállítások. A későbbi adózási egyeztetés alapja: [2026-os adózási előkészítés](TAX_PROFILE_2026.md).
+Az API + tömeges Basic havi csomag 2026-09-03-án aktiválva. A `OVEXI Firebase Production` V3 API-kulcs olvasási és írási jogosultsággal létrejött, Firebase Secret Managerbe került, és a Billingo API 200-as válasszal igazolta a 330792-es `Számlák` tömböt. A hivatalos cím, a 62198448 nyilvántartási szám, az AAM alapértelmezés és a bruttó egységár beállítása mentve.
 
-NAV-kapcsolat hiányzik, a technikai felhasználó négy mezője üres. A NAV Online Számla belépés DÁP/Ügyfélkapu+ azonosításig előkészítve. Személyes belépést a tulajdonos végzi.
-
-API-előfizetés nincs. Az API + tömeges Basic havi csomag kosara előkészítve: 50 bizonylat/hó, nettó 2 390 Ft, a rendelési összesítő szerint bruttó 3 035 Ft/hó, bankkártyás automatikus levonással. Nem lett megvásárolva. A jelenlegi számlázó Free; a Billingo hivatalos GYIK szerint elektronikus számlához külön Basic/Standard/Pro számlázó előfizetés is kell. A két szükséges csomag teljes költségét vásárlás előtt együtt kell jóváhagyni.
+A NAV Online Számla kapcsolat még hiányzik; a technikai felhasználó, jelszó, XML aláírókulcs és XML cserekulcs megadása szükséges. Emiatt a Billingo és az ügyfélfizetés futásidejű kapuja zárva marad.
 
 ## Kódban ellenőrzendő az éles fizetés előtt
 

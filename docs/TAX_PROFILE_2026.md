@@ -13,9 +13,9 @@ A tulajdonos közlése: egyéni vállalkozó, SZJA szerinti átalányadózó, he
 
 ## Stripe és későbbi Billingo
 
-A Stripe hivatalos címe az EVNY-adatokkal egyezőre javítva, majd az aktiválás 2026-09-02-án véglegesen beküldve. A Stripe API szerint az aktivált fiókban a terhelések és a kifizetések engedélyezettek, nincs esedékes vagy ellenőrzésre váró adat. Tax Off, Climate Off; a pénzügyi ügyfélszolgálati szám helyes. A kikapcsolt Tax nem AAM-igazolás. A Stripe Tax az értékesítések forgalmi adóját kezeli; a magyar személyes adókat és kedvezményeket a nyilvántartásban/bevallásban kell kezelni. [Stripe Tax](https://docs.stripe.com/tax/set-up)
+A Stripe hivatalos címe az EVNY-adatokkal egyezőre javítva, majd az aktiválás 2026-09-02-án véglegesen beküldve. A Stripe beállítási összesítője az aktiválást késznek jelzi. Tax Off, Climate Off; a pénzügyi ügyfélszolgálati szám helyes. A kikapcsolt Tax nem AAM-igazolás. A Stripe Tax az értékesítések forgalmi adóját kezeli; a magyar személyes adókat és kedvezményeket a nyilvántartásban/bevallásban kell kezelni. [Stripe Tax](https://docs.stripe.com/tax/set-up)
 
-Billingo-beállítás és vásárlás most nem történt. Később az átalányadózó jelölést és a számlák áfajogcímét külön kell véglegesíteni. A meglévő AAM konfiguráció nem tekinthető ellenőrzöttnek. Az éles fizetési és számlázási kapuk zárva maradnak.
+A Billingo API Basic előfizetés 2026-09-03-án aktiválva, a V3 API-kulcs biztonságosan bekötve és a 330792-es számlatömb API-n ellenőrizve. A Billingo alapértelmezett áfakulcsa AAM, az egységár bruttó; ez továbbra sem helyettesíti az AAM belső NAV-törzsadattal történő igazolását. A NAV Online Számla kapcsolat elkészültéig az éles fizetési és számlázási kapuk zárva maradnak.
 
 ## A személyre szabott számításhoz még szükséges
 

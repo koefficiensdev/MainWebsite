@@ -32,7 +32,7 @@ A tulajdonos az okmányos/szelfis ellenőrzést későbbre halasztotta. Ezért a
 
 Ellenőrzés: 53/53 automatikus teszt sikeres, ebből 23 új foglalási teszt; frontend- és backend-szintaktikai ellenőrzés sikeres. Az ütközésvédelem tranzakciós tesztadatbázison ellenőrizve; valódi Firestore-emulátoros teszt még hátravan.
 
-Fiókellenőrzés: Stripe aktiválása hiányos (személyazonosítás, bank, 2FA, ügyfélszolgálati telefonszám). A szolgáltatásleírás, az OVEXI.HU kivonati név és a teljes személynév mentve. Billingo: nincs NAV-összekötés, API-kulcs vagy aktív API-előfizetés; meglévő számlatömb API-azonosítója 330792, de ez nincs éles backend-konfigurációba átvezetve. Új előfizetés nem történt. A tulajdonos az igény-visszaigazoló e-mail megérkezését visszaigazolta; a spam-besorolásról nincs külön ellenőrzési eredmény.
+Fiókellenőrzés 2026-09-03-i frissítése: a Stripe aktiválása kész. A Billingo API Basic előfizetés aktív; a V3 írási kulcs Firebase Secret Managerbe került, és a 330792-es számlatömböt az API visszaigazolta. A NAV Online Számla összekötés és az AAM belső NAV-igazolása még hiányzik, ezért az ügyfélfizetés és az automatikus számlázás kapuja zárt. A tulajdonos az igény-visszaigazoló e-mail megérkezését visszaigazolta; a spam-besorolásról nincs külön ellenőrzési eredmény.
 
 ## Korábban telepített állapot
 
@@ -42,7 +42,7 @@ Az oldal jelenlegi üzemi módja fizetés nélküli igényfogadás. Nem teljesen
 
 1. **Rendelés:** szerveroldali validáció, rögzített katalógusárak, ismételt beküldés elleni védelem és óránkénti kéréskorlát elkészült. A publikált oldal ehhez kapcsolódik. Próba: `OVX-MTG4GWQ2-21C261`, „OVEXI technikai teszt – nem ügyfél”; ismételt beküldés ugyanazt az azonosítót adta, pénzmozgás és e-mail nélkül.
 2. **Fizetés:** Checkout-előkészítés, HUF egységkezelés, összeg/mód/aláírás-ellenőrzés és ismételt Stripe-események kezelése megírva. A fizetés tiltott; éles fiók és teljes tesztkártyás próba még kell. A teszt webhookon a kódban szereplő nyolc eseményt mind engedélyezni kell; a korábbi beállítás csak `checkout.session.completed` eseményt tartalmazott.
-3. **Számlázás:** Billingo-partner és számla létrehozása, külön küldése, visszakeresése és bizonytalan válasz utáni védelem megírva és izoláltan tesztelve. `BILLINGO_API_KEY` hiányzik; számlatömb és könyvelői dátumellenőrzés kell. Valódi Billingo-számla nem készült.
+3. **Számlázás:** Billingo-partner és számla létrehozása, külön küldése, visszakeresése és bizonytalan válasz utáni védelem megírva és izoláltan tesztelve. A `BILLINGO_API_KEY` és a 330792-es számlatömb beállítva; NAV-összekötés és könyvelői dátumellenőrzés kell. Valódi Billingo-számla nem készült.
 4. **E-mailek:** `SMTP_PASS` beállítva, SMTP-hitelesítés sikeres, `SMTP_ENABLED=true` telepítve. Az éles igénybeküldési folyamat saját címre küldött próbája: `OVX-MTG572QZ-3C0755`, címzett `info@ovexi.hu`; az e-mail-feladat első próbálkozásra `done`, a levelezőszerver elfogadta a küldést. A postafiókbeli megérkezést és spam-besorolást a tulajdonosnak még ellenőriznie kell. SPF rekord létezik; DKIM ellenőrzése és a hiányzó DMARC rendezése hátravan. A fizetéshez kapcsolódó levélágak a fizetés tiltása miatt még nem voltak végponttól végpontig tesztelve. Az admin e-mailes hibariasztása még nincs kész; hibák jelenleg az admin felületen láthatók.
 5. **Havi modulok:** a vegyes kosár egyszeri tétele csak az első számlán szerepel; megújulás, fizetési hiba és lemondás eseménykezelése megírva. Ügyfélportál admin végpont előkészítve; Stripe-portál beállítás és ügyfél számára biztonságos hozzáférés még kell. Csomagváltás/proráció külön kézi ellenőrzést igényel.
 6. **Biztonság, ellenőrzés, üzem:** pénzügyi mezők kliensoldali írása tiltva; hibák és újrapróbálások admin listája elkészült. 29 automatikus teszt sikeres. Érvénytelen igény és aláíratlan webhook a telepített végponton HTTP 400. Mobilos kosár/brief megnyitása és rejtett sütisáv javítva. Teljes fizetés→számla→e-mail próba, jogosultsági integrációs tesztek, mentés/visszaállítás és riasztási próba még szükséges.
@@ -61,7 +61,7 @@ Az oldal jelenlegi üzemi módja fizetés nélküli igényfogadás. Nem teljesen
 
 Nulla állandó példány; legfeljebb két példány függvényenként. Újrapróbálás 30 percenként, kis adagokban, legfeljebb öt automatikus próbával. A Cloud Run buildképek hét nap után automatikusan törlődnek a költségcsökkentő szabály szerint; ez nem törli az ügyféladatokat vagy a helyi forráskódot.
 
-A korábbi 25 USD felhőriasztás és 10 USD AI-keret nem közös, garantált 50 EUR költési plafon. Az árfolyam, külső szolgáltatók, levélküldés és számlázó díja is számít. A fizetés és automatikus AI-gyártás tiltva marad, új fizetős csomag nem került megrendelésre.
+A korábbi 25 USD felhőriasztás és 10 USD AI-keret nem közös, garantált 50 EUR költési plafon. Az árfolyam, külső szolgáltatók, levélküldés és számlázó díja is számít. A Billingo API Basic havi csomag bruttó 3 035 Ft-ért aktív. Az ügyfélfizetés és automatikus AI-gyártás továbbra is tiltva marad.
 
 ## SMTP-bekötés ellenőrzése
 
