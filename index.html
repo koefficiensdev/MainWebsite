@@ -307,9 +307,9 @@
           <p class="promo-status" id="promoStatus" role="status" aria-live="polite"></p>
         </div>
         <div class="order-review" id="checkoutReview"></div>
-        <p class="checkout-note">Az egyszeri weboldaldíj a fejlesztésre és az átadásra szól. Ha domainre vagy tárhelyre is szükséged van, segítünk a saját neveden létrehozni. Ezek díja alapesetben külön fizetendő; érvényes promókódnál az ÁSZF szerinti első éves ajánlat érvényes.</p>
+        <p class="checkout-note" id="infrastructureCheckoutNote" hidden>Az egyszeri weboldaldíj a fejlesztésre és az átadásra szól. Ha domainre vagy tárhelyre is szükséged van, segítünk a saját neveden létrehozni. Ezek díja alapesetben külön fizetendő; érvényes promókódnál az ÁSZF szerinti első éves ajánlat érvényes.</p>
         <label class="check-row"><input type="checkbox" name="termsAccepted" required><span>Elolvastam és elfogadom az <a href="/aszf" target="_blank">ÁSZF-et</a> és az <a href="/adatkezeles" target="_blank">adatkezelési tájékoztatót</a>.</span></label>
-        <label class="check-row"><input type="checkbox" name="operatingCostsAcknowledged" required><span>Tudomásul veszem, hogy az egyszeri ár alapesetben nem tartalmazza a domain, tárhely, e-mail és külső szolgáltatások díját. Érvényes promókód esetén kizárólag az ÁSZF-ben leírt első éves domain- és tárhelyajánlat az eltérés.</span></label>
+        <label class="check-row"><input type="checkbox" name="operatingCostsAcknowledged" required><span id="operatingCostsText">Tudomásul veszem a csomagon kívüli külső szolgáltatások külön díját.</span></label>
         <label class="check-row"><input type="checkbox" name="businessPurchaseConfirmed" required><span>Megerősítem, hogy a szolgáltatást vállalkozási vagy szakmai tevékenységemhez rendelem meg, és jogosult vagyok a megadott vállalkozás képviseletére.</span></label>
         <label class="check-row"><input type="checkbox" name="hungarianBillingConfirmed" required><span>Megerősítem, hogy a számlázási cím Magyarországon van. A Stripe fizetési oldalán ugyanezt a valós számlázási címet adom meg.</span></label>
         <label class="check-row"><input type="checkbox" name="marketingConsent"><span>Szeretnék hasznos tippeket és ajánlatokat kapni e-mailben. Ez nem feltétele a rendelésnek.</span></label>
@@ -336,6 +336,6 @@
   </div>
 
   <noscript>Az online csomagválasztó használatához engedélyezd a JavaScriptet, vagy írj az info@ovexi.hu címre.</noscript>
-  <script type="module" src="js/main.js?v=20260903-9"></script>
+  <script type="module" src="js/main.js?v=20260903-10"></script>
 </body>
 </html>

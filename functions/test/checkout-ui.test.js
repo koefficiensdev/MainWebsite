@@ -52,7 +52,7 @@ test('checkout: validation failure permits corrected data; ambiguous or malforme
 test('checkout: no direct order write fallback, server receipt ID and hidden demo navigation',()=>{
   const root=path.resolve(__dirname,'../..'),main=fs.readFileSync(path.join(root,'js/main.js'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),admin=fs.readFileSync(path.join(root,'pages/admin.html'),'utf8');
   assert.doesNotMatch(main,/addDoc\(collection\(db,\s*"orders"/);assert.match(main,/logAnalytics\("order_submitted",result.orderNumber\)/);assert.match(main,/event.key==='Tab'/);assert.match(html,/id="orderReceipt"/);assert.match(html,/businessPurchaseConfirmed/);assert.match(main,/Megrendelem és tovább a fizetéshez/);assert.doesNotMatch(admin,/class="module-preview"/);
-  assert.match(html,/id="promoSection"/);assert.match(main,/checkPromoCode/);
+  assert.match(html,/id="promoSection"/);assert.match(main,/checkPromoCode/);assert.match(html,/id="infrastructureCheckoutNote" hidden/);assert.match(main,/infrastructureCheckoutNote\.hidden = !hasWebsite/);
 });
 test('checkout: cookie choice can be reopened and analytics excludes query/hash data',()=>{
   const root=path.resolve(__dirname,'../..'),main=fs.readFileSync(path.join(root,'js/main.js'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),policy=fs.readFileSync(path.join(root,'pages/cookie-policy.html'),'utf8');

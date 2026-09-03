@@ -89,6 +89,8 @@ function updateCheckoutCopy() {
   const currentUrlField = checkoutForm?.elements.namedItem("currentUrl");
   const infrastructurePlanField = checkoutForm?.elements.namedItem("infrastructurePlan");
   const infrastructurePlanRow = document.getElementById("infrastructurePlanRow");
+  const infrastructureCheckoutNote = document.getElementById("infrastructureCheckoutNote");
+  const operatingCostsText = document.getElementById("operatingCostsText");
   const payment = canStartPayment();
   const hasWebsite = state.cart.some((id) => id.startsWith("website-"));
   if (currentUrlField) currentUrlField.required = state.cart.some((id) => id.startsWith("maintenance-") || ["quick-audit", "external-audit"].includes(id));
@@ -98,6 +100,10 @@ function updateCheckoutCopy() {
     if (!hasWebsite) infrastructurePlanField.value = "";
   }
   if (promoSection) promoSection.hidden = !hasWebsite;
+  if (infrastructureCheckoutNote) infrastructureCheckoutNote.hidden = !hasWebsite;
+  if (operatingCostsText) operatingCostsText.textContent = hasWebsite
+    ? "Tudomásul veszem, hogy az egyszeri ár alapesetben nem tartalmazza a domain, tárhely, e-mail és külső szolgáltatások díját. Érvényes promókód esetén kizárólag az ÁSZF-ben leírt első éves domain- és tárhelyajánlat az eltérés."
+    : "Tudomásul veszem, hogy a csomagban fel nem sorolt külső szolgáltatások díja külön fizetendő, és ilyen szolgáltatást csak az írásos jóváhagyásom után indítunk.";
   if (!hasWebsite) clearPromoVerification(true);
   if (submitButton) submitButton.textContent = payment ? "Megrendelem és tovább a fizetéshez" : "Igény beküldése";
   if (note) note.textContent = payment
