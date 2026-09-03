@@ -201,18 +201,12 @@ exports.stripeWebhook = onRequest({ secrets: [stripeKey, webhookKey], cors: fals
 
 async function mailTask(id, data, order) {
   if (process.env.SMTP_ENABLED !== "true") return { status: "blocked", errorCode: "smtp_not_configured" };
-  const subjects = { order_received: "Megérkezett az igényed", payment_received: "Fizetés visszaigazolása", payment_failed: "Sikertelen előfizetési fizetés", subscription_cancelled: "Előfizetés lemondva" };
-  const texts = {
-    order_received: "Rögzítettük az igényedet. Ez nem jelent sikeres fizetést. Az egyeztetést igénylő szolgáltatásról külön jelentkezünk. A rendelési azonosítóval és e-mail-címeddel belépési linket kérhetsz itt: https://ovexi.hu/ugyfelter",
-    payment_received: "A fizetést a fizetési szolgáltató visszaigazolta. A számlát külön küldjük a számlázási folyamat lezárásakor.",
-    payment_failed: "Az előfizetés fizetése nem sikerült. A fizetési mód frissítéséhez írj az info@ovexi.hu címre. Kártyaadatot e-mailben ne küldj.",
-    subscription_cancelled: "Az előfizetés lemondását rögzítettük. A kifizetett szolgáltatási időszak és az átadott munkák részleteiről kérdés esetén írj nekünk."
-  };
+  const message = require("./commerce-email").buildCommerceEmail(data.type, order);
   const transport = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 465), secure: Number(process.env.SMTP_PORT || 465) === 465,
     auth: { user: process.env.SMTP_USER, pass: smtpKey.value() }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 20000 });
   await taskRef(id).update({mailStartedAt:new Date()});
   try { await transport.sendMail({ from: process.env.EMAIL_FROM || `OVEXI <${process.env.SMTP_USER}>`, to: order.email,
-    subject: `${subjects[data.type]} – ${order.orderNumber}`, text: `Szia ${order.contactName}!\n\n${texts[data.type]}\n\nAzonosító: ${order.orderNumber}\nOVEXI · info@ovexi.hu`,
+    subject: message.subject, text: message.text, html: message.html,
     messageId: `<${id}@ovexi.hu>`, replyTo: process.env.ADMIN_EMAIL || "info@ovexi.hu" }); }
   catch(error) { const result=require('./mail-delivery').failure(error,data.attempts);return {...result,status:result.status==='send_unknown'?'needs_review':result.status,mailStartedAt:result.status==='send_unknown'?new Date():null}; }
   return { status: "done" };

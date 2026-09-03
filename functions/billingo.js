@@ -8,6 +8,7 @@ function buildPartner(order, customerDetails = {}) {
   if (requiredAddress.some((value) => !String(value || "").trim())) {
     throw new Error("A Stripe számlázási cím hiányos; Billingo partner nem hozható létre.");
   }
+  if (String(address.country).toUpperCase() !== "HU") throw new Error("Az automatikus Billingo-számlázás csak magyar számlázási címhez engedélyezett.");
   const taxId = Array.isArray(customerDetails.tax_ids)
     ? customerDetails.tax_ids.find((entry) => entry?.value)?.value
     : "";

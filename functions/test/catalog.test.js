@@ -27,17 +27,24 @@ test("business website includes booking at the agreed one-time price", async () 
   assert.deepEqual(calculateTotals(resolveProducts(["website-business"])), { once: 69990, monthly: 0 });
 });
 
+test("every product still offered on the storefront is directly payable", async () => {
+  const frontend = await import("../../js/catalog.js");
+  const offered = frontend.PRODUCT_CATALOG.filter((product) => product.availability !== "retired");
+  assert.ok(offered.length >= 16);
+  for (const product of offered) assert.equal(product.availability, undefined, product.id);
+});
+
 test("unknown and duplicate product ids are rejected", () => {
   assert.throws(() => resolveProducts(["unknown"]), /Unknown product/);
   assert.throws(() => resolveProducts(["website-business", "website-business"]), /Duplicate/);
 });
 
-test("quick audit is a low-cost one-time deliverable", async () => {
+test("quick audit remains in history but is retired from new storefront orders", async () => {
   const frontend = await import("../../js/catalog.js");
   const product = frontend.getProduct("quick-audit");
   assert.equal(product.price, 990);
   assert.equal(product.billing, "once");
-  assert.equal(product.instantPayment, true);
+  assert.equal(product.availability, "retired");
   assert.ok(product.features.some((feature) => feature.includes("3 munkanapon")));
 });
 

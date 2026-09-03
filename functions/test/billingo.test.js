@@ -19,6 +19,10 @@ test("buildPartner maps Stripe billing details to Billingo", () => {
   assert.equal(partner.taxcode, "12345678-2-43");
 });
 
+test("buildPartner blocks automatic AAM invoicing for a foreign billing address", () => {
+  assert.throws(() => buildPartner({ companyName: "Minta" },{ email: "test@example.com", address: { country: "AT", postal_code: "1010", city: "Wien", line1: "Muster 1" } }), /magyar számlázási címhez/);
+});
+
 test("buildInvoice emits gross AAM invoice items", () => {
   const invoice = buildInvoice({
     partnerId: 42, blockId: 7, vat: "AAM", vendorId: "evt_test", date: "2026-08-10",

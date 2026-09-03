@@ -19,8 +19,6 @@ export const PRODUCT_CATALOG = Object.freeze([
     billing: "once",
     featured: true,
     badge: "Foglalással együtt",
-    availability: "request_only",
-    availabilityNote: "Fejlesztés alatt · jelenleg igényfelmérés kérhető, fizetés nélkül. A foglalórendszer még nem elérhető kész szolgáltatásként.",
     description: "Mobilbarát céges weboldal online időpontfoglalással és saját kezelőfelülettel, időpontra dolgozó vállalkozásoknak — szakmától függetlenül.",
     features: ["Legfeljebb 6 aloldal, egyedi szöveg és dizájn", "Online foglalás 1 szolgáltató naptárával", "Szolgáltatások, árak és időtartamok", "Foglalási naptár, ügyféladatok és státuszok", "Nyitvatartás, szünetek és lemondások kezelése", "E-mailes visszaigazolás, technikai SEO, 2 kör módosítás"]
   },
@@ -176,7 +174,7 @@ export const PRODUCT_CATALOG = Object.freeze([
     shortName: "Gyors ellenőrzés",
     price: 990,
     billing: "once",
-    instantPayment: true,
+    availability: "retired",
     badge: "Kipróbáláshoz",
     availabilityNote: "Közvetlenül fizethető · egy nyilvános magyar vállalkozói weboldalhoz.",
     description: "Rövid, egyedi technikai átnézés egy megadott nyilvános webcímről.",
@@ -206,10 +204,12 @@ export function getProduct(productId) {
   return PRODUCT_CATALOG.find((product) => product.id === productId) || null;
 }
 
+// hu-HU leaves four-digit numbers ungrouped ("5990"), which reads inconsistently
+// next to the grouped prices on the page. Group every thousand, non-breaking.
 export function formatPrice(amount) {
-  return new Intl.NumberFormat("hu-HU").format(amount) + " Ft";
+  return String(Math.round(Number(amount) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " Ft";
 }
 
 export function billingLabel(product) {
-  return product.billing === "monthly" ? "/ hó" : "egyszeri díj";
+  return product.billing === "monthly" ? "havidíj" : "egyszeri díj";
 }

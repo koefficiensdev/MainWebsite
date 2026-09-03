@@ -26,7 +26,7 @@ function validateOrder(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Érvénytelen rendelés.");
   if (!/^[a-f0-9-]{32,36}$/i.test(input.requestId || "")) throw new Error("Érvénytelen kérésazonosító.");
   if (input.website) throw new Error("Érvénytelen kérés.");
-  if (input.termsAccepted !== true || input.operatingCostsAcknowledged !== true || input.businessPurchaseConfirmed !== true) throw new Error("Fogadd el a feltételeket, az üzemeltetési tájékoztatást és erősítsd meg az üzleti célú vásárlást.");
+  if (input.termsAccepted !== true || input.operatingCostsAcknowledged !== true || input.businessPurchaseConfirmed !== true || input.hungarianBillingConfirmed !== true) throw new Error("Fogadd el a feltételeket, és erősítsd meg az üzleti célú vásárlást, valamint a magyar számlázási címet.");
   const products = resolveProducts(input.itemIds).map((p) => ({ ...p }));
   for (const prefix of ["website-", "maintenance-"]) {
     if (products.filter((p) => p.id.startsWith(prefix)).length > 1) throw new Error("Egy kategóriából egy csomag választható.");
@@ -42,10 +42,10 @@ function validateOrder(input) {
   order.email = order.email.toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(order.email)) throw new Error("Érvénytelen e-mail-cím.");
   order.currentUrl = normalizeWebUrl(order.currentUrl);
-  if (products.some((product) => product.id === "quick-audit") && !order.currentUrl) throw new Error("A gyors weboldal-ellenőrzéshez add meg a vizsgálandó nyilvános webcímet.");
+  if (products.some((product) => product.id.startsWith("maintenance-") || ["quick-audit", "external-audit"].includes(product.id)) && !order.currentUrl) throw new Error("Add meg a vizsgálandó vagy karbantartandó nyilvános webcímet.");
   const totals = calculateTotals(products);
   return { ...order, products, itemIds: products.map((p) => p.id), itemNames: products.map((p) => p.name), onceTotal: totals.once, monthlyTotal: totals.monthly,
-    termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true, termsVersion: TERMS_VERSION, marketingConsent: input.marketingConsent === true,
+    termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true, hungarianBillingConfirmed: true, termsVersion: TERMS_VERSION, marketingConsent: input.marketingConsent === true,
     source: "ovexi_storefront", requestId: input.requestId.toLowerCase(), bundleMaintenanceGift: false };
 }
 
@@ -54,7 +54,6 @@ function fingerprint(order) {
 }
 
 function paymentGate(order, env = process.env) {
-  if (order.itemIds.includes("website-business")) return "booking_in_development";
   const approved = String(env.INSTANT_PRODUCT_IDS || "").split(",").map((id) => id.trim()).filter(Boolean);
   if (!order.itemIds.every((id) => approved.includes(id))) return "scope_review";
   if (env.PAYMENTS_ENABLED !== "true") return "payments_disabled";

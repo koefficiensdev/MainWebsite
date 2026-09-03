@@ -1,12 +1,12 @@
 import { STOREFRONT_CONFIG } from "./storefront-config.js?v=20260830-1";
-import {safeStorage,cleanCart,normalizeWebUrl,submissionManager} from "./checkout-model.js?v=20260903-2";
+import {safeStorage,cleanCart,normalizeWebUrl,submissionManager} from "./checkout-model.js?v=20260903-5";
 import {
   PRODUCT_CATALOG,
   CATEGORY_LABELS,
   billingLabel,
   formatPrice,
   getProduct
-} from "./catalog.js?v=20260903-2";
+} from "./catalog.js?v=20260903-5";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",
@@ -76,7 +76,7 @@ function totals() {
 
 function canStartPayment() {
   const products = cartProducts();
-  return products.length > 0 && products.every((product) => product.instantPayment === true);
+  return products.length > 0 && products.every((product) => !["request_only", "retired"].includes(product.availability));
 }
 
 function updateCheckoutCopy() {
@@ -84,7 +84,7 @@ function updateCheckoutCopy() {
   const note = document.getElementById("checkoutActionNote");
   const currentUrlField = checkoutForm?.elements.namedItem("currentUrl");
   const payment = canStartPayment();
-  if (currentUrlField) currentUrlField.required = state.cart.includes("quick-audit");
+  if (currentUrlField) currentUrlField.required = state.cart.some((id) => id.startsWith("maintenance-") || ["quick-audit", "external-audit"].includes(id));
   if (submitButton) submitButton.textContent = payment ? "Megrendelem és tovább a fizetéshez" : "Igény beküldése";
   if (note) note.textContent = payment
     ? "A beküldés után a Stripe biztonságos fizetési oldala nyílik meg. A kártyaadatokat az OVEXI nem látja és nem tárolja."
@@ -92,7 +92,7 @@ function updateCheckoutCopy() {
 }
 
 function renderCatalog() {
-  const products = PRODUCT_CATALOG.filter((product) => product.category === state.category);
+  const products = PRODUCT_CATALOG.filter((product) => product.category === state.category && product.availability !== "retired");
   productGrid.innerHTML = products.map((product) => `
     <article class="product-card${product.featured ? " is-featured" : ""}">
       <span class="product-badge">${escapeHtml(product.badge)}</span>
@@ -128,10 +128,10 @@ function renderCart() {
 
   const hasWebsite = products.some((product) => product.category === "website");
   cartSummary.innerHTML = `
-    <div class="summary-line"><span>Egyszeri díj</span><strong>${formatPrice(calculated.once)}</strong></div>
-    <div class="summary-line"><span>Havi díj</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>
+    ${calculated.once ? `<div class="summary-line"><span>Egyszeri díj</span><strong>${formatPrice(calculated.once)}</strong></div>` : ""}
+    ${calculated.monthly ? `<div class="summary-line"><span>Havi díj</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>` : ""}
     ${hasWebsite ? `<p class="checkout-note">A weboldal egyszeri ára nem tartalmaz folyamatos tárhelyet, domainmegújítást vagy e-mail-szolgáltatást. Ezek díját fizetés előtt külön egyeztetjük.</p>` : ""}
-    ${products.some((p) => p.availability === "request_only") ? `<p class="checkout-note">A foglalós csomag fejlesztés alatt áll. Erre most fizetés nélküli igényfelmérést fogadunk.</p>` : ""}
+    ${products.some((p) => p.availability === "request_only") ? `<p class="checkout-note">A kosárban egyeztetést igénylő csomag van. Erre fizetés nélküli igényfelmérést fogadunk.</p>` : ""}
   `;
   startCheckoutButton.disabled = products.length === 0;
   renderCatalog();
@@ -212,9 +212,9 @@ function orderSummaryMarkup() {
   return `
     <div class="summary-line"><span>Kiválasztott csomagok</span><strong>${cartProducts().length} db</strong></div>
     ${cartProducts().map((product) => `<div class="summary-line"><span>${escapeHtml(product.name)}</span><span>${formatPrice(product.price)} ${product.billing === "monthly" ? "/ hó" : ""}</span></div>`).join("")}
-    <div class="summary-line"><span>Egyszeri összesen</span><strong>${formatPrice(calculated.once)}</strong></div>
-    <div class="summary-line"><span>Havonta összesen</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>
-    <p class="checkout-note">A havi összeg csak a kosárba tett havi modulokat tartalmazza. A külső szolgáltatók üzemeltetési díjai ezen felül, külön egyeztetés szerint fizetendők.</p>
+    ${calculated.once ? `<div class="summary-line summary-total"><span>Egyszeri összesen</span><strong>${formatPrice(calculated.once)}</strong></div>` : ""}
+    ${calculated.monthly ? `<div class="summary-line summary-total"><span>Havonta összesen</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>` : ""}
+    <p class="checkout-note">${calculated.monthly ? "A havi összeg csak a kosárba tett havi modulokat tartalmazza. " : ""}A külső szolgáltatók üzemeltetési díjai ezen felül, külön egyeztetés szerint fizetendők.</p>
   `;
 }
 
@@ -240,7 +240,7 @@ async function submitOrder(event) {
     if(Date.now()-formLoadedAt<2500){setFormStatus("Ellenőrizd az adatokat, majd küldd be az igényt.",true);return;}
     if(Date.now()-Number(local.get(ORDER_COOLDOWN_KEY)||0)<ORDER_COOLDOWN_MS){setFormStatus("Egy igényt már elküldtél. Új igény előtt várj két percet.",true);return;}
   }
-  const raw={...Object.fromEntries(formData),itemIds:[...state.cart],termsAccepted:formData.get("termsAccepted")==="on",operatingCostsAcknowledged:formData.get("operatingCostsAcknowledged")==="on",businessPurchaseConfirmed:formData.get("businessPurchaseConfirmed")==="on",marketingConsent:formData.get("marketingConsent")==="on"};
+  const raw={...Object.fromEntries(formData),itemIds:[...state.cart],termsAccepted:formData.get("termsAccepted")==="on",operatingCostsAcknowledged:formData.get("operatingCostsAcknowledged")==="on",businessPurchaseConfirmed:formData.get("businessPurchaseConfirmed")==="on",hungarianBillingConfirmed:formData.get("hungarianBillingConfirmed")==="on",marketingConsent:formData.get("marketingConsent")==="on"};
   lockCheckout(true);setFormStatus("Az igény rögzítése folyamatban…");
   let accepted=null;
   try{

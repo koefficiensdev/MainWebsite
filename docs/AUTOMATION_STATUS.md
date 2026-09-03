@@ -1,5 +1,7 @@
 # Automatizálás – 2026-08-30
 
+> Frissítés – 2026-09-03: mind a 16 aktív katalóguscsomag közvetlenül fizethető; a `website-business` fizetési kapuja megszűnt, a `quick-audit` visszavonva marad. A tranzakciós e-mailek tételes HTML+szöveges sablont kapnak (`functions/commerce-email.js`). A főoldali hero, a szolgáltatásoldalak és a mobilnézet elrendezési hibái javítva. Részletek: [PAYMENT_ACTIVATION_REVIEW.md](PAYMENT_ACTIVATION_REVIEW.md). Az alábbi korábbi szakaszok a `quick-audit`-only állapotot írják le.
+
 > Frissítés – 2026-09-02: az új gyártás, marketing, foglalás, értesítések és mentés aktuális állapotát az [AUTONOMOUS_READINESS.md](AUTONOMOUS_READINESS.md) tartalmazza. Az alábbi korábbi tesztszámok és hiánylisták az akkori állapotra vonatkoznak.
 
 2026-09-02 frissítés: az igényfogadás, ügyféltér, adminfeldolgozás és verziózott előnézet–jóváhagyás–átadás új állapota: [WORKSPACE_FLOW.md](WORKSPACE_FLOW.md). Ez felülírja az ügyféltér hiányáról szóló korábbi megjegyzéseket.

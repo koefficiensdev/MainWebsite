@@ -1,17 +1,17 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const model=import('../../js/checkout-model.js');
-const raw=()=>({itemIds:['website-onepage'],contactName:'Teszt Kapcsolat',companyName:'Minta Cég',email:'test@example.invalid',businessDescription:'Fiktív teszt vállalkozás leírása.',primaryGoal:'Több ajánlatkérés',termsAccepted:true,operatingCostsAcknowledged:true,businessPurchaseConfirmed:true});
+const raw=()=>({itemIds:['website-onepage'],contactName:'Teszt Kapcsolat',companyName:'Minta Cég',email:'test@example.invalid',businessDescription:'Fiktív teszt vállalkozás leírása.',primaryGoal:'Több ajánlatkérés',currentUrl:'ovexi.hu',termsAccepted:true,operatingCostsAcknowledged:true,businessPurchaseConfirmed:true,hungarianBillingConfirmed:true});
 function memory(){const map=new Map();return {map,get:key=>map.get(key)||null,set:(key,value)=>{map.set(key,value);return true;},remove:key=>map.delete(key)};}
 const result={orderNumber:'OVX-TEST-123ABC',status:'received',emailQueued:true};
 test('checkout: cart restores only valid unique products and one plan per category',async()=>{
-  const {cleanCart}=await model;assert.deepEqual(cleanCart(['website-onepage','website-business','website-business','marketing-mini','marketing-pro','marketing-launch','maintenance-basic','maintenance-plus','quick-audit','bad']),['website-business','marketing-pro','marketing-launch','maintenance-plus','quick-audit']);assert.deepEqual(cleanCart({}),[]);
+  const {cleanCart}=await model;assert.deepEqual(cleanCart(['website-onepage','website-business','website-business','marketing-mini','marketing-pro','marketing-launch','maintenance-basic','maintenance-plus','quick-audit','bad']),['website-business','marketing-pro','marketing-launch','maintenance-plus']);assert.deepEqual(cleanCart({}),[]);
 });
 test('checkout: short and mistyped website addresses are normalized',async()=>{
   const {normalizeWebUrl,orderInput}=await model;
   assert.equal(normalizeWebUrl('ovexi.hu'),'https://ovexi.hu/');
   assert.equal(normalizeWebUrl('https:\\\\ovexi.hu.'),'https://ovexi.hu/');
-  assert.equal(orderInput({...raw(),itemIds:['quick-audit'],currentUrl:'ovexi.hu'}).currentUrl,'https://ovexi.hu/');
-  assert.throws(()=>orderInput({...raw(),itemIds:['quick-audit'],currentUrl:''}),/webcímet/);
+  assert.equal(orderInput({...raw(),itemIds:['external-audit'],currentUrl:'ovexi.hu'}).currentUrl,'https://ovexi.hu/');
+  assert.throws(()=>orderInput({...raw(),itemIds:['external-audit'],currentUrl:''}),/webcímet/);
 });
 test('checkout: standalone marketing and maintenance pass the server contract',async()=>{
   const {orderInput}=await model,{validateOrder}=require('../commerce-domain');
@@ -20,7 +20,7 @@ test('checkout: standalone marketing and maintenance pass the server contract',a
   }
 });
 test('checkout: frontend rejects invalid brief, consent and dangerous URL before submission',async()=>{
-  const {orderInput}=await model;for(const change of [{contactName:'x'},{companyName:'x'},{businessDescription:'rövid'},{email:'wrong'},{termsAccepted:false},{operatingCostsAcknowledged:false},{businessPurchaseConfirmed:false},{currentUrl:'javascript:alert(1)'},{currentUrl:'https://user:pass@example.com'}])assert.throws(()=>orderInput({...raw(),...change}));
+  const {orderInput}=await model;for(const change of [{contactName:'x'},{companyName:'x'},{businessDescription:'rövid'},{email:'wrong'},{termsAccepted:false},{operatingCostsAcknowledged:false},{businessPurchaseConfirmed:false},{hungarianBillingConfirmed:false},{currentUrl:'javascript:alert(1)'},{currentUrl:'https://user:pass@example.com'}])assert.throws(()=>orderInput({...raw(),...change}));
 });
 test('checkout: uncertain request survives reload and retries same ID and frozen payload',async()=>{
   const {submissionManager}=await model,store=memory(),first=submissionManager(store);let sent;

@@ -16,9 +16,15 @@ A tulajdonos 2026-09-02-án megerősítette: a Stripe +36 20 398 9011 száma a p
 
 ## Billingo
 
-Az API + tömeges Basic havi csomag 2026-09-03-án aktiválva. A `OVEXI Firebase Production` V3 API-kulcs olvasási és írási jogosultsággal létrejött, Firebase Secret Managerbe került, és a Billingo API 200-as válasszal igazolta a 330792-es `Számlák` tömböt. A hivatalos cím, a 62198448 nyilvántartási szám, az AAM alapértelmezés és a bruttó egységár beállítása mentve.
+Az API + tömeges Basic havi csomag 2026-09-03-án aktiválva. A `OVEXI Firebase Production` V3 API-kulcs olvasási és írási jogosultsággal létrejött, Firebase Secret Managerbe került, és a Billingo API 200-as válasszal igazolta a 330792-es `Számlák` tömböt. A hivatalos cím, a 62198448 nyilvántartási szám, az AAM alapértelmezés és a bruttó egységár beállítása mentve. Az első valódi, 990 Ft-os vásárlás Stripe-fizetése, előlegszámlája és három tranzakciós e-mailje hiba nélkül elkészült; a számla Billingo-azonosítója 135674270.
 
-A NAV Online Számla kapcsolat 2026-09-03-án elkészült külön Billingo technikai felhasználóval, számlakezelési és lekérdezési jogosultsággal. A Billingo futásidejű integráció engedélyezve. Az első éles próba költségének csökkentésére a közvetlen ügyfélfizetés kizárólag a ténylegesen teljesíthető, 990 Ft-os `quick-audit` csomagra nyílt meg; a teljes audit fizetés nélküli egyeztetés marad.
+A NAV Online Számla kapcsolat 2026-09-03-án elkészült külön Billingo technikai felhasználóval, számlakezelési és lekérdezési jogosultsággal. A Billingo futásidejű integráció engedélyezve. A sikeres éles próba után a 990 Ft-os `quick-audit` csomag új vásárlása megszűnt.
+
+## Teljes körű fizetés – 2026-09-03
+
+A tulajdonos döntése alapján a katalógus mind a 16 aktív csomagja közvetlenül fizethető. A `commerce-domain.js` korábbi, `website-business` azonosítóra kötött `booking_in_development` kapuja megszűnt; a fizethetőséget kizárólag a szerveroldali `INSTANT_PRODUCT_IDS` lista, a `PAYMENTS_ENABLED`, `PAYMENT_MODE`, `LIVE_PAYMENTS_APPROVED`, `BILLINGO_ENABLED`, `SMTP_ENABLED` és `BILLINGO_BLOCK_ID` együttes állapota szabályozza. A `request_only` mechanizmus a kódban maradt, hogy egy későbbi csomag bármikor visszaállítható legyen igényfelmérésre.
+
+Fenntartás: a `website-business` foglalómotorja a `BOOKING_ENABLED` kapcsoló mögött, telepítés nélkül áll. A csomag díja így egy kézi kivitelezéssel átadott foglalós weboldalra szól. Az ÁSZF ezért kiegészült a Céges weboldal 35 munkanapos teljesítési határidejével, a foglalás alapváltozatának pontos körülhatárolásával és a keretén kívüli igényekre vonatkozó visszatérítési szabállyal.
 
 ## Számlázási modell
 
