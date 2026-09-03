@@ -24,7 +24,7 @@
   <meta name="twitter:image" content="https://ovexi.hu/assets/images/og-ovexi-1200.jpg">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/images/favicon-48.png">
   <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/icon-192.png">
-  <link rel="stylesheet" href="css/site.css?v=20260903-8">
+  <link rel="stylesheet" href="css/site.css?v=20260903-9">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -68,7 +68,13 @@
         <a href="#gyik">GYIK</a>
       </nav>
       <button class="cart-button" id="openCartButton" type="button">
-        Kosár <span id="cartCount" aria-live="polite">0</span>
+        <svg class="cart-icon" aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="20" r="1"></circle>
+          <circle cx="19" cy="20" r="1"></circle>
+          <path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.5h7.7a2 2 0 0 0 2-1.6L21 7H6"></path>
+        </svg>
+        <span class="cart-label">Kosár</span>
+        <span id="cartCount" aria-live="polite">0</span>
       </button>
     </div>
   </header>

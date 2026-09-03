@@ -76,7 +76,9 @@ h3 { font-size: 1.25rem; }
   display: inline-flex; align-items: center; gap: .7rem; border: 1px solid var(--line); border-radius: 999px; padding: .65rem .75rem .65rem 1rem;
   color: var(--white); background: rgba(255,255,255,.06); cursor: pointer;
 }
+.cart-icon { display: none; flex: 0 0 auto; }
 .cart-button span { min-width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; color: var(--ink); background: var(--cyan); font-weight: 800; }
+.cart-button .cart-label { min-width: 0; height: auto; display: inline; border-radius: 0; color: inherit; background: transparent; font-weight: inherit; }
 
 .hero { position: relative; min-height: 710px; display: grid; align-items: center; padding: 6rem 0 5rem; overflow: hidden; }
 .hero::before {
@@ -254,8 +256,9 @@ textarea { min-height: 105px; resize: vertical; }
   .nav-shell { height: 68px; gap: .65rem; }
   .brand img { height: 36px; }
   .nav-toggle { display: inline-flex; order: 2; border: 1px solid var(--line); border-radius: 8px; padding: .55rem .7rem; color: var(--white); background: transparent; }
-  .cart-button { order: 3; font-size: 0; padding: .42rem; }
-  .cart-button::before { content: "Kosár"; font-size: .82rem; margin-left: .35rem; }
+  .cart-button { order: 3; gap: .42rem; padding: .42rem; }
+  .cart-icon { display: block; }
+  .cart-button .cart-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
   .main-nav { position: absolute; left: 0; right: 0; top: 68px; display: none; flex-direction: column; align-items: stretch; gap: 0; padding: .8rem 1.25rem 1.2rem; border-bottom: 1px solid var(--line); background: #091525; }
   .main-nav.is-open { display: flex; }
   :target, section[id], [id].order-receipt { scroll-margin-top: 84px; }
@@ -311,7 +314,6 @@ textarea { min-height: 105px; resize: vertical; }
   .nav-shell { gap:.45rem; }
   .brand img { height:32px; }
   .nav-toggle { padding:.5rem .55rem; }
-  .cart-button::before { display:none; }
   .final-cta-inner,.bundle-banner { padding:1.3rem; }
 }
 
