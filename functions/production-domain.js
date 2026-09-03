@@ -42,7 +42,7 @@ function build(order,input={}) {
   c.posts.forEach((post,i)=>{for(const height of [1080,1350])files[`kreativ-${i+1}-${height}.svg`]=creative(c,post,height);});
   const missing=[];if(!c.contactUrl)missing.push('Nyilvános kapcsolatfelvételi URL');if(!c.services.length)missing.push('Végleges szolgáltatáslista és leírások');
   const needed=requirements(order.itemIds||[]);if(c.posts.length<needed.posts||c.blogs.length<needed.blogs||c.emailDrafts.length<needed.emails)missing.push(`A csomag teljes tartalma: ${needed.posts} poszt, ${needed.blogs} blog, ${needed.emails} e-mail; jelenleg ${c.posts.length}/${c.blogs.length}/${c.emailDrafts.length} készült.`);
-  if((order.itemIds||[]).some(id=>['website-shop','website-pro','website-business'].includes(id)))missing.push('A kiválasztott csomag további oldalainak, foglalásának vagy webshopjának egyedi specifikációja és megvalósítása');
+  if((order.itemIds||[]).some(id=>['website-shop','website-pro','website-business'].includes(id)))missing.push('A kiválasztott csomag további oldalainak, üzleti moduljának vagy webshopjának egyedi specifikációja és megvalósítása');
   missing.push('Ügyfél által jóváhagyott tartalom és jogi oldalak','Végleges domain/tárhely és publikálási döntés');
   const manifest={schemaVersion:1,kind:'static-draft',generator:'ovexi-template-v1',files:Object.entries(files).map(([name,value])=>({name,bytes:Buffer.byteLength(value),sha256:crypto.createHash('sha256').update(value).digest('hex')})),missing,quality:{htmlEscaped:true,scripts:false,externalAssets:false,responsive:true}};
   files['manifest.json']=JSON.stringify(manifest,null,2);

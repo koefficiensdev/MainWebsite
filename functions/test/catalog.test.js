@@ -16,22 +16,22 @@ test("mixed carts calculate one-time and monthly totals separately", () => {
   assert.deepEqual(calculateTotals(selected), { once: 69990, monthly: 15980 });
 });
 
-test("business website includes booking at the agreed one-time price", async () => {
+test("business website includes one tailored business module at the agreed one-time price", async () => {
   const frontend = await import("../../js/catalog.js");
   const product = frontend.getProduct("website-business");
   assert.equal(product.price, 69990);
   assert.equal(product.billing, "once");
-  assert.ok(product.features.some((feature) => feature.includes("Online foglalás")));
-  assert.ok(product.features.some((feature) => feature.includes("ügyféladatok")));
-  assert.ok(product.description.includes("szakmától függetlenül"));
+  assert.ok(product.features.some((feature) => feature.includes("1 alap üzleti modul")));
+  assert.ok(product.features.some((feature) => feature.includes("időpontkérés")));
+  assert.ok(product.description.includes("vállalkozás működéséhez illő"));
   assert.deepEqual(calculateTotals(resolveProducts(["website-business"])), { once: 69990, monthly: 0 });
 });
 
-test("every offered product except the unfinished booking package is directly payable", async () => {
+test("every offered product is directly payable", async () => {
   const frontend = await import("../../js/catalog.js");
   const offered = frontend.PRODUCT_CATALOG.filter((product) => product.availability !== "retired");
   assert.ok(offered.length >= 16);
-  for (const product of offered) assert.equal(product.availability, product.id === "website-business" ? "request_only" : undefined, product.id);
+  for (const product of offered) assert.equal(product.availability, undefined, product.id);
 });
 
 test("unknown and duplicate product ids are rejected", () => {

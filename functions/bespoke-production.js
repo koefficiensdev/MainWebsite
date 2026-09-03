@@ -35,7 +35,7 @@ function assemble(order,content,raw){
   const missing=(raw.missingInformation||[]).map(x=>String(x).slice(0,400)).slice(0,30),needed=requirements(order.itemIds||[]);
   if(content.posts.length<needed.posts||content.blogs.length<needed.blogs||content.emailDrafts.length<needed.emails)missing.push(`Csomagtartalom: ${needed.posts} poszt, ${needed.blogs} blog, ${needed.emails} hírlevél szükséges; jelenleg ${content.posts.length}/${content.blogs.length}/${content.emailDrafts.length}.`);
   missing.push('Tényszerű, vizuális és ügyfél-jóváhagyás; végleges publikálás.');
-  if((order.itemIds||[]).some(id=>['website-shop','website-pro','website-business'].includes(id)))missing.push('Egyedi funkciók, további aloldalak, foglalás vagy webshop integrációja a specifikáció szerint.');
+  if((order.itemIds||[]).some(id=>['website-shop','website-pro','website-business'].includes(id)))missing.push('Egyedi üzleti modulok, további aloldalak vagy webshop-integráció a specifikáció szerint.');
   const manifest={schemaVersion:2,generator:'ovexi-bespoke-v1',kind:'bespoke-static-draft',concept:raw.concept,decisions:(raw.decisions||[]).map(String).slice(0,20),missing,files:Object.entries(files).map(([name,value])=>({name,bytes:Buffer.byteLength(value),sha256:hash(value)}))};
   files['manifest.json']=JSON.stringify(manifest,null,2);return {files,manifest,content,designFingerprint:hash(raw.pages.map(p=>css(p.css)).join('\n'))};
 }

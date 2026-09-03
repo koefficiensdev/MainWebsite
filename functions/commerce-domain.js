@@ -58,7 +58,6 @@ function fingerprint(order) {
 }
 
 function paymentGate(order, env = process.env) {
-  if (order.itemIds.includes("website-business")) return "booking_in_development";
   const approved = String(env.INSTANT_PRODUCT_IDS || "").split(",").map((id) => id.trim()).filter(Boolean);
   if (!order.itemIds.every((id) => approved.includes(id))) return "scope_review";
   if (env.PAYMENTS_ENABLED !== "true") return "payments_disabled";

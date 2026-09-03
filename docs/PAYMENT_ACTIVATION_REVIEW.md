@@ -24,7 +24,7 @@ A NAV Online Számla kapcsolat 2026-09-03-án elkészült külön Billingo techn
 
 A tulajdonos döntése alapján a katalógus mind a 16 aktív csomagja közvetlenül fizethető. A `commerce-domain.js` korábbi, `website-business` azonosítóra kötött `booking_in_development` kapuja megszűnt; a fizethetőséget kizárólag a szerveroldali `INSTANT_PRODUCT_IDS` lista, a `PAYMENTS_ENABLED`, `PAYMENT_MODE`, `LIVE_PAYMENTS_APPROVED`, `BILLINGO_ENABLED`, `SMTP_ENABLED` és `BILLINGO_BLOCK_ID` együttes állapota szabályozza. A `request_only` mechanizmus a kódban maradt, hogy egy későbbi csomag bármikor visszaállítható legyen igényfelmérésre.
 
-Fenntartás: a `website-business` foglalómotorja a `BOOKING_ENABLED` kapcsoló mögött, telepítés nélkül áll. A csomag díja így egy kézi kivitelezéssel átadott foglalós weboldalra szól. Az ÁSZF ezért kiegészült a Céges weboldal 35 munkanapos teljesítési határidejével, a foglalás alapváltozatának pontos körülhatárolásával és a keretén kívüli igényekre vonatkozó visszatérítési szabállyal.
+A `website-business` csomag egy, a briefhez igazított alap üzleti modult tartalmazó céges weboldal fejlesztési és átadási díja. A modul lehet időpontkérés, ajánlatkérés vagy egyszerű igényfelvétel; a kész foglalómotor telepítése nem előfeltétele a megrendelésnek. A 35 munkanapos határidő, az alapmodul kerete és a kereten kívüli igények visszatérítési szabálya az ÁSZF-ben szerepel.
 
 ## Számlázási modell
 

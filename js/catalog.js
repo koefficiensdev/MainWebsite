@@ -18,11 +18,9 @@ export const PRODUCT_CATALOG = Object.freeze([
     price: 69990,
     billing: "once",
     featured: true,
-    badge: "Foglalással együtt",
-    availability: "request_only",
-    availabilityNote: "Fejlesztés alatt · jelenleg fizetés nélküli igényfelmérés kérhető.",
-    description: "Mobilbarát céges weboldal online időpontfoglalással és saját kezelőfelülettel, időpontra dolgozó vállalkozásoknak — szakmától függetlenül.",
-    features: ["Legfeljebb 6 aloldal, egyedi szöveg és dizájn", "Online foglalás 1 szolgáltató naptárával", "Szolgáltatások, árak és időtartamok", "Foglalási naptár, ügyféladatok és státuszok", "Nyitvatartás, szünetek és lemondások kezelése", "E-mailes visszaigazolás, technikai SEO, 2 kör módosítás"]
+    badge: "Üzleti funkcióval",
+    description: "Többoldalas céges weboldal egy, a vállalkozás működéséhez illő alap üzleti modullal.",
+    features: ["Legfeljebb 6 aloldal, egyedi szöveg és dizájn", "1 alap üzleti modul a brief alapján", "Például időpontkérés, ajánlatkérés vagy igényfelvétel", "A modulhoz illő adatok és státuszok kezelése", "Szükség esetén e-mailes visszaigazolás", "Technikai SEO és 2 kör módosítás"]
   },
   {
     id: "website-pro",

@@ -28,15 +28,15 @@ test("rejects invalid data, forged consent and incompatible carts", () => {
 });
 test("every ready storefront product can be charged once it is on the approved live list", () => {
   const live = { PAYMENTS_ENABLED: "true", PAYMENT_MODE: "live", LIVE_PAYMENTS_APPROVED: "true", BILLINGO_ENABLED: "true", SMTP_ENABLED: "true", BILLINGO_BLOCK_ID: "1" };
-  for (const { id } of require("../catalog").products.filter(({id}) => !["website-business","quick-audit"].includes(id))) {
+  for (const { id } of require("../catalog").products.filter(({id}) => id !== "quick-audit")) {
     const checked = d.validateOrder({ ...input(), itemIds: [id], currentUrl: "example.com" });
     assert.equal(d.paymentGate(checked, { ...live, INSTANT_PRODUCT_IDS: id }), null, id);
     assert.equal(d.paymentGate(checked, { ...live, INSTANT_PRODUCT_IDS: "" }), "scope_review", id);
   }
 });
-test("unfinished booking package stays payment-free even if mistakenly allowlisted", () => {
+test("business website can start payment when explicitly allowlisted", () => {
   const checked = d.validateOrder(input());
-  assert.equal(d.paymentGate(checked, { INSTANT_PRODUCT_IDS:"website-business", PAYMENTS_ENABLED:"true", PAYMENT_MODE:"test" }), "booking_in_development");
+  assert.equal(d.paymentGate(checked, { INSTANT_PRODUCT_IDS:"website-business", PAYMENTS_ENABLED:"true", PAYMENT_MODE:"test" }), null);
 });
 test("website orders require a valid domain and hosting plan", () => {
   for (const infrastructurePlan of ["existing","domain_only","new","guidance"]) assert.equal(d.validateOrder({ ...input(), infrastructurePlan }).infrastructurePlan, infrastructurePlan);
@@ -72,7 +72,7 @@ test("mixed Checkout uses subscription mode but one-time items never recur", () 
   assert.equal(session.subscription_data.metadata.app, "ovexi");
 });
 test("every ready package produces an exact HUF Checkout line item", () => {
-  const ready = require("../catalog").products.filter(({id}) => !["website-business","quick-audit"].includes(id));
+  const ready = require("../catalog").products.filter(({id}) => id !== "quick-audit");
   for (const product of ready) {
     const checked = { ...d.validateOrder({ ...input(), itemIds:[product.id], currentUrl:"example.com" }), orderNumber:"OVX-TEST-TEST" };
     const payload = d.checkoutPayload("abc", checked);
