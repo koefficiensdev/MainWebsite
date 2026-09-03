@@ -258,7 +258,7 @@ function orderSummaryMarkup() {
     ${calculated.once ? `<div class="summary-line summary-total"><span>Egyszeri összesen</span><strong>${formatPrice(calculated.once)}</strong></div>` : ""}
     ${calculated.monthly ? `<div class="summary-line summary-total"><span>Havonta összesen</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>` : ""}
     ${verifiedPromo ? `<div class="summary-line promo-summary"><span>Promókód: ${escapeHtml(verifiedPromo.code)}</span><strong>Érvényes</strong></div><p class="checkout-note">${escapeHtml(verifiedPromo.label)}</p>` : ""}
-    <p class="checkout-note">${calculated.monthly ? "A havi összeg csak a kosárba tett havi modulokat tartalmazza. " : ""}A külső szolgáltatók üzemeltetési díjai ezen felül, külön egyeztetés szerint fizetendők.</p>
+    <p class="checkout-note">${calculated.monthly ? "A havi összeg csak a kosárba tett havi modulokat tartalmazza. " : ""}${verifiedPromo ? "A promócióban felsorolt domain- és tárhelydíjon kívüli külső szolgáltatások külön egyeztetés szerint fizetendők." : "A külső szolgáltatók üzemeltetési díjai ezen felül, külön egyeztetés szerint fizetendők."}</p>
   `;
 }
 
