@@ -2,10 +2,15 @@
 const OpenAI = require("openai");
 const { reserveAiBudget, settleAiBudget } = require("./ai-budget");
 const { hash, email, text, publicUrl, revision, fail } = require("./outreach-domain");
-const { verifySource } = require("./outreach-source");
+const { verifySource, emailCandidates } = require("./outreach-source");
 const { composeProspectDraft } = require("./outreach-copy");
 const { qualificationSchema, qualify, checkEmailWebsite, isCited } = require("./outreach-qualification");
 const discoveryTarget = count => Math.min(20, Math.max(10, count * 3));
+function discoveredEmail(value) {
+  const candidates=emailCandidates(value);
+  if (candidates.length!==1) fail("INVALID_EMAIL");
+  return email(candidates[0]);
+}
 async function research(db, apiKey, uid, raw) {
   const startedAt = Date.now();
   const targetMode = raw.targetMode || "no_website";
@@ -54,7 +59,7 @@ async function research(db, apiKey, uid, raw) {
       // Leave time for one bounded candidate verification and persisting partial results.
       if (Date.now() - startedAt > 360000) break;
       try {
-        const recipient = email(candidate.recipient), sourceUrl = publicUrl(candidate.sourceUrl).href;
+        const recipient = discoveredEmail(candidate.recipient), sourceUrl = publicUrl(candidate.sourceUrl).href;
         if (!isCited(sources, sourceUrl)) fail("UNCITED_SOURCE");
         const id = hash(recipient), message = db.collection("outreach_messages").doc(id);
         const [existing, suppression] = await Promise.all([message.get(), db.collection("outreach_suppressions").doc(id).get()]);
@@ -80,4 +85,4 @@ async function research(db, apiKey, uid, raw) {
     return { requestId, status: "failed", errorCode };
   } finally { await db.runTransaction(async tx=>{const current=(await tx.get(lock)).data();if(current?.requestId===requestId)tx.set(lock,{until:0,requestId});}).catch(()=>{}); }
 }
-module.exports = { research, discoveryTarget };
+module.exports = { research, discoveryTarget, discoveredEmail };

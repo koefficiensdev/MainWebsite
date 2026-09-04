@@ -2,6 +2,7 @@
 const test=require("node:test"),assert=require("node:assert/strict");
 const {composeProspectDraft}=require("../outreach-copy");
 const {qualify,isBusinessProfile,checkEmailWebsite}=require("../outreach-qualification");
+const {emailCandidates}=require("../outreach-source");
 const model=import("../../js/admin-model.js");
 test("new outreach copy is short plain Hungarian without unsupported promises or translated jargon",()=>{
   for(const websiteStatus of ["not_found","outdated"]){
@@ -37,6 +38,10 @@ test("custom email website is a conservative exclusion; failed fetch is not abse
   assert.equal(checked.length,2);
   assert.equal(await checkEmailWebsite("business@gmail.com",async()=>{throw Error("must not fetch mail provider");}),"shared_mail_provider");
   assert.equal(await checkEmailWebsite("info@company.hu",async()=>{throw Error("unavailable");}),"inconclusive_human_review_required");
+});
+test("source verification extracts common public email obfuscation without guessing",()=>{
+  assert.deepEqual(emailCandidates("Írjon: varga@ gmail.com vagy iroda kukac pelda pont hu"),["varga@gmail.com","iroda@pelda.hu"]);
+  assert.deepEqual(emailCandidates("nincs itt cím"),[]);
 });
 test("send affordance is per-message and calls the same confirmed approval path",()=>{
   const fs=require("node:fs"),path=require("node:path"),root=path.resolve(__dirname,"../..");

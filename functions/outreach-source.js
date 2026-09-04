@@ -2,6 +2,15 @@
 const https = require("node:https");
 const dns = require("node:dns").promises;
 const { publicUrl, publicIp, email, fail, hash } = require("./outreach-domain");
+function emailCandidates(value) {
+  const expanded=String(value||"")
+    .replace(/&commat;/gi,"@").replace(/&period;/gi,".")
+    .replace(/\s*(?:\[at\]|\(at\)|\{at\}|kukac)\s*/gi,"@")
+    .replace(/\s*(?:\[dot\]|\(dot\)|\{dot\}|pont)\s*/gi,".")
+    .replace(/([a-z0-9.!#$%&'*+/=?^_`{|}~-])\s*@\s*(?=[a-z0-9-])/gi,"$1@")
+    .replace(/([a-z0-9-])\s*\.\s*(?=[a-z]{2,}\b)/gi,"$1.");
+  return [...new Set((expanded.match(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+/gi)||[]).map(item=>item.toLowerCase()))];
+}
 async function verifySource(sourceUrl, recipient, redirects = 0, options = {}) {
   const url = publicUrl(sourceUrl);
   const addresses = await dns.lookup(url.hostname, { all: true });
@@ -21,9 +30,9 @@ async function verifySource(sourceUrl, recipient, redirects = 0, options = {}) {
     req.on("close", () => clearTimeout(timer)); req.on("error", reject);
   });
   if (result.redirect) { if (redirects >= 3) fail("TOO_MANY_REDIRECTS"); return verifySource(new URL(result.redirect, url).href, recipient, redirects + 1, options); }
-  const body = result.body.replace(/&#(?:x([a-f0-9]+)|(\d+));/gi, (_, hex, dec) => String.fromCodePoint(Math.min(0x10ffff, parseInt(hex || dec, hex ? 16 : 10)))).replace(/&commat;/gi, "@").replace(/&period;/gi, ".");
-  const found = (body.match(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+/gi) || []).map(s => s.toLowerCase());
+  const body = result.body.replace(/&#(?:x([a-f0-9]+)|(\d+));/gi, (_, hex, dec) => String.fromCodePoint(Math.min(0x10ffff, parseInt(hex || dec, hex ? 16 : 10))));
+  const found = emailCandidates(body);
   if (recipient !== null && !found.includes(email(recipient))) fail("EMAIL_NOT_ON_SOURCE");
   return { sourceUrl: url.href, sourceContentHash: hash(result.body), emailVerifiedAt: new Date(), ...(options.includeText ? { evidenceText: body.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi," ").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi," ").replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/\s+/g," ") } : {}) };
 }
-module.exports = { verifySource };
+module.exports = { verifySource, emailCandidates };
