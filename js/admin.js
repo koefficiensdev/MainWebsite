@@ -6,7 +6,7 @@ import {STATUS_LABELS as labels,SOURCE_NAMES,outreachReady,escapeHtml as e,safeU
 import {installBookingSettings} from "./booking-settings-ui.js?v=20260902-3";
 import {installProduction} from "./production-ui.js?v=20260902-3";
 import {installWorkflows} from "./workflow-ui.js?v=20260902-1";
-import {installOutreach} from "./outreach-ui.js?v=20260904-4";
+import {installOutreach} from "./outreach-ui.js?v=20260904-5";
 
 const app=initializeApp({apiKey:"AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",authDomain:"ovexi-6ef38.firebaseapp.com",projectId:"ovexi-6ef38",storageBucket:"ovexi-6ef38.firebasestorage.app",messagingSenderId:"370083022451",appId:"1:370083022451:web:4e3ba562d07641fcef4c06"});
 const auth=getAuth(app),db=getFirestore(app),functions=getFunctions(app,"europe-west1");

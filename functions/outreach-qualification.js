@@ -8,7 +8,7 @@ const properties = {
   evidenceUrl: { type: "string" },
   evidenceQuote: { type: "string" },
   issue: { type: "string", enum: ["no_site_found", "under_construction", "outdated_information", "legacy_technology"] },
-  searchQueries: { type: "array", items: { type: "string" }, minItems: 2, maxItems: 4 },
+  searchQueries: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 4 },
   foundedOn: { type: "string" },
   foundedSourceUrl: { type: "string" },
   foundedQuote: { type: "string" }
@@ -45,7 +45,11 @@ async function qualify(raw, sources, searchedQueries, fetchSource = verifySource
   const reason = text(raw.needReason, 1000, 40);
   const queries = [...new Set((raw.searchQueries || []).map(q => text(q, 400, 5)))];
   const observedQueries = new Set(searchedQueries.map(normalize));
-  if (queries.length < 2 || queries.length > 4 || queries.some(q => !observedQueries.has(normalize(q)))) fail("SEARCH_CHECKS_REQUIRED");
+  if (queries.length < 1 || queries.length > 4 || queries.some(q => !observedQueries.has(normalize(q)))) fail("SEARCH_CHECKS_REQUIRED");
+  if (raw.websiteStatus === "not_found" && raw.companyName) {
+    const nameTokens=identityTokens(raw.companyName);
+    if (!nameTokens.length || !queries.some(query=>nameTokens.some(token=>normalize(query).includes(token)))) fail("SEARCH_CHECKS_REQUIRED");
+  }
   async function evidence(url, quote, fallbackIdentity = "", contactEmail = null) {
     const href = publicUrl(url).href, excerpt = text(quote, 300, 15);
     if (excerpt.split(/\s+/).length > 20) fail("EVIDENCE_EXCERPT_TOO_LONG");

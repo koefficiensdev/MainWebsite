@@ -3,6 +3,16 @@ import {escapeHtml as e,safeUrl,outreachReady,outreachBlockedReason} from "./adm
 export function installOutreach({functions,getData,isAdmin,refresh,messageRows,formatDate,badge,sourceEmpty}) {
   const $=id=>document.getElementById(id), selected=new Set(), reviews=new Map(); let busy=false;
   const call=(name,data,timeout=300000)=>httpsCallable(functions,name,{timeout})(data);
+  const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  const researchSummary=result=>result.status==="done"?`${result.found||0} új piszkozat elkészült. ${result.skipped||0} nem ellenőrizhető / ismételt találat kihagyva. Levél nem ment ki.`:result.status==="failed"?`A kutatás sikertelen: ${result.errorCode||"ismeretlen hiba"}.`:`A kutatás a háttérben folytatódik. A napló automatikusan frissül; ne indítsd el újra.`;
+  async function followResearch(requestId){
+    for(let attempt=0;attempt<54&&isAdmin();attempt++){
+      await sleep(10000);await refresh();
+      const row=(getData().outreach_research||[]).find(item=>item.id===requestId||item.requestId===requestId);
+      if(row?.status==="done"||row?.status==="failed")return row;
+    }
+    return {status:"processing"};
+  }
   const links=url=>safeUrl(url)?`<a href="${e(safeUrl(url))}" target="_blank" rel="noopener noreferrer">Forrás megnyitása ↗</a>`:"Nincs forrás";
   const eligible=outreachReady;
   function qualificationCard(r){
@@ -38,7 +48,7 @@ export function installOutreach({functions,getData,isAdmin,refresh,messageRows,f
   $("researchForm").addEventListener("submit",async event=>{
     event.preventDefault();if(!isAdmin()||busy)return;const button=event.currentTarget.querySelector('button[type="submit"]'),raw=Object.fromEntries(new FormData(event.currentTarget));
     busy=true;button.disabled=true;counts();$("researchStatus").textContent="Kutatás folyamatban… ez több percig tarthat. Nem küldünk levelet.";
-    try{const result=(await call("researchOutreach",{...raw,requestId:crypto.randomUUID()},540000)).data;$("researchStatus").textContent=result.status==="done"?`${result.found} új piszkozat elkészült. ${result.skipped||0} nem ellenőrizhető / ismételt találat kihagyva. Levél nem ment ki.`:`A kutatás nem fejeződött be: ${result.errorCode||result.status}.`;}
+    try{const requestId=crypto.randomUUID();let result=(await call("researchOutreach",{...raw,requestId},540000)).data;$("researchStatus").textContent=researchSummary(result);if(result.status==="processing")result=await followResearch(requestId);$("researchStatus").textContent=researchSummary(result);}
     catch(error){$("researchStatus").textContent=`Nem sikerült visszaigazolni a kutatást. Frissítsd a naplót, mielőtt újraindítod. ${error.message||""}`;}
     finally{busy=false;button.disabled=false;await refresh();counts();}
   });

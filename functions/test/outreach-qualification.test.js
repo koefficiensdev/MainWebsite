@@ -12,25 +12,29 @@ test("qualified research accepts concrete quoted website need, not a sector-only
 test("research rejects invented source quotes, uncited URLs and unexecuted searches",async()=>{
   await assert.rejects(()=>qualify({...candidate(),evidenceQuote:"Az oldal 1998 óta hibás"},sources,queries,page),{code:"UNSUPPORTED_QUALIFICATION"});
   await assert.rejects(()=>qualify(candidate(),new Set(),queries,page),{code:"UNCITED_QUALIFICATION"});
-  await assert.rejects(()=>qualify(candidate(),sources,[queries[0]],page),{code:"SEARCH_CHECKS_REQUIRED"});
+  await assert.rejects(()=>qualify({...candidate(),searchQueries:["Nem futtatott keresés"]},sources,queries,page),{code:"SEARCH_CHECKS_REQUIRED"});
 });
 test("citation matching tolerates harmless URL presentation differences",()=>{
   assert.equal(isCited(new Set(["https://example.hu/listing/?utm_source=search#contact"]),"https://EXAMPLE.hu/listing"),true);
   assert.equal(isCited(new Set(["https://example.hu/other"]),"https://example.hu/listing"),false);
 });
 test("no-site is explicitly a search inference and contradicting known URL is rejected",async()=>{
-  const raw={...candidate(),websiteStatus:"not_found",websiteUrl:"",issue:"no_site_found",evidenceQuote:"Autószerviz Budapesten"};
+  const raw={...candidate(),companyName:"Example Kft",websiteStatus:"not_found",websiteUrl:"",issue:"no_site_found",evidenceQuote:"Autószerviz Budapesten"};
   assert.equal((await qualify(raw,sources,queries,page)).websiteStatus,"not_found");
+  assert.equal((await qualify({...raw,searchQueries:[queries[0]]},sources,queries,page)).searchQueries.length,1);
+  await assert.rejects(()=>qualify({...raw,searchQueries:["Másik Műhely Budapest honlap"]},sources,["Másik Műhely Budapest honlap"],page),{code:"SEARCH_CHECKS_REQUIRED"});
   await assert.rejects(()=>qualify({...raw,websiteUrl:url},sources,queries,page),{code:"CONTRADICTORY_QUALIFICATION"});
 });
 test("no-site source may use server-verified business identity and exact email when an AI quote differs",async()=>{
   const listing="https://aranyoldalak.hu/autoszerelo/budapest/";
   const raw={...candidate(),websiteStatus:"not_found",websiteUrl:"",issue:"no_site_found",evidenceQuote:"Eltérően tördelt idézet",companyName:"Kecse Zsolt Autószerelő",contactEmail:"kecse80@gmail.com"};
   raw.evidenceUrl=listing;
+  raw.searchQueries=["Kecse Zsolt Autószerelő Budapest honlap"];
   const fetch=async(_url,recipient)=>{assert.equal(recipient,"kecse80@gmail.com");return {evidenceText:"Kecse Zsolt Autószerelő – kapcsolat: kecse80@gmail.com",sourceContentHash:"verified"};};
-  const result=await qualify(raw,new Set([listing]),queries,fetch,new Date(),"no_website",listing);
+  const result=await qualify(raw,new Set([listing]),raw.searchQueries,fetch,new Date(),"no_website",listing);
   assert.equal(result.evidence.verification,"business_identity_and_email");assert.equal(result.evidence.quote,"");
-  await assert.rejects(()=>qualify({...raw,companyName:"Másik Műhely"},new Set([listing]),queries,fetch,new Date(),"no_website",listing),{code:"UNSUPPORTED_QUALIFICATION"});
+  const other={...raw,companyName:"Másik Műhely",searchQueries:["Másik Műhely Budapest honlap"]};
+  await assert.rejects(()=>qualify(other,new Set([listing]),other.searchQueries,fetch,new Date(),"no_website",listing),{code:"UNSUPPORTED_QUALIFICATION"});
 });
 test("new business priority requires current dated evidence, not an assumption",async()=>{
   const raw={...candidate(),foundedOn:"2026-08-01",foundedSourceUrl:url,foundedQuote:"Nyitás 2026-08-01."};
