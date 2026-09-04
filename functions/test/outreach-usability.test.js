@@ -17,7 +17,10 @@ test("no-website mode cannot return a company with an old existing site",async()
   await assert.rejects(()=>qualify({websiteStatus:"not_found"},new Set(),[],undefined,new Date(),"no_website","https://company.hu/contact"),{code:"OWN_WEBSITE_CONTACT_SOURCE"});
   assert.equal(isBusinessProfile("https://company.hu"),false);
   assert.equal(isBusinessProfile("https://www.facebook.com/BusinessProfile"),true);
+  assert.equal(isBusinessProfile("https://aranyoldalak.hu/autoszerelo/budapest/"),true);
+  assert.equal(isBusinessProfile("https://budapest.cylex.hu/ceg-info/pelda-123.html"),true);
   assert.equal(isBusinessProfile("https://facebook.com.evil.hu/Business"),false);
+  assert.equal(isBusinessProfile("https://evil-aranyoldalak.hu/company"),false);
 });
 test("old imported/unqualified drafts cannot appear among send-ready prospects",async()=>{
   const {outreachReady,outreachBlockedReason}=await model;

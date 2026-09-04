@@ -15,6 +15,20 @@ const properties = {
 };
 const qualificationSchema = { type: "object", properties, required: Object.keys(properties), additionalProperties: false };
 const normalize = value => String(value).normalize("NFKC").replace(/\s+/g, " ").trim().toLowerCase();
+function citationKey(value) {
+  try {
+    const url = publicUrl(value);
+    url.hash = "";
+    for (const key of [...url.searchParams.keys()]) if (/^(utm_|fbclid$|gclid$|ref$|source$)/i.test(key)) url.searchParams.delete(key);
+    url.hostname = url.hostname.toLowerCase();
+    url.pathname = url.pathname.replace(/\/+$/, "") || "/";
+    return url.href;
+  } catch { return ""; }
+}
+function isCited(sources, value) {
+  const wanted = citationKey(value);
+  return Boolean(wanted) && [...sources].some(source => citationKey(source) === wanted);
+}
 async function qualify(raw, sources, searchedQueries, fetchSource = verifySource, now = new Date(), targetMode = raw?.websiteStatus === "not_found" ? "no_website" : "website_refresh", contactSource = "") {
   if (!["no_website","website_refresh"].includes(targetMode)) fail("INVALID_TARGET_MODE");
   if (!raw || !["not_found","outdated"].includes(raw.websiteStatus)) fail("NO_BUYING_SIGNAL");
@@ -28,7 +42,7 @@ async function qualify(raw, sources, searchedQueries, fetchSource = verifySource
   async function evidence(url, quote) {
     const href = publicUrl(url).href, excerpt = text(quote, 300, 15);
     if (excerpt.split(/\s+/).length > 20) fail("EVIDENCE_EXCERPT_TOO_LONG");
-    if (!sources.has(href)) fail("UNCITED_QUALIFICATION");
+    if (!isCited(sources, href)) fail("UNCITED_QUALIFICATION");
     const page = await fetchSource(href, null, 0, { includeText: true });
     if (!normalize(page.evidenceText).includes(normalize(excerpt))) fail("UNSUPPORTED_QUALIFICATION");
     return { url: href, quote: excerpt, contentHash: page.sourceContentHash };
@@ -39,7 +53,7 @@ async function qualify(raw, sources, searchedQueries, fetchSource = verifySource
     if (raw.websiteUrl || raw.issue !== "no_site_found") fail("CONTRADICTORY_QUALIFICATION");
   } else {
     websiteUrl = publicUrl(raw.websiteUrl).href;
-    if (!sources.has(websiteUrl) || !["under_construction","outdated_information","legacy_technology"].includes(raw.issue)) fail("CONCRETE_ISSUE_REQUIRED");
+    if (!isCited(sources, websiteUrl) || !["under_construction","outdated_information","legacy_technology"].includes(raw.issue)) fail("CONCRETE_ISSUE_REQUIRED");
     if (new URL(websiteUrl).hostname.replace(/^www\./, "") !== new URL(proof.url).hostname.replace(/^www\./, "")) fail("WRONG_WEBSITE_EVIDENCE");
     if (/^(?:copyright|©|all rights reserved)/i.test(proof.quote)) fail("COPYRIGHT_NOT_A_DEFECT");
     if (raw.issue === "under_construction" && !/fejleszt[eé]s|[aá]talak[ií]t[aá]s|k[eé]sz[uü]l|under construction|coming soon/i.test(proof.quote)) fail("UNSUPPORTED_CONSTRUCTION_CLAIM");
@@ -62,9 +76,13 @@ async function qualify(raw, sources, searchedQueries, fetchSource = verifySource
 function isBusinessProfile(value) {
   try {
     const url = publicUrl(value), host = url.hostname.replace(/^(www|m)\./, "");
+    const directoryRoots = ["aranyoldalak.hu","cylex.hu","nyitva.hu","joszaki.hu","qjob.hu","uzleti.hu"];
+    const directory = directoryRoots.some(root => host === root || host.endsWith(`.${root}`));
     return ["facebook.com","instagram.com"].includes(host) && url.pathname.length > 2
       || host === "linkedin.com" && url.pathname.startsWith("/company/")
-      || host === "google.com" && url.pathname.startsWith("/maps/");
+      || host === "google.com" && url.pathname.startsWith("/maps/")
+      || host === "maps.app.goo.gl"
+      || directory && url.pathname.length > 1;
   } catch { return false; }
 }
 async function checkEmailWebsite(recipient, fetchSource = verifySource) {
@@ -80,4 +98,4 @@ async function checkEmailWebsite(recipient, fetchSource = verifySource) {
   }
   return "inconclusive_human_review_required";
 }
-module.exports = { qualificationSchema, qualify, isBusinessProfile, checkEmailWebsite };
+module.exports = { qualificationSchema, qualify, isBusinessProfile, checkEmailWebsite, citationKey, isCited };

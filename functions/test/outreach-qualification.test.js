@@ -1,6 +1,6 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict");
-const {qualify}=require("../outreach-qualification");
+const {qualify,isCited}=require("../outreach-qualification");
 const {checkApproval,revision}=require("../outreach-domain");
 const url="https://example.hu/",queries=["Example Kft Budapest honlap","Example Kft Budapest saját weboldal"],sources=new Set([url]);
 const page=async()=>({evidenceText:"Autószerviz Budapesten, honlapunk jelenleg fejlesztés alatt. Nyitás 2026-08-01.",sourceContentHash:"test"});
@@ -13,6 +13,10 @@ test("research rejects invented source quotes, uncited URLs and unexecuted searc
   await assert.rejects(()=>qualify({...candidate(),evidenceQuote:"Az oldal 1998 óta hibás"},sources,queries,page),{code:"UNSUPPORTED_QUALIFICATION"});
   await assert.rejects(()=>qualify(candidate(),new Set(),queries,page),{code:"UNCITED_QUALIFICATION"});
   await assert.rejects(()=>qualify(candidate(),sources,[queries[0]],page),{code:"SEARCH_CHECKS_REQUIRED"});
+});
+test("citation matching tolerates harmless URL presentation differences",()=>{
+  assert.equal(isCited(new Set(["https://example.hu/listing/?utm_source=search#contact"]),"https://EXAMPLE.hu/listing"),true);
+  assert.equal(isCited(new Set(["https://example.hu/other"]),"https://example.hu/listing"),false);
 });
 test("no-site is explicitly a search inference and contradicting known URL is rejected",async()=>{
   const raw={...candidate(),websiteStatus:"not_found",websiteUrl:"",issue:"no_site_found",evidenceQuote:"Autószerviz Budapesten"};
