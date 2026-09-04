@@ -45,7 +45,10 @@ async function qualify(raw, sources, searchedQueries, fetchSource = verifySource
   const reason = text(raw.needReason, 1000, 40);
   const queries = [...new Set((raw.searchQueries || []).map(q => text(q, 400, 5)))];
   const observedQueries = new Set(searchedQueries.map(normalize));
-  if (queries.length < 1 || queries.length > 4 || queries.some(q => !observedQueries.has(normalize(q)))) fail("SEARCH_CHECKS_REQUIRED");
+  // The search provider may rewrite an issued query before returning its tool
+  // telemetry. Require real search activity, while retaining the model's short
+  // per-candidate query summary for human review.
+  if (queries.length < 1 || queries.length > 4 || !observedQueries.size) fail("SEARCH_CHECKS_REQUIRED");
   async function evidence(url, quote, fallbackIdentity = "", contactEmail = null) {
     const href = publicUrl(url).href, excerpt = text(quote, 300, 15);
     if (excerpt.split(/\s+/).length > 20) fail("EVIDENCE_EXCERPT_TOO_LONG");

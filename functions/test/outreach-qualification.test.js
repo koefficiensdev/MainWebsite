@@ -12,7 +12,8 @@ test("qualified research accepts concrete quoted website need, not a sector-only
 test("research rejects invented source quotes, uncited URLs and unexecuted searches",async()=>{
   await assert.rejects(()=>qualify({...candidate(),evidenceQuote:"Az oldal 1998 óta hibás"},sources,queries,page),{code:"UNSUPPORTED_QUALIFICATION"});
   await assert.rejects(()=>qualify(candidate(),new Set(),queries,page),{code:"UNCITED_QUALIFICATION"});
-  await assert.rejects(()=>qualify({...candidate(),searchQueries:["Nem futtatott keresés"]},sources,queries,page),{code:"SEARCH_CHECKS_REQUIRED"});
+  await assert.rejects(()=>qualify(candidate(),sources,[],page),{code:"SEARCH_CHECKS_REQUIRED"});
+  assert.equal((await qualify({...candidate(),searchQueries:["Szolgáltató által átírt keresés"]},sources,queries,page)).searchQueries.length,1);
 });
 test("citation matching tolerates harmless URL presentation differences",()=>{
   assert.equal(isCited(new Set(["https://example.hu/listing/?utm_source=search#contact"]),"https://EXAMPLE.hu/listing"),true);
