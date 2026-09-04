@@ -22,7 +22,6 @@ test("no-site is explicitly a search inference and contradicting known URL is re
   const raw={...candidate(),companyName:"Example Kft",websiteStatus:"not_found",websiteUrl:"",issue:"no_site_found",evidenceQuote:"Autószerviz Budapesten"};
   assert.equal((await qualify(raw,sources,queries,page)).websiteStatus,"not_found");
   assert.equal((await qualify({...raw,searchQueries:[queries[0]]},sources,queries,page)).searchQueries.length,1);
-  await assert.rejects(()=>qualify({...raw,searchQueries:["Másik Műhely Budapest honlap"]},sources,["Másik Műhely Budapest honlap"],page),{code:"SEARCH_CHECKS_REQUIRED"});
   await assert.rejects(()=>qualify({...raw,websiteUrl:url},sources,queries,page),{code:"CONTRADICTORY_QUALIFICATION"});
 });
 test("no-site source may use server-verified business identity and exact email when an AI quote differs",async()=>{

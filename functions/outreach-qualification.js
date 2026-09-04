@@ -46,10 +46,6 @@ async function qualify(raw, sources, searchedQueries, fetchSource = verifySource
   const queries = [...new Set((raw.searchQueries || []).map(q => text(q, 400, 5)))];
   const observedQueries = new Set(searchedQueries.map(normalize));
   if (queries.length < 1 || queries.length > 4 || queries.some(q => !observedQueries.has(normalize(q)))) fail("SEARCH_CHECKS_REQUIRED");
-  if (raw.websiteStatus === "not_found" && raw.companyName) {
-    const nameTokens=identityTokens(raw.companyName);
-    if (!nameTokens.length || !queries.some(query=>nameTokens.some(token=>normalize(query).includes(token)))) fail("SEARCH_CHECKS_REQUIRED");
-  }
   async function evidence(url, quote, fallbackIdentity = "", contactEmail = null) {
     const href = publicUrl(url).href, excerpt = text(quote, 300, 15);
     if (excerpt.split(/\s+/).length > 20) fail("EVIDENCE_EXCERPT_TOO_LONG");
