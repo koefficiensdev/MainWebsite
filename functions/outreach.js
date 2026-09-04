@@ -11,7 +11,9 @@ const { hash, draftFields, revision, fail } = require("./outreach-domain");
 const db = getFirestore(), ai = defineSecret("OPENAI_API_KEY"), smtp = defineSecret("SMTP_PASS");
 function admin(request) { if (request.auth?.token?.admin !== true) throw new HttpsError("permission-denied", "Adminjogosultság szükséges."); }
 function id(raw) { if (!/^[a-f0-9]{64}$/.test(raw || "")) throw new HttpsError("invalid-argument", "Hibás azonosító."); return raw; }
-const base = { maxInstances: 1, concurrency: 1, minInstances: 0 };
+// Keep one slot available for fast lock/status responses while a long research
+// request occupies the worker. The Firestore lease still serializes paid runs.
+const base = { maxInstances: 2, concurrency: 1, minInstances: 0 };
 exports.researchOutreach = onCall({ ...base, secrets: [ai], timeoutSeconds: 540 }, async request => {
   admin(request);
   try { return await research(db, ai.value(), request.auth.uid, request.data || {}); }
