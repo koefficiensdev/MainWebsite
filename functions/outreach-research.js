@@ -8,7 +8,7 @@ const { qualificationSchema, qualify, checkEmailWebsite, isCited } = require("./
 const discoveryTarget = count => Math.min(20, Math.max(10, count * 3));
 function discoveredEmail(value) {
   const candidates=emailCandidates(value);
-  if (candidates.length!==1) fail("INVALID_EMAIL");
+  if (!candidates.length) fail("INVALID_EMAIL");
   return email(candidates[0]);
 }
 async function research(db, apiKey, uid, raw) {
