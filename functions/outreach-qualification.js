@@ -15,6 +15,13 @@ const properties = {
 };
 const qualificationSchema = { type: "object", properties, required: Object.keys(properties), additionalProperties: false };
 const normalize = value => String(value).normalize("NFKC").replace(/\s+/g, " ").trim().toLowerCase();
+const identityTokens = value => normalize(value).replace(/[^a-z0-9áéíóöőúüű ]/g," ").split(/\s+/).filter(token=>token.length>=4&&!new Set(["egyéni","vállalkozó","kft","zrt","nyrt","szolgáltató"]).has(token));
+function supportsIdentity(pageText, companyName) {
+  const page=normalize(pageText), name=normalize(companyName);
+  if (name.length>=4 && page.includes(name)) return true;
+  const tokens=[...new Set(identityTokens(companyName))];
+  return tokens.length>=2 && tokens.filter(token=>page.includes(token)).length>=2;
+}
 function citationKey(value) {
   try {
     const url = publicUrl(value);
@@ -39,15 +46,17 @@ async function qualify(raw, sources, searchedQueries, fetchSource = verifySource
   const queries = [...new Set((raw.searchQueries || []).map(q => text(q, 400, 5)))];
   const observedQueries = new Set(searchedQueries.map(normalize));
   if (queries.length < 2 || queries.length > 4 || queries.some(q => !observedQueries.has(normalize(q)))) fail("SEARCH_CHECKS_REQUIRED");
-  async function evidence(url, quote) {
+  async function evidence(url, quote, fallbackIdentity = "", contactEmail = null) {
     const href = publicUrl(url).href, excerpt = text(quote, 300, 15);
     if (excerpt.split(/\s+/).length > 20) fail("EVIDENCE_EXCERPT_TOO_LONG");
     if (!isCited(sources, href)) fail("UNCITED_QUALIFICATION");
-    const page = await fetchSource(href, null, 0, { includeText: true });
-    if (!normalize(page.evidenceText).includes(normalize(excerpt))) fail("UNSUPPORTED_QUALIFICATION");
-    return { url: href, quote: excerpt, contentHash: page.sourceContentHash };
+    const page = await fetchSource(href, contactEmail, 0, { includeText: true });
+    const quoteMatched=normalize(page.evidenceText).includes(normalize(excerpt));
+    if (!quoteMatched && !(fallbackIdentity && supportsIdentity(page.evidenceText, fallbackIdentity))) fail("UNSUPPORTED_QUALIFICATION");
+    return { url: href, quote: quoteMatched ? excerpt : "", verification: quoteMatched ? "exact_quote" : "business_identity_and_email", contentHash: page.sourceContentHash };
   }
-  const proof = await evidence(raw.evidenceUrl, raw.evidenceQuote);
+  if (raw.websiteStatus === "not_found" && contactSource && citationKey(raw.evidenceUrl)!==citationKey(contactSource)) fail("WRONG_CONTACT_EVIDENCE");
+  const proof = await evidence(raw.evidenceUrl, raw.evidenceQuote, raw.websiteStatus === "not_found" ? raw.companyName : "", raw.websiteStatus === "not_found" ? raw.contactEmail : null);
   let websiteUrl = "";
   if (raw.websiteStatus === "not_found") {
     if (raw.websiteUrl || raw.issue !== "no_site_found") fail("CONTRADICTORY_QUALIFICATION");
@@ -98,4 +107,4 @@ async function checkEmailWebsite(recipient, fetchSource = verifySource) {
   }
   return "inconclusive_human_review_required";
 }
-module.exports = { qualificationSchema, qualify, isBusinessProfile, checkEmailWebsite, citationKey, isCited };
+module.exports = { qualificationSchema, qualify, isBusinessProfile, checkEmailWebsite, citationKey, isCited, supportsIdentity };

@@ -60,7 +60,7 @@ async function research(db, apiKey, uid, raw) {
         const [existing, suppression] = await Promise.all([message.get(), db.collection("outreach_suppressions").doc(id).get()]);
         if (existing.exists || suppression.exists) { skipped++; continue; }
         let qualification;
-        try { qualification = await qualify(candidate.qualification, sources, searchedQueries, verifySource, new Date(), targetMode, sourceUrl); }
+        try { qualification = await qualify({ ...candidate.qualification, companyName: candidate.companyName, contactEmail: recipient }, sources, searchedQueries, verifySource, new Date(), targetMode, sourceUrl); }
         catch(error) { excluded(error); excludedByQualification++; skipped++; continue; }
         if (targetMode === "no_website") {
           try { qualification.emailDomainCheck = await checkEmailWebsite(recipient); }

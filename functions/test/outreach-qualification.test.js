@@ -23,6 +23,15 @@ test("no-site is explicitly a search inference and contradicting known URL is re
   assert.equal((await qualify(raw,sources,queries,page)).websiteStatus,"not_found");
   await assert.rejects(()=>qualify({...raw,websiteUrl:url},sources,queries,page),{code:"CONTRADICTORY_QUALIFICATION"});
 });
+test("no-site source may use server-verified business identity and exact email when an AI quote differs",async()=>{
+  const listing="https://aranyoldalak.hu/autoszerelo/budapest/";
+  const raw={...candidate(),websiteStatus:"not_found",websiteUrl:"",issue:"no_site_found",evidenceQuote:"Eltérően tördelt idézet",companyName:"Kecse Zsolt Autószerelő",contactEmail:"kecse80@gmail.com"};
+  raw.evidenceUrl=listing;
+  const fetch=async(_url,recipient)=>{assert.equal(recipient,"kecse80@gmail.com");return {evidenceText:"Kecse Zsolt Autószerelő – kapcsolat: kecse80@gmail.com",sourceContentHash:"verified"};};
+  const result=await qualify(raw,new Set([listing]),queries,fetch,new Date(),"no_website",listing);
+  assert.equal(result.evidence.verification,"business_identity_and_email");assert.equal(result.evidence.quote,"");
+  await assert.rejects(()=>qualify({...raw,companyName:"Másik Műhely"},new Set([listing]),queries,fetch,new Date(),"no_website",listing),{code:"UNSUPPORTED_QUALIFICATION"});
+});
 test("new business priority requires current dated evidence, not an assumption",async()=>{
   const raw={...candidate(),foundedOn:"2026-08-01",foundedSourceUrl:url,foundedQuote:"Nyitás 2026-08-01."};
   assert.equal((await qualify(raw,sources,queries,page,new Date("2026-08-31"))).newBusiness,true);
