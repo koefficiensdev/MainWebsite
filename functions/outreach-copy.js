@@ -4,6 +4,7 @@ const { PROMO_LABEL } = require("./promo-domain");
 const { text } = require("./outreach-domain");
 
 const ORDER_URL = "https://ovexi.hu/?category=website#csomagok";
+const ALL_OFFERS_URL = "https://ovexi.hu/#csomagok";
 const PROMO_CODE = "OVEXI1EV";
 
 function safeProposal(company) {
@@ -43,8 +44,8 @@ function composeProspectDraft(company, qualification) {
   const proposal = safeProposal(company);
   const observation = refresh
     ? `A ${name} jelenlegi weboldalának megújításával kapcsolatban keresem Önöket.`
-    : `A ${name} elérhetőségét egy nyilvános üzleti adatlapon találtam meg, önálló weboldal viszont nem jelent meg az ellenőrző keresésekben. Ha van működő honlapjuk, kérem, tekintsék tárgytalannak a levelet.`;
-  const body = `Jó napot kívánok!\n\n${observation}\n\nAz OVEXI nem egyszerű bemutatkozó oldalt készít. A weboldalhoz a vállalkozás működéséhez igazított üzleti rendszer tartozik, amely összegyűjti és követhetővé teszi az érdeklődők és ügyfelek kéréseit.\n\nA KSH 2025-ös adata szerint a honlappal rendelkező hazai vállalkozások 30,5%-án már online megrendelés is elérhető. Ez azt jelzi, hogy a saját weboldal egyre gyakrabban az ügyfélkérések kezelésének eszköze is. (Forrás: KSH, 2025.)\n\nAz Önök működéséhez készülő megoldásban:\n• ${proposal.customerRequest}.\n• ${proposal.businessControl}.\n• ${proposal.workflowBenefit}.\n\nAz automatikus üzenet kizárólag a megkeresés beérkezését igazolja. Időpont, ajánlat vagy munka csak az Önök jóváhagyása után válik véglegessé.\n\nA Céges weboldal csomag egyszeri díja ${price} Ft. Legfeljebb 6 aloldalt és egy, az igényfelmérés alapján kiválasztott alap üzleti modult tartalmaz. Fizetés után egyeztetjük a jelenlegi munkafolyamatot, majd írásban rögzítjük a megvalósítandó funkciókat.\n\nAJÁNDÉK AZ ELSŐ ÉVRE\nAz ${PROMO_CODE} promókóddal ${PROMO_LABEL.charAt(0).toLowerCase()}${PROMO_LABEL.slice(1)} A promóció a fizetendő ${price} Ft-os fejlesztési díjat nem csökkenti.\n\nCsomag megtekintése és megrendelése:\n${ORDER_URL}`;
+    : `A ${name} elérhetőségét egy nyilvános üzleti adatlapon találtam meg, önálló weboldal viszont nem jelent meg az ellenőrző keresésekben. Ha már van honlapjuk, a levél további része akkor is hasznos lehet: meglévő oldalhoz korszerűsítést, ügyfélkezelést segítő rendszert, karbantartást és marketingtámogatást is kínálunk.`;
+  const body = `Jó napot kívánok!\n\n${observation}\n\nAz OVEXI nem egyszerű bemutatkozó oldalt készít. A weboldalhoz a vállalkozás működéséhez igazított üzleti rendszer tartozik, amely összegyűjti és követhetővé teszi az érdeklődők és ügyfelek kéréseit.\n\nA KSH 2025-ös adata szerint a honlappal rendelkező hazai vállalkozások 30,5%-án már online megrendelés is elérhető. Ez azt jelzi, hogy a saját weboldal egyre gyakrabban az ügyfélkérések kezelésének eszköze is. (Forrás: KSH, 2025.)\n\nAz Önök működéséhez készülő megoldásban:\n• ${proposal.customerRequest}.\n• ${proposal.businessControl}.\n• ${proposal.workflowBenefit}.\n\nAz automatikus üzenet kizárólag a megkeresés beérkezését igazolja. Időpont, ajánlat vagy munka csak az Önök jóváhagyása után válik véglegessé.\n\nA Céges weboldal csomag egyszeri díja ${price} Ft. Legfeljebb 6 aloldalt és egy, az igényfelmérés alapján kiválasztott alap üzleti modult tartalmaz. Fizetés után egyeztetjük a jelenlegi munkafolyamatot, majd írásban rögzítjük a megvalósítandó funkciókat.\n\nAJÁNDÉK AZ ELSŐ ÉVRE\nAz ${PROMO_CODE} promókóddal ${PROMO_LABEL.charAt(0).toLowerCase()}${PROMO_LABEL.slice(1)} A promóció a fizetendő ${price} Ft-os fejlesztési díjat nem csökkenti.\n\nWeboldalcsomag megtekintése és megrendelése:\n${ORDER_URL}\n\nTovábbi OVEXI-ajánlatok meglévő weboldalhoz:\n${ALL_OFFERS_URL}`;
   return {
     subject: `${name} – rendezettebb ügyfélkezelés saját weboldallal`.slice(0, 160),
     offer: `Céges weboldal legfeljebb 6 aloldallal és 1 alap üzleti modullal: ${price} Ft egyszeri díj. ${PROMO_CODE}: ${PROMO_LABEL}`,
@@ -52,4 +53,4 @@ function composeProspectDraft(company, qualification) {
   };
 }
 
-module.exports = { composeProspectDraft, safeProposal, ORDER_URL, PROMO_CODE };
+module.exports = { composeProspectDraft, safeProposal, ORDER_URL, ALL_OFFERS_URL, PROMO_CODE };

@@ -9,11 +9,11 @@ test("new outreach copy is tailored, purchase-ready and keeps business approval 
     const d=composeProspectDraft({companyName:"Teszt Autószerviz",companyDescription:"Független budapesti autószerviz",proposal:{customerRequest:"az ügyfél megadhatja az autó típusát, a tapasztalt hibát és a megfelelő időpontokat",businessControl:"a műhely átnézheti a kérést, további adatot kérhet, elfogadhatja vagy másik időpontot javasolhat",workflowBenefit:"kevesebb adatot kell telefonon újra bekérni, és követhető marad minden válaszra váró megkeresés"}},{websiteStatus});
     assert.match(d.subject,/Teszt Autószerviz/);assert(d.body.split(/\s+/).length<=260);
     assert.match(d.body,/69\s990 Ft/);assert.match(d.body,/OVEXI1EV/);assert.match(d.body,/első 12 hónap/);assert.match(d.body,/KSH 2025-ös adata/);assert.match(d.body,/30,5%/);
-    assert.match(d.body,/https:\/\/ovexi\.hu\/\?category=website#csomagok/);
+    assert.match(d.body,/https:\/\/ovexi\.hu\/\?category=website#csomagok/);assert.match(d.body,/További OVEXI-ajánlatok meglévő weboldalhoz/);assert.match(d.body,/https:\/\/ovexi\.hu\/#csomagok/);
     assert.match(d.body,/csak az Önök jóváhagyása után/);assert.match(d.body,/autó típusát/);
     assert.match(d.body,/Legfeljebb 6 aloldalt/);assert.match(d.body,/igényfelmérés alapján/);assert.match(d.body,/AJÁNDÉK AZ ELSŐ ÉVRE/);
     assert.doesNotMatch(d.body,/landing|konverz|garantál|növeli|automatikusan elfogad/i);
-    if(websiteStatus==="not_found")assert.match(d.body,/tekintsék tárgytalannak/);
+    if(websiteStatus==="not_found"){assert.match(d.body,/Ha már van honlapjuk/);assert.match(d.body,/karbantartást és marketingtámogatást/);assert.doesNotMatch(d.body,/tekintsék tárgytalannak/);}
   }
 });
 test("internal implementation briefs cannot leak into prospect benefits",()=>{
