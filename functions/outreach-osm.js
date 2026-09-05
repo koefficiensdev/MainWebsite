@@ -1,6 +1,6 @@
 "use strict";
 const https = require("node:https");
-const { email, hash } = require("./outreach-domain");
+const { email, hash, publicUrl, text } = require("./outreach-domain");
 const { emailCandidates } = require("./outreach-source");
 
 const SECTORS = [
@@ -63,4 +63,20 @@ async function discoverOsm(criteria, fetcher = postOverpass) {
   const plan = osmPlan(criteria); if (!plan) return [];
   return normalizeElements(await fetcher(osmQuery(plan)), plan);
 }
-module.exports = { discoverOsm, normalizeElements, osmPlan, osmQuery, postOverpass };
+function normalizeTrustedSeeds(raw) {
+  if (!Array.isArray(raw)) return [];
+  const rows = [], seen = new Set();
+  for (const item of raw.slice(0, 20)) {
+    try {
+      const recipient = email(item.recipient), companyName = text(item.companyName, 160), companyDescription = text(item.companyDescription, 1200);
+      const sourceUrl = publicUrl(item.sourceUrl);
+      if (!/^(www\.)?openstreetmap\.org$/i.test(sourceUrl.hostname) || !/^\/(node|way|relation)\/\d+\/?$/.test(sourceUrl.pathname) || seen.has(recipient)) continue;
+      seen.add(recipient);
+      const canonicalUrl = `https://www.openstreetmap.org${sourceUrl.pathname.replace(/\/$/, "")}`;
+      const evidenceText = `${companyName} ${companyDescription} ${recipient}`.replace(/\s+/g, " ").trim();
+      rows.push({ companyName, companyDescription, recipient, sourceUrl: canonicalUrl, evidenceText, sourceContentHash: hash(evidenceText), verificationMethod: "openstreetmap_admin_public_data" });
+    } catch {}
+  }
+  return rows;
+}
+module.exports = { discoverOsm, normalizeElements, normalizeTrustedSeeds, osmPlan, osmQuery, postOverpass };

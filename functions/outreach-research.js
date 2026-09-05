@@ -5,7 +5,7 @@ const { hash, email, text, publicUrl, fail } = require("./outreach-domain");
 const { safeProposal } = require("./outreach-copy");
 const { verifySource, emailCandidates } = require("./outreach-source");
 const { qualificationSchema, qualify, checkEmailWebsite, isCited, citationKey } = require("./outreach-qualification");
-const { discoverOsm } = require("./outreach-osm");
+const { discoverOsm, normalizeTrustedSeeds } = require("./outreach-osm");
 // Keep the candidate pool bounded so sparse searches remain inexpensive.
 const discoveryTarget = count => Math.min(20, Math.max(3, count * 2));
 function discoveredEmail(value) {
@@ -35,7 +35,8 @@ async function research(db, apiKey, uid, raw) {
     reservation = await reserveAiBudget(db, "outreach-research", { ...process.env, OPENAI_RESERVATION_USD: "1" });
     await ref.update({ budgetReservedUsd: 1 });
     const fields = ["companyName", "companyDescription", "recipient", "sourceUrl"], candidateTarget = discoveryTarget(count);
-    const osmCandidates = targetMode === "no_website" ? await discoverOsm(criteria).catch(() => []) : [];
+    const browserOsmCandidates = targetMode === "no_website" ? normalizeTrustedSeeds(raw.trustedSeedCandidates) : [];
+    const osmCandidates = browserOsmCandidates.length ? browserOsmCandidates : targetMode === "no_website" ? await discoverOsm(criteria).catch(() => []) : [];
     const osmSeeds = osmCandidates.slice(0, Math.min(20, candidateTarget * 2)), osmByRecipient = new Map(osmSeeds.map(row => [row.recipient, row]));
     const proposalSchema = { type: "object", properties: {
       customerRequest: { type: "string" },
@@ -51,7 +52,7 @@ async function research(db, apiKey, uid, raw) {
       text: { format: { type: "json_schema", name: "company_research", strict: true, schema: { type: "object", properties: { companies: { type: "array", items: { type: "object", properties: { ...Object.fromEntries(fields.map(f => [f, { type: "string" }])), proposal: proposalSchema, qualification: qualificationSchema }, required: [...fields, "proposal", "qualification"], additionalProperties: false } } }, required: ["companies"], additionalProperties: false } } }
     };
     requestOptions.instructions += "\n\nThis is one bounded search round. Do not investigate one company with more than two searches. A recipient containing #, stars, spaces, '[email protected]' or any other masking is invalid: omit it and continue with another company. Return all candidates with a complete syntactically valid email found within the tool limit.";
-    if (osmSeeds.length) requestOptions.instructions += "\n\ntrustedSeedCandidates were fetched by the server from current OpenStreetMap business data and already contain exact public emails and source URLs. Use their companyName, recipient and sourceUrl exactly; do not replace or mask them. Search the exact business names to detect independent official websites. Omit a seed if an independent website is found, the business appears closed, or identity is ambiguous. For retained seeds set websiteStatus=not_found, websiteUrl='', issue=no_site_found, evidenceUrl to its OpenStreetMap sourceUrl, and write an honest needReason stating that no independent website surfaced in the checks. The OpenStreetMap source itself does not need another web-search citation.";
+    if (osmSeeds.length) requestOptions.instructions += "\n\ntrustedSeedCandidates were fetched from current OpenStreetMap business data by the authenticated admin client or the server and already contain exact public emails and source URLs. Use their companyName, recipient and sourceUrl exactly; do not replace or mask them. Search the exact business names to detect independent official websites. Omit a seed if an independent website is found, the business appears closed, or identity is ambiguous. For retained seeds set websiteStatus=not_found, websiteUrl='', issue=no_site_found, evidenceUrl to its OpenStreetMap sourceUrl, and write an honest needReason stating that no independent website surfaced in the checks. The OpenStreetMap source itself does not need another web-search citation.";
     const responses = [], companies = [], attemptedCandidates = [], seen = new Set(), usage = { input_tokens: 0, output_tokens: 0 };
     let usableCandidates = 0, discoveryInvalidEmails = 0;
     for (let round = 0; round < 1 && usableCandidates < candidateTarget && Date.now() - startedAt < 300000; round++) {
@@ -106,7 +107,7 @@ async function research(db, apiKey, uid, raw) {
           try { qualification.emailDomainCheck = await checkEmailWebsite(recipient); }
           catch { excludedByQualification++; skipped++; continue; }
         }
-        const verified = osmSeed ? { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: new Date(), verificationMethod: "openstreetmap_public_data" } : await verifySource(sourceUrl, recipient);
+        const verified = osmSeed ? { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: new Date(), verificationMethod: osmSeed.verificationMethod || "openstreetmap_public_data" } : await verifySource(sourceUrl, recipient);
         const row = { recipient, companyName: text(candidate.companyName, 160), companyDescription: text(candidate.companyDescription, 1200), proposal: safeProposal(candidate), ...verified, qualification, status: "researched", source: "ai_research", researchId: requestId, model: "gpt-5-mini", createdAt: new Date(), updatedAt: new Date() };
         await candidateRef.create(row); found++;
       } catch(error) { excluded(error); skipped++; }
