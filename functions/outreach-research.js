@@ -43,6 +43,10 @@ async function research(db, apiKey, uid, raw) {
       if (cache.exists && Number.isFinite(updatedAt.getTime()) && Date.now() - updatedAt.getTime() <= 7 * 86400000) cachedOsmCandidates = normalizeTrustedSeeds(data.rows).map(row => ({ ...row, emailVerifiedAt: updatedAt, verificationMethod: "openstreetmap_cached_public_data" }));
     }
     const osmCandidates = browserOsmCandidates.length ? browserOsmCandidates : cachedOsmCandidates.length ? cachedOsmCandidates : targetMode === "no_website" ? await discoverOsm(criteria).catch(() => []) : [];
+    if (cacheKey && osmCandidates.length && !cachedOsmCandidates.length) {
+      const rows = osmCandidates.slice(0, 20).map(({ companyName, companyDescription, recipient, sourceUrl }) => ({ companyName, companyDescription, recipient, sourceUrl }));
+      await db.collection("outreach_osm_cache").doc(cacheKey).set({ criteria, rows, license: "© OpenStreetMap contributors, ODbL", updatedAt: new Date() });
+    }
     const osmSeeds = osmCandidates.slice(0, Math.min(20, candidateTarget * 2)), osmByRecipient = new Map(osmSeeds.map(row => [row.recipient, row]));
     const proposalSchema = { type: "object", properties: {
       customerRequest: { type: "string" },
