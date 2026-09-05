@@ -92,6 +92,18 @@
     ],
     "rewrites": [
       {
+        "source": "/mintak/autoszerviz",
+        "destination": "/pages/minta-autoszerviz.html"
+      },
+      {
+        "source": "/mintak/fodraszat",
+        "destination": "/pages/minta-fodraszat.html"
+      },
+      {
+        "source": "/mintak/szolgaltato",
+        "destination": "/pages/minta-szolgaltato.html"
+      },
+      {
         "source": "/foglalas",
         "destination": "/pages/foglalas.html"
       },
@@ -137,6 +149,15 @@
       }
     ],
     "headers": [
+      {
+        "source": "/mintak/**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          }
+        ]
+      },
       {
         "source": "/foglalas",
         "headers": [

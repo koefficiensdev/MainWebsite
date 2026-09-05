@@ -48,11 +48,14 @@ const checkoutStatus = document.getElementById("checkoutStatus");
 const promoSection = document.getElementById("promoSection");
 const promoStatus = document.getElementById("promoStatus");
 const applyPromoButton = document.getElementById("applyPromoButton");
+const proposalForm = document.getElementById("proposalForm");
+const proposalStatus = document.getElementById("proposalStatus");
 const toast = document.getElementById("toast");
 let toastTimer = null;
 let formLoadedAt = Date.now();
 let overlayReturnFocus=null,drawerCloseTimer=null;
 let verifiedPromo=null;
+let proposalLoadedAt=Date.now(),proposalBusy=false,proposalRequestId="";
 
 function readCart() {
   try {
@@ -323,6 +326,31 @@ async function submitOrder(event) {
   }
 }
 
+async function submitProposal(event){
+  event.preventDefault();
+  if(!proposalForm||proposalBusy)return;
+  const button=proposalForm.querySelector('[type="submit"]'),formData=new FormData(proposalForm);
+  if(formData.get("website"))return;
+  if(Date.now()-proposalLoadedAt<2000){proposalStatus.textContent="Ellenőrizd az adatokat, majd küldd el újra.";proposalStatus.classList.add("is-error");return;}
+  const needs=formData.getAll("needs");
+  if(!needs.length){proposalStatus.textContent="Jelölj meg legalább egy területet, amelyben segítséget kérsz.";proposalStatus.classList.add("is-error");return;}
+  proposalRequestId ||= crypto.randomUUID();
+  const payload={...Object.fromEntries(formData),requestId:proposalRequestId,needs,contactConsent:formData.get("contactConsent")==="on",privacyAccepted:formData.get("privacyAccepted")==="on"};
+  proposalBusy=true;button.disabled=true;proposalStatus.classList.remove("is-error");proposalStatus.textContent="A javaslatkérés biztonságos rögzítése folyamatban…";
+  try{
+    const [app,{getFunctions,httpsCallable}]=await functionsSdk();
+    const submit=httpsCallable(getFunctions(app,"europe-west1"),"submitProposalRequest",{timeout:30000});
+    const result=(await submit(payload)).data;
+    proposalRequestId="";
+    proposalForm.innerHTML=`<div class="proposal-success" tabindex="-1"><p class="eyebrow">Javaslatkérés rögzítve</p><h3>Köszönjük, megkaptuk.</h3><p>A kérésed azonosítója: <strong>${escapeHtml(result.proposalNumber)}</strong></p><p>Átnézzük a vállalkozásod működését, és a megadott elérhetőségen jelentkezünk a személyre szabott hárompontos javaslattal.</p><a class="button button-ghost" href="#mintak">Addig megnézem a mintákat</a></div>`;
+    proposalForm.querySelector('.proposal-success')?.focus();
+    logAnalytics("proposal_submitted",result.proposalNumber);
+  }catch(error){
+    proposalStatus.textContent=error.code==="functions/invalid-argument"?String(error.message||"Ellenőrizd a megadott adatokat.").replace(/^Firebase:\s*/i,"").slice(0,300):"A beküldést most nem tudtuk visszaigazolni. Ne töltsd ki más adatokkal; próbáld újra, vagy írj az info@ovexi.hu címre.";
+    proposalStatus.classList.add("is-error");
+  }finally{proposalBusy=false;button.disabled=false;}
+}
+
 function normalize(value, maxLength) {
   return String(value || "").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
@@ -430,6 +458,7 @@ startCheckoutButton.addEventListener("click", openCheckout);
 document.getElementById("closeCheckoutButton")?.addEventListener("click", closeCheckout);
 checkoutBackdrop.addEventListener("click", (event) => { if (event.target === checkoutBackdrop) closeCheckout(); });
 checkoutForm.addEventListener("submit", submitOrder);
+proposalForm?.addEventListener("submit",submitProposal);
 checkoutForm.elements.namedItem("currentUrl")?.addEventListener("blur",(event)=>{try{event.target.value=normalizeWebUrl(event.target.value);}catch{}});
 checkoutForm.elements.namedItem("promoCode")?.addEventListener("input",()=>{clearPromoVerification();checkoutReview.innerHTML=orderSummaryMarkup();});
 applyPromoButton?.addEventListener("click",checkPromoCode);

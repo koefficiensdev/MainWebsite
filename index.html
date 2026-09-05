@@ -24,7 +24,7 @@
   <meta name="twitter:image" content="https://ovexi.hu/assets/images/og-ovexi-1200.jpg">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/images/favicon-48.png">
   <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/icon-192.png">
-  <link rel="stylesheet" href="css/site.css?v=20260903-9">
+  <link rel="stylesheet" href="css/site.css?v=20260905-10">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -62,6 +62,7 @@
       <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mainNav">Menü</button>
       <nav class="main-nav" id="mainNav" aria-label="Fő navigáció">
         <a href="#szolgaltatasok">Szolgáltatások</a>
+        <a href="#mintak">Minták</a>
         <a href="#csomagok">Árak</a>
         <a href="#folyamat">Hogyan működik?</a>
         <a href="#garancia">Garanciák</a>
@@ -89,7 +90,7 @@
           <p class="hero-lead">Válaszd ki, mire van szükséged, töltsd ki a rövid briefet, és egy átlátható folyamatban elkészítjük. Minden megjelenő csomag azonnal megrendelhető, külön-külön vagy együtt is.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#csomagok">Csomagot választok</a>
-            <a class="button button-ghost" href="#folyamat">Megnézem a folyamatot</a>
+            <a class="button button-ghost" href="#javaslat">Ingyenes javaslatot kérek</a>
           </div>
           <ul class="hero-proof">
             <li>Átlátható árak, rejtett tételek nélkül</li>
@@ -136,6 +137,71 @@
         <span>SEO-alapok</span>
         <span>Biztonságos folyamat</span>
         <span>Magyar támogatás</span>
+      </div>
+    </section>
+
+    <section class="showcase-section" id="mintak">
+      <div class="container">
+        <div class="section-heading">
+          <div><p class="eyebrow">Három külön vállalkozás, három külön rendszer</p><h2>Nézd meg működés közben</h2></div>
+          <p>Ezek fiktív vállalkozások számára készített, interaktív bemutatók. Nem ügyfélreferenciák: azt mutatják meg, hogyan igazítható a weboldal és az ügyfélkezelés az eltérő munkafolyamatokhoz.</p>
+        </div>
+        <div class="showcase-grid">
+          <article class="showcase-card showcase-garage">
+            <div class="showcase-visual" aria-hidden="true"><span>Rendszám</span><strong>KFX–218</strong><i>Új igény → Átnézés → Jóváhagyás</i></div>
+            <p class="showcase-label">Autószerviz · ajánlatkérés</p><h3>Műhely 47</h3>
+            <p>A tulajdonos előre megkapja a hibaleírást és a járműadatokat, majd ő dönt az ajánlatról és az időpontról.</p>
+            <a class="button button-ghost button-full" href="/mintak/autoszerviz">Interaktív minta megnyitása</a>
+          </article>
+          <article class="showcase-card showcase-salon">
+            <div class="showcase-visual" aria-hidden="true"><span>Kiválasztott szolgáltatás</span><strong>Festés + vágás</strong><i>Időpontkérés · szakemberi jóváhagyással</i></div>
+            <p class="showcase-label">Fodrászat · időpontkezelés</p><h3>Selyem Stúdió</h3>
+            <p>A vendég szolgáltatást és megfelelő időt kér, a szalon pedig átláthatóan véglegesíti vagy módosítja.</p>
+            <a class="button button-ghost button-full" href="/mintak/fodraszat">Interaktív minta megnyitása</a>
+          </article>
+          <article class="showcase-card showcase-service">
+            <div class="showcase-visual" aria-hidden="true"><span>Helyszíni igény</span><strong>Klíma karbantartás</strong><i>Felmérés → Besorolás → Visszajelzés</i></div>
+            <p class="showcase-label">Helyszíni szolgáltató · igényfelvétel</p><h3>OtthonPont</h3>
+            <p>A rendszer a megfelelő adatokat kéri be, így a vállalkozó felkészülten válaszolhat és kevesebb kört fut.</p>
+            <a class="button button-ghost button-full" href="/mintak/szolgaltato">Interaktív minta megnyitása</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="proposal-section" id="javaslat">
+      <div class="container proposal-layout">
+        <div class="proposal-copy">
+          <p class="eyebrow">Díjmentes első lépés</p>
+          <h2>Kérj személyre szabott, hárompontos javaslatot</h2>
+          <p>Írd le röviden, hogyan dolgozik a vállalkozásod és mi viszi el a legtöbb időt. Átnézzük, majd olyan weboldal- és rendszerjavaslatot küldünk, amely a te működésedhez illik.</p>
+          <ol class="proposal-steps"><li><strong>1.</strong> Megismerjük a jelenlegi folyamatot.</li><li><strong>2.</strong> Kiválasztjuk a három leghasznosabb fejlesztést.</li><li><strong>3.</strong> Konkrét megvalósítást és megfelelő csomagot javaslunk.</li></ol>
+          <p class="proposal-promise">A javaslat díjmentes és nem kötelez vásárlásra. Automatikus értékesítési levélsorozatot nem indítunk.</p>
+        </div>
+        <form id="proposalForm" class="proposal-form">
+          <div class="form-grid">
+            <label>Név<input name="contactName" autocomplete="name" minlength="2" maxlength="80" required></label>
+            <label>Vállalkozás neve<input name="companyName" autocomplete="organization" minlength="2" maxlength="120" required></label>
+            <label>E-mail<input type="email" name="email" autocomplete="email" maxlength="160" required></label>
+            <label>Telefonszám <small>(nem kötelező)</small><input type="tel" name="phone" autocomplete="tel" maxlength="32"></label>
+            <label class="form-wide">Mivel foglalkozik a vállalkozás?<input name="businessType" minlength="3" maxlength="120" placeholder="Például autószerviz Budapesten" required></label>
+            <label class="form-wide">Weboldal vagy közösségi oldal <small>(nem kötelező)</small><input name="currentUrl" inputmode="url" autocomplete="url" maxlength="300" placeholder="például facebook.com/vallalkozas"></label>
+          </div>
+          <fieldset class="proposal-needs"><legend>Miben lenne a leghasznosabb segítség?</legend>
+            <label><input type="checkbox" name="needs" value="website"> Weboldal vagy megújítás</label>
+            <label><input type="checkbox" name="needs" value="inquiries"> Érdeklődők kezelése</label>
+            <label><input type="checkbox" name="needs" value="appointments"> Időpontok kezelése</label>
+            <label><input type="checkbox" name="needs" value="quotes"> Ajánlatkérések kezelése</label>
+            <label><input type="checkbox" name="needs" value="administration"> Kevesebb kézi adminisztráció</label>
+            <label><input type="checkbox" name="needs" value="unsure"> Még nem tudom</label>
+          </fieldset>
+          <label class="proposal-challenge">Mi okozza most a legtöbb nehézséget?<textarea name="mainChallenge" minlength="15" maxlength="1200" placeholder="Például telefonon és üzenetekben érkeznek az igények, ezért nehéz követni, kinek válaszoltunk már." required></textarea></label>
+          <label class="check-row"><input type="checkbox" name="contactConsent" required><span>Kérem, hogy az OVEXI a megadott e-mail-címen vagy telefonszámon kapcsolatba lépjen velem kizárólag ennek a javaslatkérésnek az egyeztetéséhez.</span></label>
+          <label class="check-row"><input type="checkbox" name="privacyAccepted" required><span>Elolvastam az <a href="/adatkezeles" target="_blank">adatkezelési tájékoztatót</a>.</span></label>
+          <div class="bot-trap" aria-hidden="true"><label>Másodlagos webhely<input name="website" tabindex="-1" autocomplete="off"></label></div>
+          <p class="form-status" id="proposalStatus" aria-live="polite"></p>
+          <button class="button button-primary button-full" type="submit">Kérem a hárompontos javaslatot</button>
+        </form>
       </div>
     </section>
 
@@ -342,6 +408,6 @@
   </div>
 
   <noscript>Az online csomagválasztó használatához engedélyezd a JavaScriptet, vagy írj az info@ovexi.hu címre.</noscript>
-  <script type="module" src="js/main.js?v=20260903-10"></script>
+  <script type="module" src="js/main.js?v=20260905-11"></script>
 </body>
 </html>

@@ -44,3 +44,5 @@ details{margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--line);font-
 .record-editor-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;border:1px solid #dce2e9;border-radius:12px;padding:16px;margin:12px 0;min-width:0}.record-editor-row label{min-width:0}.record-editor-row textarea{min-height:100px}.record-editor-row button{align-self:end}input[type=checkbox]{width:auto!important}details>summary{cursor:pointer;padding:12px 0;font-weight:600}
 
 .action-confirmation{max-width:calc(100vw - 32px);width:430px;border:1px solid #b8c7d1;border-radius:16px;padding:24px;background:#fff;color:#172c38;box-shadow:0 24px 80px #0005}.action-confirmation::backdrop{background:#10253299}.action-confirmation button{margin:8px 8px 0 0}.action-confirmation p{color:#172c38}
+
+.button-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:.65rem .9rem;border:1px solid var(--line);border-radius:9px;color:var(--cyan);text-decoration:none;font-weight:700}

@@ -18,6 +18,7 @@ const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
 
 // Commerce endpoints handle validated requests, signed payments and durable retries.
 Object.assign(exports, require("./commerce"));
+Object.assign(exports, require("./proposal"));
 Object.assign(exports, require("./outreach"));
 Object.assign(exports, require("./operations"));
 Object.assign(exports, require("./notification-worker"));
