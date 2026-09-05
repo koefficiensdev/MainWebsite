@@ -5,8 +5,7 @@ const { hash, email, text, publicUrl, fail } = require("./outreach-domain");
 const { safeProposal } = require("./outreach-copy");
 const { verifySource, emailCandidates } = require("./outreach-source");
 const { qualificationSchema, qualify, checkEmailWebsite, isCited } = require("./outreach-qualification");
-// Independent search rounds need a smaller pool than the former single-pass
-// request, which keeps one-company checks inexpensive while retaining replacements.
+// Keep the candidate pool bounded so sparse searches remain inexpensive.
 const discoveryTarget = count => Math.min(20, Math.max(3, count * 2));
 function discoveredEmail(value) {
   const candidates=emailCandidates(value);
@@ -48,10 +47,10 @@ async function research(db, apiKey, uid, raw) {
       input: JSON.stringify({ criteria, requestedCount: count, candidateTarget, researchDate: new Date().toISOString().slice(0,10), targetMode }),
       text: { format: { type: "json_schema", name: "company_research", strict: true, schema: { type: "object", properties: { companies: { type: "array", items: { type: "object", properties: { ...Object.fromEntries(fields.map(f => [f, { type: "string" }])), proposal: proposalSchema, qualification: qualificationSchema }, required: [...fields, "proposal", "qualification"], additionalProperties: false } } }, required: ["companies"], additionalProperties: false } } }
     };
-    requestOptions.instructions += "\n\nThis request is one bounded search round. Do not investigate one company with more than two searches. Return all usable candidates found in this round. excludedCandidates came from earlier rounds: do not return those businesses or addresses again.";
+    requestOptions.instructions += "\n\nThis is one bounded search round. Do not investigate one company with more than two searches. A recipient containing #, stars, spaces, '[email protected]' or any other masking is invalid: omit it and continue with another company. Return all candidates with a complete syntactically valid email found within the tool limit.";
     const responses = [], companies = [], attemptedCandidates = [], seen = new Set(), usage = { input_tokens: 0, output_tokens: 0 };
     let usableCandidates = 0, discoveryInvalidEmails = 0;
-    for (let round = 0; round < 3 && usableCandidates < candidateTarget && Date.now() - startedAt < 300000; round++) {
+    for (let round = 0; round < 1 && usableCandidates < candidateTarget && Date.now() - startedAt < 300000; round++) {
       requestOptions.input = JSON.stringify({ criteria, requestedCount: count, candidateTarget: Math.min(6, candidateTarget - usableCandidates), researchDate: new Date().toISOString().slice(0,10), targetMode, round: round + 1, excludedCandidates: attemptedCandidates.slice(-20) });
       const response = await client.responses.create(requestOptions);
       responses.push(response); usage.input_tokens += Number(response.usage?.input_tokens || 0); usage.output_tokens += Number(response.usage?.output_tokens || 0);
