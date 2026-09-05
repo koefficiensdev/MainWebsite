@@ -23,6 +23,7 @@ test("no-website mode cannot return a company with an old existing site",async()
   assert.equal(isBusinessProfile("https://www.facebook.com/BusinessProfile"),true);
   assert.equal(isBusinessProfile("https://aranyoldalak.hu/autoszerelo/budapest/"),true);
   assert.equal(isBusinessProfile("https://budapest.cylex.hu/ceg-info/pelda-123.html"),true);
+  assert.equal(isBusinessProfile("https://www.openstreetmap.org/node/123456"),true);
   assert.equal(isBusinessProfile("https://facebook.com.evil.hu/Business"),false);
   assert.equal(isBusinessProfile("https://evil-aranyoldalak.hu/company"),false);
 });

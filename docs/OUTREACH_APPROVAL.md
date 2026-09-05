@@ -2,6 +2,12 @@
 
 ## Legfrissebb korrekció: régi lista, célzás és küldés
 
+## Térképes előkeresés és személyes e-mail-címek – 2026-09-05
+
+A `no_website` kutatás a támogatott helyi szakmáknál először nyilvános OpenStreetMap üzleti adatokból gyűjt olyan jelölteket, amelyeknél közzétett e-mail-cím van, de saját weboldal nincs feltüntetve. Az AI ezután a pontos cégnévre keresve ellenőrzi, hogy található-e önálló hivatalos honlap, megszűnt-e a vállalkozás, illetve egyértelmű-e az azonosság. A térképes adat önmagában nem bizonyítja a honlap hiányát; csak olcsó és célzott jelöltforrás. A felület minden ilyen rekordnál megjeleníti az OpenStreetMap-forrást és az előírt szerzői hivatkozást.
+
+Egyéni vállalkozók és nyilvánosan közzétett Gmail/Freemail címek bekerülhetnek a jelöltlistába. A tényleges küldés védelme nem lazult: természetes személyhez köthető címre továbbra is csak dokumentált előzetes hozzájárulással enged a rendszer levelet küldeni. A jelölt megtalálása, a piszkozat elkészítése és a megkeresés jogalapja külön lépés.
+
 A felhasználó által kifogásolt 12 cég a `leads` korábbi `researched_csv` importja volt; nem az új kutatás eredménye. Ezek változatlanul megmaradnak, de a Leadek nézetben összecsukott, nem küldhető régi listaként szerepelnek. A korábbi egyetlen gyenge AI-piszkozat szintén megmarad, az alapértelmezett küldhető nézetből kizárva. Új találatokat nem állítunk elő a régi adatok átnevezésével.
 
 A kutatás alapértelmezése `no_website`: minden ismert saját honlap kizáró ok, még elavult honlap is. A `website_refresh` külön választás. Honlap nélküli jelöltnél az e-mail forrása nyilvános üzleti közösségi profil kell legyen; saját céges kontaktoldal nem elfogadható. A saját e-mail-domain HTTPS főoldalának sikeres lekérése konzervatív kizárást jelent; sikertelen lekérés nem bizonyít honlaphiányt. Két tényleges keresés és forrásidézet továbbra is kell. Közösségi oldalak elérhetőségi korlátai miatt hiteles jelöltek is kieshetnek; a forrásellenőrzést nem kerüljük meg.

@@ -94,6 +94,7 @@ function isBusinessProfile(value) {
       || host === "linkedin.com" && url.pathname.startsWith("/company/")
       || host === "google.com" && url.pathname.startsWith("/maps/")
       || host === "maps.app.goo.gl"
+      || host === "openstreetmap.org" && /^\/(node|way|relation)\/\d+/.test(url.pathname)
       || directory && url.pathname.length > 1;
   } catch { return false; }
 }

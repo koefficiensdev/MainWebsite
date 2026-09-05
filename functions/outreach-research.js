@@ -4,7 +4,8 @@ const { reserveAiBudget, settleAiBudget } = require("./ai-budget");
 const { hash, email, text, publicUrl, fail } = require("./outreach-domain");
 const { safeProposal } = require("./outreach-copy");
 const { verifySource, emailCandidates } = require("./outreach-source");
-const { qualificationSchema, qualify, checkEmailWebsite, isCited } = require("./outreach-qualification");
+const { qualificationSchema, qualify, checkEmailWebsite, isCited, citationKey } = require("./outreach-qualification");
+const { discoverOsm } = require("./outreach-osm");
 // Keep the candidate pool bounded so sparse searches remain inexpensive.
 const discoveryTarget = count => Math.min(20, Math.max(3, count * 2));
 function discoveredEmail(value) {
@@ -34,6 +35,8 @@ async function research(db, apiKey, uid, raw) {
     reservation = await reserveAiBudget(db, "outreach-research", { ...process.env, OPENAI_RESERVATION_USD: "1" });
     await ref.update({ budgetReservedUsd: 1 });
     const fields = ["companyName", "companyDescription", "recipient", "sourceUrl"], candidateTarget = discoveryTarget(count);
+    const osmCandidates = targetMode === "no_website" ? await discoverOsm(criteria).catch(() => []) : [];
+    const osmSeeds = osmCandidates.slice(0, Math.min(20, candidateTarget * 2)), osmByRecipient = new Map(osmSeeds.map(row => [row.recipient, row]));
     const proposalSchema = { type: "object", properties: {
       customerRequest: { type: "string" },
       businessControl: { type: "string" },
@@ -48,10 +51,11 @@ async function research(db, apiKey, uid, raw) {
       text: { format: { type: "json_schema", name: "company_research", strict: true, schema: { type: "object", properties: { companies: { type: "array", items: { type: "object", properties: { ...Object.fromEntries(fields.map(f => [f, { type: "string" }])), proposal: proposalSchema, qualification: qualificationSchema }, required: [...fields, "proposal", "qualification"], additionalProperties: false } } }, required: ["companies"], additionalProperties: false } } }
     };
     requestOptions.instructions += "\n\nThis is one bounded search round. Do not investigate one company with more than two searches. A recipient containing #, stars, spaces, '[email protected]' or any other masking is invalid: omit it and continue with another company. Return all candidates with a complete syntactically valid email found within the tool limit.";
+    if (osmSeeds.length) requestOptions.instructions += "\n\ntrustedSeedCandidates were fetched by the server from current OpenStreetMap business data and already contain exact public emails and source URLs. Use their companyName, recipient and sourceUrl exactly; do not replace or mask them. Search the exact business names to detect independent official websites. Omit a seed if an independent website is found, the business appears closed, or identity is ambiguous. For retained seeds set websiteStatus=not_found, websiteUrl='', issue=no_site_found, evidenceUrl to its OpenStreetMap sourceUrl, and write an honest needReason stating that no independent website surfaced in the checks. The OpenStreetMap source itself does not need another web-search citation.";
     const responses = [], companies = [], attemptedCandidates = [], seen = new Set(), usage = { input_tokens: 0, output_tokens: 0 };
     let usableCandidates = 0, discoveryInvalidEmails = 0;
     for (let round = 0; round < 1 && usableCandidates < candidateTarget && Date.now() - startedAt < 300000; round++) {
-      requestOptions.input = JSON.stringify({ criteria, requestedCount: count, candidateTarget: Math.min(6, candidateTarget - usableCandidates), researchDate: new Date().toISOString().slice(0,10), targetMode, round: round + 1, excludedCandidates: attemptedCandidates.slice(-20) });
+      requestOptions.input = JSON.stringify({ criteria, requestedCount: count, candidateTarget: Math.min(6, candidateTarget - usableCandidates), researchDate: new Date().toISOString().slice(0,10), targetMode, trustedSeedCandidates: osmSeeds.map(({ companyName, companyDescription, recipient, sourceUrl }) => ({ companyName, companyDescription, recipient, sourceUrl })), round: round + 1, excludedCandidates: attemptedCandidates.slice(-20) });
       const response = await client.responses.create(requestOptions);
       responses.push(response); usage.input_tokens += Number(response.usage?.input_tokens || 0); usage.output_tokens += Number(response.usage?.output_tokens || 0);
       if (response.status !== "completed") continue;
@@ -70,13 +74,14 @@ async function research(db, apiKey, uid, raw) {
     await ref.update({ estimatedCostUsd: costMicros / 1000000, budgetReservedUsd: 0 });
     const sources = new Set(), searchedQueries = [];
     const addSource = url => { try { sources.add(new URL(url).href); } catch {} };
+    for (const seed of osmSeeds) addSource(seed.sourceUrl);
     for (const output of outputItems) {
       if (output.action?.type === "search") searchedQueries.push(...(output.action.queries || (output.action.query ? [output.action.query] : [])));
       for (const source of output.action?.sources || []) if (source.url) addSource(source.url);
       if (output.action?.url) addSource(output.action.url);
       for (const content of output.content || []) for (const annotation of content.annotations || []) if (annotation.url) addSource(annotation.url);
     }
-    await ref.update({ searchRounds: responses.length, searchToolCalls: toolCalls, citedSourceCount: sources.size, searchQueryCount: searchedQueries.length });
+    await ref.update({ searchRounds: responses.length, searchToolCalls: toolCalls, osmSeedCount: osmSeeds.length, citedSourceCount: sources.size, searchQueryCount: searchedQueries.length });
     const parsed = { companies }; let found = 0, skipped = discoveryInvalidEmails, excludedByQualification = 0; const excludedReasons=discoveryInvalidEmails ? { INVALID_EMAIL: discoveryInvalidEmails } : {}; const excluded=error=>{const key=String(error.message||error.code||'VERIFICATION_FAILED').replace(/[^A-Z_]/g,'').slice(0,80)||'VERIFICATION_FAILED';excludedReasons[key]=(excludedReasons[key]||0)+1;};
     for (const candidate of (parsed.companies || []).slice(0, candidateTarget)) {
       if (found >= count) break;
@@ -88,14 +93,20 @@ async function research(db, apiKey, uid, raw) {
         const id = hash(recipient), candidateRef = db.collection("outreach_candidates").doc(id), messageRef = db.collection("outreach_messages").doc(id);
         const [existingCandidate, existingMessage, suppression] = await Promise.all([candidateRef.get(), messageRef.get(), db.collection("outreach_suppressions").doc(id).get()]);
         if (existingCandidate.exists || existingMessage.exists || suppression.exists) { skipped++; continue; }
+        const osmSeed = osmByRecipient.get(recipient);
+        if (osmSeed && (citationKey(osmSeed.sourceUrl) !== citationKey(sourceUrl) || String(candidate.companyName).trim() !== osmSeed.companyName)) fail("OSM_IDENTITY_CHANGED");
+        const sourceFetcher = osmSeed ? async (url, contactEmail, _redirects, options = {}) => {
+          if (citationKey(url) !== citationKey(osmSeed.sourceUrl) || (contactEmail !== null && email(contactEmail) !== osmSeed.recipient)) return verifySource(url, contactEmail, 0, options);
+          return { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: new Date(), ...(options.includeText ? { evidenceText: osmSeed.evidenceText } : {}) };
+        } : verifySource;
         let qualification;
-        try { qualification = await qualify({ ...candidate.qualification, companyName: candidate.companyName, contactEmail: recipient }, sources, searchedQueries, verifySource, new Date(), targetMode, sourceUrl); }
+        try { qualification = await qualify({ ...candidate.qualification, companyName: candidate.companyName, contactEmail: recipient }, sources, searchedQueries, sourceFetcher, new Date(), targetMode, sourceUrl); }
         catch(error) { excluded(error); excludedByQualification++; skipped++; continue; }
         if (targetMode === "no_website") {
           try { qualification.emailDomainCheck = await checkEmailWebsite(recipient); }
           catch { excludedByQualification++; skipped++; continue; }
         }
-        const verified = await verifySource(sourceUrl, recipient);
+        const verified = osmSeed ? { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: new Date(), verificationMethod: "openstreetmap_public_data" } : await verifySource(sourceUrl, recipient);
         const row = { recipient, companyName: text(candidate.companyName, 160), companyDescription: text(candidate.companyDescription, 1200), proposal: safeProposal(candidate), ...verified, qualification, status: "researched", source: "ai_research", researchId: requestId, model: "gpt-5-mini", createdAt: new Date(), updatedAt: new Date() };
         await candidateRef.create(row); found++;
       } catch(error) { excluded(error); skipped++; }

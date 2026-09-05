@@ -1,6 +1,7 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict");
 const {discoveryTarget,discoveredEmail}=require("../outreach-research");
+const {discoverOsm,normalizeElements,osmPlan,osmQuery}=require("../outreach-osm");
 const fs=require("node:fs"),path=require("node:path");
 test("research examines a larger bounded pool so rejected candidates can be replaced",()=>{
   assert.equal(discoveryTarget(1),3);
@@ -16,4 +17,10 @@ test("research normalizes public email formats and selects the first verifiable 
 test("research endpoint keeps a second instance available while one long search runs",()=>{
   const source=fs.readFileSync(path.join(__dirname,"../outreach.js"),"utf8");
   assert.match(source,/maxInstances:\s*2,\s*concurrency:\s*1/);
+});
+test("OSM discovery finds public Gmail hairdressers without a website tag",async()=>{
+  const plan=osmPlan("fodrász Budapesten");assert.equal(plan.city,"Budapest");assert.match(osmQuery(plan),/shop.*hairdresser/);
+  const payload={elements:[{type:"node",id:123,tags:{name:"Teszt Fodrászműhely",email:"teszt.fodrasz@ gmail.com","addr:street":"Minta utca","addr:housenumber":"1"}},{type:"node",id:124,tags:{name:"Honlapos Szalon",email:"szalon@gmail.com",website:"https://example.hu"}}]};
+  const rows=normalizeElements(payload,plan);assert.equal(rows.length,1);assert.equal(rows[0].recipient,"teszt.fodrasz@gmail.com");assert.equal(rows[0].sourceUrl,"https://www.openstreetmap.org/node/123");
+  assert.deepEqual(await discoverOsm("ismeretlen szakma Budapesten",async()=>assert.fail("must not fetch")),[]);
 });
