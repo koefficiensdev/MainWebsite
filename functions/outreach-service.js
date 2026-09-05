@@ -1,5 +1,8 @@
 "use strict";
+const crypto = require("node:crypto");
 const { hash, fail, checkApproval, FOOTER } = require("./outreach-domain");
+const DAILY_OUTREACH_LIMIT = 10;
+const UNSUBSCRIBE_URL = "https://europe-west1-ovexi-6ef38.cloudfunctions.net/outreachUnsubscribe";
 async function approveAndSend(db, transport, uid, item) {
   if (!/^[a-f0-9]{64}$/.test(item.id || "")) fail("INVALID_ID");
   const ref = db.collection("outreach_messages").doc(item.id);
@@ -14,23 +17,27 @@ async function approveAndSend(db, transport, uid, item) {
     const [blocked, contacted, companyContacted, count] = await Promise.all([tx.get(suppress), tx.get(contact), tx.get(domain), tx.get(quota)]);
     if (blocked.exists) fail("SUPPRESSED");
     if (contacted.exists || companyContacted.exists) fail("ALREADY_CONTACTED");
-    if (Number(count.data()?.count || 0) >= 100) fail("DAILY_LIMIT");
-    const now = new Date(), providerMessageId = `<ovexi-${item.id}@ovexi.hu>`;
+    if (Number(count.data()?.count || 0) >= DAILY_OUTREACH_LIMIT) fail("DAILY_LIMIT");
+    const now = new Date(), providerMessageId = `<ovexi-${item.id}@ovexi.hu>`, unsubscribeToken = crypto.randomBytes(32).toString("hex");
     tx.set(quota, { count: Number(count.data()?.count || 0) + 1, updatedAt: now });
     tx.set(contact, { messageId: item.id, createdAt: now });
     tx.set(domain, { messageId: item.id, createdAt: now });
-    tx.update(ref, { status: "sending", approvedBy: uid, approvedAt: now, approvedRevision: item.revision, legalBasis: item.legalBasis, legalNote: item.legalNote, providerMessageId, updatedAt: now });
-    return { ...data, providerMessageId };
+    tx.update(ref, { status: "sending", approvedBy: uid, approvedAt: now, approvedRevision: item.revision, legalBasis: item.legalBasis, legalNote: item.legalNote, providerMessageId, unsubscribeTokenHash: hash(unsubscribeToken), updatedAt: now });
+    return { ...data, providerMessageId, unsubscribeToken };
   });
   // A committed claim is never retried, even after a crash/ambiguous SMTP result.
   try {
-    const info = await transport.sendMail({ from: { name: "OVEXI · Turai Sándor Attila EV", address: "info@ovexi.hu" }, to: row.recipient, replyTo: "info@ovexi.hu", subject: row.subject, text: row.body + FOOTER + `\nKapcsolat nyilvános forrása: ${row.sourceUrl}`, messageId: row.providerMessageId, headers: { "List-Unsubscribe": "<mailto:info@ovexi.hu?subject=LEIRATKOZAS>" }, disableFileAccess: true, disableUrlAccess: true });
+    const unsubscribe = `${UNSUBSCRIBE_URL}?id=${item.id}&token=${row.unsubscribeToken}`;
+    const info = await transport.sendMail({ from: { name: "OVEXI · Turai Sándor Attila EV", address: "info@ovexi.hu" }, to: row.recipient, replyTo: "info@ovexi.hu", subject: row.subject, text: row.body + FOOTER + `\nKapcsolat nyilvános forrása: ${row.sourceUrl}`, messageId: row.providerMessageId, headers: { "List-Unsubscribe": `<${unsubscribe}>, <mailto:info@ovexi.hu?subject=LEIRATKOZAS>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click", "Auto-Submitted": "no" }, disableFileAccess: true, disableUrlAccess: true });
     if (!info.accepted?.some(r => String(r).toLowerCase() === row.recipient)) throw new Error("NOT_ACCEPTED");
-    await ref.update({ status: "sent", source: "provider", provider: "rackhost_smtp", sentAt: new Date(), updatedAt: new Date(), errorCode: null });
+    await db.runTransaction(async tx => {
+      const latest = await tx.get(ref), now = new Date();
+      tx.update(ref, { ...(latest.data()?.status === "suppressed" ? {} : { status: "sent" }), source: "provider", provider: "rackhost_smtp", sentAt: now, updatedAt: now, errorCode: null });
+    });
     return { id: item.id, status: "sent" };
   } catch {
     await ref.update({ status: "send_unknown", errorCode: "CHECK_MAILBOX_NO_AUTOMATIC_RETRY", updatedAt: new Date() }).catch(() => {});
     return { id: item.id, status: "send_unknown" };
   }
 }
-module.exports = { approveAndSend };
+module.exports = { approveAndSend, DAILY_OUTREACH_LIMIT, UNSUBSCRIBE_URL };

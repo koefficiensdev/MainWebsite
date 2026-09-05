@@ -1,6 +1,6 @@
 "use strict";
 const test = require("node:test"), assert = require("node:assert/strict");
-const d = require("../outreach-domain"), { approveAndSend } = require("../outreach-service");
+const d = require("../outreach-domain"), { approveAndSend, DAILY_OUTREACH_LIMIT, UNSUBSCRIBE_URL } = require("../outreach-service");
 function memoryDb() {
   const rows=new Map(), versions=new Map();
   const snap=path=>({exists:rows.has(path),data:()=>structuredClone(rows.get(path))});
@@ -36,9 +36,9 @@ test("outreach: edits, missing evidence and missing legal review block sending",
 });
 test("outreach: concurrent approvals send exactly once with fixed sender and unsubscribe",async()=>{
   const {db,row,item}=fixture();let count=0;
-  const transport={sendMail:async mail=>{count++;assert.equal(mail.to,row.recipient);assert.equal(mail.from.address,"info@ovexi.hu");assert.match(mail.text,/LEIRATKOZAS/);return {accepted:[row.recipient]};}};
+  const transport={sendMail:async mail=>{count++;assert.equal(mail.to,row.recipient);assert.equal(mail.from.address,"info@ovexi.hu");assert.match(mail.text,/LEIRATKOZAS/);assert.match(mail.headers["List-Unsubscribe"],new RegExp(`^<${UNSUBSCRIBE_URL.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}\\?id=${item.id}&token=[a-f0-9]{64}>`));assert.equal(mail.headers["List-Unsubscribe-Post"],"List-Unsubscribe=One-Click");return {accepted:[row.recipient]};}};
   const results=await Promise.allSettled([approveAndSend(db,transport,"admin",item),approveAndSend(db,transport,"admin",item)]);
-  assert.equal(count,1);assert.equal(results.filter(r=>r.status==="fulfilled").length,1);assert.equal(db.rows.get(`outreach_messages/${item.id}`).status,"sent");
+  assert.equal(count,1);assert.equal(results.filter(r=>r.status==="fulfilled").length,1);const stored=db.rows.get(`outreach_messages/${item.id}`);assert.equal(stored.status,"sent");assert.match(stored.unsubscribeTokenHash,/^[a-f0-9]{64}$/);assert.equal(stored.unsubscribeToken,undefined);
 });
 test("outreach: ambiguous SMTP acceptance is never retried",async()=>{
   const {db,item}=fixture();let calls=0;const transport={sendMail:async()=>{calls++;throw Error("timeout after DATA");}};
@@ -52,7 +52,7 @@ test("outreach: suppression and duplicate company block prior to SMTP",async()=>
 test("outreach: daily quota and old source evidence fail closed",async()=>{
   const {db,row,item}=fixture();
   const day=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Budapest"}).format(new Date());
-  db.seed(`outreach_controls/day-${day}`,{count:100});
+  assert.equal(DAILY_OUTREACH_LIMIT,10);db.seed(`outreach_controls/day-${day}`,{count:DAILY_OUTREACH_LIMIT});
   await assert.rejects(()=>approveAndSend(db,{},"admin",item),{code:"DAILY_LIMIT"});
   assert.throws(()=>d.checkApproval({...row,emailVerifiedAt:new Date(Date.now()-31*86400000)},item),{code:"SOURCE_EXPIRED"});
 });

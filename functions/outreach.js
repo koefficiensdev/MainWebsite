@@ -1,6 +1,6 @@
 "use strict";
 const { getFirestore } = require("firebase-admin/firestore");
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { defineSecret } = require("firebase-functions/params");
 const nodemailer = require("nodemailer");
@@ -55,7 +55,7 @@ exports.generateOutreachDrafts = onCall(base, async request => {
 exports.approveOutreach = onCall({ ...base, secrets: [smtp], timeoutSeconds: 300 }, async request => {
   admin(request); const items = request.data?.items;
   if (process.env.OUTREACH_SEND_ENABLED !== "true") throw new HttpsError("failed-precondition", "A hirdető levélküldés jelenleg le van állítva.");
-  if (!Array.isArray(items) || !items.length || items.length > 10) throw new HttpsError("invalid-argument", "Egyszerre 1–10 levél hagyható jóvá.");
+  if (!Array.isArray(items) || !items.length || items.length > 5) throw new HttpsError("invalid-argument", "Az induló időszakban egyszerre 1–5 levél hagyható jóvá.");
   const transport = nodemailer.createTransport({ host: "smtp.rackhost.hu", port: 465, secure: true, auth: { user: "info@ovexi.hu", pass: smtp.value() }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000, logger: false, debug: false });
   const results = [];
   try {
@@ -73,6 +73,23 @@ exports.suppressOutreach = onCall(base, async request => {
     tx.set(db.collection("outreach_suppressions").doc(hash(row.recipient)), { reason: "manual_admin", createdAt: new Date(), createdBy: request.auth.uid });
     tx.update(ref, { ...(row.status === "draft" ? { status: "suppressed" } : {}), suppressedAt: new Date(), updatedAt: new Date() });
   }); return { suppressed: true };
+});
+exports.outreachUnsubscribe = onRequest({ ...base, timeoutSeconds: 30 }, async (request, response) => {
+  response.set("Cache-Control", "no-store");
+  if (request.method !== "POST") return response.status(405).send("Method not allowed");
+  const rawBody = Buffer.isBuffer(request.rawBody) ? request.rawBody.toString("utf8") : "";
+  const oneClick = String(request.body?.["List-Unsubscribe"] || "") === "One-Click" || /(?:^|&)List-Unsubscribe=One-Click(?:&|$)/.test(rawBody);
+  if (!oneClick) return response.status(400).send("Invalid request");
+  const messageId = String(request.query.id || ""), token = String(request.query.token || "");
+  if (!/^[a-f0-9]{64}$/.test(messageId) || !/^[a-f0-9]{64}$/.test(token)) return response.status(400).send("Invalid request");
+  try {
+    await db.runTransaction(async tx => {
+      const ref = db.collection("outreach_messages").doc(messageId), snap = await tx.get(ref), row = snap.data();
+      if (!row || row.unsubscribeTokenHash !== hash(token)) fail("INVALID_UNSUBSCRIBE");
+      const now = new Date(); tx.set(db.collection("outreach_suppressions").doc(hash(row.recipient)), { reason: "one_click_unsubscribe", createdAt: now }); tx.update(ref, { status: "suppressed", unsubscribedAt: now, updatedAt: now });
+    });
+    return response.status(200).send("Unsubscribed");
+  } catch { return response.status(400).send("Invalid request"); }
 });
 exports.syncOutreachReplies = onCall({ ...base, secrets: [smtp], timeoutSeconds: 240 }, async request => { admin(request); return syncInbox(db, smtp.value()); });
 exports.pollOutreachReplies = onSchedule({ ...base, secrets: [smtp], timeoutSeconds: 240, schedule: "every 15 minutes", retryCount: 0 }, async () => {
