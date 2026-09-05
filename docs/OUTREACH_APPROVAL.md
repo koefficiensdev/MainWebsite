@@ -54,7 +54,7 @@ Leállítás: `OUTREACH_SEND_ENABLED=false`, `OUTREACH_INBOX_ENABLED=false`, maj
 
 - SMTP hitelesítés sikeres, e-mail küldése nélkül.
 - IMAP hitelesítés + read-only INBOX sikeres; élő szinkronban nincs kapcsolt válasz.
-- SPF rekord megvan. A Rackhost DKIM-aláírás és a publikált `mx0820260425` selector ellenőrzése sikeres. A DMARC rekord a 2026-09-05-i DNS-ellenőrzéskor még hiányzik; ezt indulás előtt be kell állítani. A napi 10 technikai maximum nem kézbesítési ígéret.
+- SPF rekord megvan. A Rackhost DKIM-aláírás és a publikált `mx0820260425` selector ellenőrzése sikeres. A DMARC 2026-09-05-én megfigyelő módban beállítva (`p=none`, összesítő jelentések: `info@ovexi.hu`), és a Google, valamint a Cloudflare nyilvános DNS-feloldóján ellenőrizve. A napi 10 technikai maximum nem kézbesítési ígéret.
 - Egy élő, 1 céges kutatás: 1 ellenőrzött piszkozat; becsült API-költség 0,024137 USD; kiküldött levél 0.
 - Unit tesztek: versengő jóváhagyás, stale hash, természetes személy hozzájárulás, tiltás, domain-duplikáció, SMTP timeout, SSRF, fejlécinjektálás, szintetikus válaszimport és deduplikáció, jogosultság, admin DOM ID-k.
 - Tranzakciós tesztek optimista memóriamodellt használnak, nem Firestore emulátort. Valódi címzett jóváhagyásos küldése és valódi válasz end-to-end tesztje még nem történt meg.
