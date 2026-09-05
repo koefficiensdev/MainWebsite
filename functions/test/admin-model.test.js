@@ -53,12 +53,15 @@ test("admin: expenses require real dates, known currencies and existing campaign
   assert.throws(()=>validateExpense({...input,campaignId:"missing"}));
   assert.throws(()=>validateExpense({...input,currency:"BTC"}));
 });
-test("admin: page structure has nine panels, explicit login protection and matching element IDs",()=>{
+test("admin: page structure groups acquisition into one of eight main panels",()=>{
   const root=path.resolve(__dirname,"../..");
   const html=fs.readFileSync(path.join(root,"pages/admin.html"),"utf8"),js=fs.readFileSync(path.join(root,"js/admin.js"),"utf8");
   const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(ids.length,new Set(ids).size);
   for(const [,id] of js.matchAll(/\$\("([^"]+)"\)/g))assert.ok(ids.includes(id),`Missing ${id}`);
-  assert.equal([...html.matchAll(/data-panel=/g)].length,9);
+  assert.equal([...html.matchAll(/data-panel=/g)].length,8);
+  assert.equal([...html.matchAll(/data-outreach-panel=/g)].length,6);
+  assert.match(html,/data-admin-tab="outreach">03 <span>Ügyfélszerzés<\/span>/);
+  assert.doesNotMatch(html,/data-admin-tab="leads"/);
   assert.match(html,/id="dashboardSection"[^>]*hidden/);assert.match(js,/token\.claims\.admin!==true/);
 });
 test("admin: outbound evidence is read-only in rules, campaigns and expenses are admin-only",()=>{

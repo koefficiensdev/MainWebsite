@@ -1,9 +1,9 @@
 "use strict";
 const OpenAI = require("openai");
 const { reserveAiBudget, settleAiBudget } = require("./ai-budget");
-const { hash, email, text, publicUrl, revision, fail } = require("./outreach-domain");
+const { hash, email, text, publicUrl, fail } = require("./outreach-domain");
+const { safeProposal } = require("./outreach-copy");
 const { verifySource, emailCandidates } = require("./outreach-source");
-const { composeProspectDraft } = require("./outreach-copy");
 const { qualificationSchema, qualify, checkEmailWebsite, isCited } = require("./outreach-qualification");
 const discoveryTarget = count => Math.min(20, Math.max(10, count * 3));
 function discoveredEmail(value) {
@@ -66,9 +66,9 @@ async function research(db, apiKey, uid, raw) {
       try {
         const recipient = discoveredEmail(candidate.recipient), sourceUrl = publicUrl(candidate.sourceUrl).href;
         if (!isCited(sources, sourceUrl)) fail("UNCITED_SOURCE");
-        const id = hash(recipient), message = db.collection("outreach_messages").doc(id);
-        const [existing, suppression] = await Promise.all([message.get(), db.collection("outreach_suppressions").doc(id).get()]);
-        if (existing.exists || suppression.exists) { skipped++; continue; }
+        const id = hash(recipient), candidateRef = db.collection("outreach_candidates").doc(id), messageRef = db.collection("outreach_messages").doc(id);
+        const [existingCandidate, existingMessage, suppression] = await Promise.all([candidateRef.get(), messageRef.get(), db.collection("outreach_suppressions").doc(id).get()]);
+        if (existingCandidate.exists || existingMessage.exists || suppression.exists) { skipped++; continue; }
         let qualification;
         try { qualification = await qualify({ ...candidate.qualification, companyName: candidate.companyName, contactEmail: recipient }, sources, searchedQueries, verifySource, new Date(), targetMode, sourceUrl); }
         catch(error) { excluded(error); excludedByQualification++; skipped++; continue; }
@@ -77,8 +77,8 @@ async function research(db, apiKey, uid, raw) {
           catch { excludedByQualification++; skipped++; continue; }
         }
         const verified = await verifySource(sourceUrl, recipient);
-        const row = { recipient, companyName: text(candidate.companyName, 160), companyDescription: text(candidate.companyDescription, 1200), ...composeProspectDraft(candidate, qualification), ...verified, qualification, status: "draft", source: "ai_research", researchId: requestId, model: "gpt-5-mini", createdAt: new Date(), updatedAt: new Date() };
-        row.revision = revision(row); await message.create(row); found++;
+        const row = { recipient, companyName: text(candidate.companyName, 160), companyDescription: text(candidate.companyDescription, 1200), proposal: safeProposal(candidate), ...verified, qualification, status: "researched", source: "ai_research", researchId: requestId, model: "gpt-5-mini", createdAt: new Date(), updatedAt: new Date() };
+        await candidateRef.create(row); found++;
       } catch(error) { excluded(error); skipped++; }
     }
     await ref.update({ status: "done", found, skipped, excludedByQualification, qualificationVersion: 2, excludedReasons, examinedCandidates:(parsed.companies||[]).length, emptyReason:found?'':(parsed.companies||[]).length?'Candidates failed evidence checks':'Search returned no qualifying public evidence', updatedAt: new Date() });

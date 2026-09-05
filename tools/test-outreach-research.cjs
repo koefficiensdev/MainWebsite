@@ -20,7 +20,7 @@ async function main() {
   oauth.setCredentials({access_token:token.access_token});
   const db=new Firestore({projectId:"ovexi-6ef38",authClient:oauth});
   if(process.argv.includes("--inspect")) {
-    for(const collection of ["outreach_research","outreach_messages","leads"]) {
+    for(const collection of ["outreach_research","outreach_candidates","outreach_messages","leads"]) {
       const rows=await db.collection(collection).orderBy("createdAt","desc").limit(30).get();
       console.log(JSON.stringify({collection,records:rows.docs.map(doc=>{const r=doc.data();return {id:doc.id,status:r.status,companyName:r.companyName,recipient:r.recipient,sourceUrl:r.sourceUrl,companyDescription:r.companyDescription,offer:r.offer,subject:r.subject,body:r.body,found:r.found,estimatedCostUsd:r.estimatedCostUsd,qualification:r.qualification,website:r.website,reason:r.reason,draft:r.draft,source:r.source};})}));
     }

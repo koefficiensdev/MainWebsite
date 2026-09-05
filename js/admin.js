@@ -2,11 +2,11 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {addDoc,collection,doc,getDocs,getFirestore,limit,orderBy,query,serverTimestamp,startAfter,updateDoc} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js";
-import {STATUS_LABELS as labels,SOURCE_NAMES,outreachReady,escapeHtml as e,safeUrl,dateMs,dayKey,inPeriod,money,providerSent,summarize,validateCampaign,validateExpense,csv} from "./admin-model.js?v=20260902-3";
+import {STATUS_LABELS as labels,SOURCE_NAMES,outreachReady,escapeHtml as e,safeUrl,dateMs,dayKey,inPeriod,money,providerSent,summarize,validateCampaign,validateExpense,csv} from "./admin-model.js?v=20260905-1";
 import {installBookingSettings} from "./booking-settings-ui.js?v=20260902-3";
 import {installProduction} from "./production-ui.js?v=20260902-3";
 import {installWorkflows} from "./workflow-ui.js?v=20260902-1";
-import {installOutreach} from "./outreach-ui.js?v=20260904-6";
+import {installOutreach} from "./outreach-ui.js?v=20260905-1";
 
 const app=initializeApp({apiKey:"AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",authDomain:"ovexi-6ef38.firebaseapp.com",projectId:"ovexi-6ef38",storageBucket:"ovexi-6ef38.firebasestorage.app",messagingSenderId:"370083022451",appId:"1:370083022451:web:4e3ba562d07641fcef4c06"});
 const auth=getAuth(app),db=getFirestore(app),functions=getFunctions(app,"europe-west1");
@@ -24,7 +24,7 @@ const link=(url,text)=>safeUrl(url)?`<a href="${e(safeUrl(url))}" target="_blank
 const options=(values,current)=>values.map(v=>`<option value="${e(v)}"${current===v?" selected":""}>${e(labels[v]||v)}</option>`).join("");
 function resetData(){data=Object.fromEntries(sources.map(key=>[key,[]]));states=Object.fromEntries(sources.map(key=>[key,{status:"idle",more:false,cursor:null}]));}
 resetData();
-const outreach=installOutreach({functions,getData:()=>data,isAdmin:()=>isAdmin,refresh:()=>Promise.all(["outreach_messages","outreach_research","outreach_replies"].map(key=>loadSource(key))),messageRows,formatDate,badge,sourceEmpty});
+const outreach=installOutreach({functions,getData:()=>data,isAdmin:()=>isAdmin,refresh:()=>Promise.all(["outreach_candidates","outreach_messages","outreach_research","outreach_replies"].map(key=>loadSource(key))),messageRows,statusMessageRows,formatDate,badge,sourceEmpty});
 const workflows=installWorkflows({getData:()=>({...data,order_workflows:search(periodRows("order_workflows")),customer_requests:search(periodRows("customer_requests"))}),isAdmin:()=>isAdmin,identity:()=>auth.currentUser?.uid||"",getEpoch:()=>epoch,call:async(name,payload)=>(await httpsCallable(functions,name,{timeout:930000})(payload)).data,refresh:()=>Promise.all(["orders","order_workflows","customer_requests"].map(key=>loadSource(key))),notify:showToast});
 const production=installProduction({getData:()=>data,identity:()=>auth.currentUser?.uid||'',call:async(name,payload)=>(await httpsCallable(functions,name,{timeout:930000})(payload)).data,refresh:()=>Promise.all(['production_jobs','production_copy_jobs','order_workflows'].map(key=>loadSource(key))),notify:showToast});
 const bookingSettings=installBookingSettings({getData:()=>data,identity:()=>auth.currentUser?.uid||'',call:async(name,payload)=>(await httpsCallable(functions,name)(payload)).data,refresh:()=>loadSource('booking_tenants'),notify:showToast});
@@ -71,6 +71,7 @@ async function loadData(){
 function periodRows(key,dateField="createdAt"){return (data[key]||[]).filter(r=>inPeriod(r[dateField],$("dateFrom").value,$("dateTo").value));}
 function search(rows){const term=$("globalSearch").value.trim().toLocaleLowerCase("hu");return term?rows.filter(row=>JSON.stringify(row).toLocaleLowerCase("hu").includes(term)):rows;}
 function messageRows(){const filter=$("messageFilter").value;return search((data.outreach_messages||[]).filter(r=>inPeriod(r.sentAt||r.createdAt,$("dateFrom").value,$("dateTo").value)&&(filter==="all"||filter==="ready"&&outreachReady(r)||filter==="unqualified"&&r.status==="draft"&&!outreachReady(r)||r.status===filter)));}
+function statusMessageRows(){return search((data.outreach_messages||[]).filter(r=>inPeriod(r.sentAt||r.updatedAt||r.createdAt,$("dateFrom").value,$("dateTo").value)&&r.status!=="draft"));}
 function sourceEmpty(key,message){return empty(states[key].status==="error"?"Az adatforrás nem érhető el. Frissíts, vagy ellenőrizd a jogosultságot.":states[key].status==="loading"?"Betöltés…":message);}
 function render(){
   const from=$("dateFrom").value,to=$("dateTo").value;
@@ -111,8 +112,7 @@ function renderFinance(summary){
 function renderLeads(){
   const rows=search(periodRows("leads")),legacy=rows.filter(r=>r.source==="researched_csv"),manual=rows.filter(r=>r.source!=="researched_csv");
   const card=r=>`<article class="record-card"><h3>${e(r.companyName)}</h3><p>${link(r.website)}</p><p class="small">Kézi / régi nyilvántartás · nem küldésre jóváhagyott jelölt</p><p>${e(r.reason)}</p><details><summary>Korábbi szöveg és kapcsolat</summary><p>${e(r.contact)}</p><p class="preserve">${e(r.draft||"Nincs korábbi szöveg.")}</p></details><label>Kézi státusz<select data-status-select="${e(r.id)}" data-type="leads">${options(["researched","approved","contacted","replied","won","do_not_contact"],r.status)}</select></label><button type="button" data-save-status="${e(r.id)}" data-type="leads">Kézi státusz mentése · nem küldés</button></article>`;
-  const ready=search((data.outreach_messages||[]).filter(outreachReady));
-  $("leadsList").innerHTML=`<section class="surface"><h3>Új kutatásból származó jelöltek (${ready.length})</h3><p>A levél ellenőrzése és elküldése a Hirdető e-mailek alatt történik. A kézi státuszváltás nem küld levelet.</p>${ready.map(r=>`<article class="compact-row"><div><strong>${e(r.companyName)}</strong><p>${e(r.qualification.needReason)}</p></div><button type="button" data-open-prospect="${e(r.id)}">Levél és küldés →</button></article>`).join("")||sourceEmpty("outreach_messages","Jelenleg nincs új, minősített jelölt. A régi importált cégek nem helyettesítik a kutatás találatait.")}</section>${manual.map(card).join("")}<details class="surface"><summary>Régi importált lista (${legacy.length}) · nem küldhető, nincs újraminősítve</summary><p>Ezek a korábbi célzási feltételekkel összegyűjtött cégek. Megőriztük őket, de nem kerülnek a küldési sorba.</p>${legacy.map(card).join("")}</details>`;
+  $("leadsList").innerHTML=`${manual.map(card).join("")||sourceEmpty("leads","Nincs kézzel rögzített lead.")}<details class="surface"><summary>Régi importált lista (${legacy.length}) · nem küldhető, nincs újraminősítve</summary><p>Ezek a korábbi célzási feltételekkel összegyűjtött cégek. Megőriztük őket, de nem kerülnek a küldési sorba.</p>${legacy.map(card).join("")}</details>`;
 }
 function renderCustomers(){workflows.render();}
 function renderMaintenance(){
@@ -160,7 +160,7 @@ for(const [formId,key] of [["campaignForm","campaigns"],["expenseForm","expenses
 $("maintenanceForm").addEventListener("submit",async event=>{event.preventDefault();const form=event.currentTarget,button=form.querySelector('[type="submit"]'),values=Object.fromEntries(new FormData(form));button.disabled=true;form.querySelector(".status").textContent="";try{await httpsCallable(functions,"createMaintenanceSite")(values);form.reset();form.hidden=true;showToast("A napi ellenőrzést aktiváltuk.");await loadSource("maintenance_sites");}catch{form.querySelector(".status").textContent="Nem sikerült aktiválni. Csak nyilvános HTTPS webcím használható.";}finally{button.disabled=false;}});
 $("dashboardSection").addEventListener("click",async event=>{
   const button=event.target.closest("button");if(!button||!isAdmin)return;
-  if(button.dataset.openProspect){$("messageFilter").value="ready";navigate("outreach");renderMessages();[...document.querySelectorAll("[data-message]")].find(el=>el.dataset.message===button.dataset.openProspect)?.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  if(button.dataset.openProspect){$("messageFilter").value="ready";navigate("outreach");outreach.showStage("send");renderMessages();[...document.querySelectorAll("[data-message]")].find(el=>el.dataset.message===button.dataset.openProspect)?.scrollIntoView({behavior:"smooth",block:"start"});return;}
   if(button.dataset.editCampaign)return openForm("campaignForm",data.campaigns.find(r=>r.id===button.dataset.editCampaign));
   if(button.dataset.editExpense)return openForm("expenseForm",data.expenses.find(r=>r.id===button.dataset.editExpense));
   const ticket=epoch;
@@ -191,7 +191,7 @@ $("dashboardSection").addEventListener("click",async event=>{
   finally{button.disabled=false;}
 });
 $("exportMessages").addEventListener("click",()=>{
-  const rows=messageRows();if(!isAdmin||states.outreach_messages.status!=="ready"||!rows.length)return showToast("Nincs exportálható küldési napló.");
+  const rows=outreach.sentRows();if(!isAdmin||states.outreach_messages.status!=="ready"||!rows.length)return showToast("Nincs exportálható küldési napló.");
   const text=csv([["Cég","Címzett","Tárgy","Állapot","Küldés ideje","Visszaigazolt","Kampány"],...rows.map(r=>[r.companyName,r.recipient,r.subject,labels[r.status]||r.status,formatDate(r.sentAt),providerSent(r)?"igen":"nem",r.campaignId])]);
   const url=URL.createObjectURL(new Blob([text],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");a.href=url;a.download="ovexi-megkeresesek.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });

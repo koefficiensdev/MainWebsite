@@ -7,6 +7,7 @@ const nodemailer = require("nodemailer");
 const { research } = require("./outreach-research");
 const { approveAndSend } = require("./outreach-service");
 const { syncInbox } = require("./outreach-inbox");
+const { composeProspectDraft } = require("./outreach-copy");
 const { hash, draftFields, revision, fail } = require("./outreach-domain");
 const db = getFirestore(), ai = defineSecret("OPENAI_API_KEY"), smtp = defineSecret("SMTP_PASS");
 function admin(request) { if (request.auth?.token?.admin !== true) throw new HttpsError("permission-denied", "Adminjogosultság szükséges."); }
@@ -28,6 +29,28 @@ exports.saveOutreachDraft = onCall(base, async request => {
       tx.update(ref, { ...draftFields(raw), revision: version, updatedAt: new Date(), editedBy: request.auth.uid }); return { revision: version };
     });
   } catch { throw new HttpsError("failed-precondition", "A piszkozat megváltozott, már nem szerkeszthető vagy hibás a szöveg. Frissítsd az oldalt."); }
+});
+exports.generateOutreachDrafts = onCall(base, async request => {
+  admin(request); const ids = request.data?.ids;
+  if (!Array.isArray(ids) || !ids.length || ids.length > 10 || ids.some(value => !/^[a-f0-9]{64}$/.test(value))) throw new HttpsError("invalid-argument", "Egyszerre 1–10 jelölt választható.");
+  const results = [];
+  for (const candidateId of [...new Set(ids)]) {
+    try {
+      const result = await db.runTransaction(async tx => {
+        const candidateRef = db.collection("outreach_candidates").doc(candidateId), messageRef = db.collection("outreach_messages").doc(candidateId), suppressionRef = db.collection("outreach_suppressions").doc(candidateId);
+        const [candidateSnap, messageSnap, suppressionSnap] = await Promise.all([tx.get(candidateRef), tx.get(messageRef), tx.get(suppressionRef)]);
+        if (!candidateSnap.exists) fail("NOT_FOUND");
+        if (messageSnap.exists) return "already_generated";
+        if (suppressionSnap.exists) fail("SUPPRESSED");
+        const candidate = candidateSnap.data();
+        if (candidate.status !== "researched" || candidate.qualification?.version !== 2 || !candidate.emailVerifiedAt || !candidate.sourceUrl) fail("QUALIFICATION_REQUIRED");
+        const draft = { recipient: candidate.recipient, companyName: candidate.companyName, companyDescription: candidate.companyDescription, ...composeProspectDraft(candidate, candidate.qualification), sourceUrl: candidate.sourceUrl, emailVerifiedAt: candidate.emailVerifiedAt, sourceContentHash: candidate.sourceContentHash, qualification: candidate.qualification, status: "draft", source: "ai_research", researchId: candidate.researchId, model: candidate.model, createdAt: new Date(), updatedAt: new Date() };
+        draft.revision = revision(draft); tx.create(messageRef, draft); tx.update(candidateRef, { status: "generated", messageId: candidateId, generatedAt: new Date(), updatedAt: new Date() }); return "generated";
+      });
+      results.push({ id: candidateId, status: result });
+    } catch (error) { results.push({ id: candidateId, status: "blocked", errorCode: ["NOT_FOUND","SUPPRESSED","QUALIFICATION_REQUIRED"].includes(error.code) ? error.code : "CHECK_REQUIRED" }); }
+  }
+  return { results };
 });
 exports.approveOutreach = onCall({ ...base, secrets: [smtp], timeoutSeconds: 300 }, async request => {
   admin(request); const items = request.data?.items;

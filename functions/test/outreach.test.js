@@ -67,6 +67,7 @@ test("outreach: admin controls have matching HTML IDs and server-owned collectio
   const ui=fs.readFileSync(path.join(root,"js/outreach-ui.js"),"utf8"),html=fs.readFileSync(path.join(root,"pages/admin.html"),"utf8"),rules=fs.readFileSync(path.join(root,"firestore.rules"),"utf8");
   for(const [,id]of ui.matchAll(/\$\("([^"]+)"\)/g))assert(html.includes(`id="${id}"`),id);
   for(const key of ["outreach_research","outreach_replies","outreach_controls"])assert(rules.includes(`match /${key}/{id} { allow read: if isAdmin(); allow write: if false; }`));
+  assert.match(rules,/match \/outreach_candidates\/\{candidateId\} \{\s*allow read: if isAdmin\(\);\s*allow write: if false;/);
 });
 test("outreach: inbox only reads matched reply bodies, imports once and suppresses unsubscribe",async()=>{
   const {db,row,id}=fixture();db.seed(`outreach_messages/${id}`,{...row,status:"sent",approvedAt:new Date(),sentAt:new Date()});
@@ -80,7 +81,7 @@ test("outreach: inbox only reads matched reply bodies, imports once and suppress
 });
 test("outreach: all callable mutations reject missing or ordinary-user auth",async()=>{
   const api=require("../index");
-  for(const name of ["researchOutreach","saveOutreachDraft","approveOutreach","suppressOutreach","syncOutreachReplies"]){
+  for(const name of ["researchOutreach","generateOutreachDrafts","saveOutreachDraft","approveOutreach","suppressOutreach","syncOutreachReplies"]){
     for(const auth of [undefined,{uid:"ordinary",token:{admin:false}}]) await assert.rejects(()=>api[name].run({auth,data:{}}),{code:"permission-denied"});
   }
 });

@@ -201,6 +201,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /outreach_candidates/{candidateId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     function validCampaign() {
       let d = request.resource.data;
       return d.keys().hasAll(['name','platform','destination','creative','budgetMinor','currency','budgetPeriod','status','source','createdAt','updatedAt','createdBy'])
