@@ -61,6 +61,7 @@ test("send affordance is per-message and calls the same confirmed approval path"
   assert.match(admin,/<details class="surface"><summary>Régi importált lista/);
   assert.match(html,/data-outreach-stage="compose"/);assert.match(html,/id="generateCandidateDrafts"/);
   assert.match(ui,/generateOutreachDrafts/);assert.match(ui,/data-select-candidate=/);
+  assert.match(ui,/Automatikus jogalap-ellenőrzés/);assert.match(ui,/initialReview\(r\)/);assert.match(ui,/hozzájáruláshoz valós, dokumentált bizonyíték szükséges/);
 });
 test("research UI follows a server-side job instead of presenting processing as a failure",()=>{
   const fs=require("node:fs"),path=require("node:path"),root=path.resolve(__dirname,"../..");

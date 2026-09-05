@@ -8,7 +8,7 @@ const { research } = require("./outreach-research");
 const { approveAndSend } = require("./outreach-service");
 const { syncInbox } = require("./outreach-inbox");
 const { composeProspectDraft } = require("./outreach-copy");
-const { hash, draftFields, revision, fail } = require("./outreach-domain");
+const { hash, draftFields, revision, fail, automaticLegalReview } = require("./outreach-domain");
 const db = getFirestore(), ai = defineSecret("OPENAI_API_KEY"), smtp = defineSecret("SMTP_PASS");
 function admin(request) { if (request.auth?.token?.admin !== true) throw new HttpsError("permission-denied", "Adminjogosultság szükséges."); }
 function id(raw) { if (!/^[a-f0-9]{64}$/.test(raw || "")) throw new HttpsError("invalid-argument", "Hibás azonosító."); return raw; }
@@ -44,7 +44,7 @@ exports.generateOutreachDrafts = onCall(base, async request => {
         if (suppressionSnap.exists) fail("SUPPRESSED");
         const candidate = candidateSnap.data();
         if (candidate.status !== "researched" || candidate.qualification?.version !== 2 || !candidate.emailVerifiedAt || !candidate.sourceUrl) fail("QUALIFICATION_REQUIRED");
-        const draft = { recipient: candidate.recipient, companyName: candidate.companyName, companyDescription: candidate.companyDescription, ...composeProspectDraft(candidate, candidate.qualification), sourceUrl: candidate.sourceUrl, emailVerifiedAt: candidate.emailVerifiedAt, sourceContentHash: candidate.sourceContentHash, qualification: candidate.qualification, status: "draft", source: "ai_research", researchId: candidate.researchId, model: candidate.model, createdAt: new Date(), updatedAt: new Date() };
+        const draft = { recipient: candidate.recipient, companyName: candidate.companyName, companyDescription: candidate.companyDescription, ...composeProspectDraft(candidate, candidate.qualification), sourceUrl: candidate.sourceUrl, emailVerifiedAt: candidate.emailVerifiedAt, sourceContentHash: candidate.sourceContentHash, qualification: candidate.qualification, legalReview: candidate.legalReview || automaticLegalReview(candidate), status: "draft", source: "ai_research", researchId: candidate.researchId, model: candidate.model, createdAt: new Date(), updatedAt: new Date() };
         draft.revision = revision(draft); tx.create(messageRef, draft); tx.update(candidateRef, { status: "generated", messageId: candidateId, generatedAt: new Date(), updatedAt: new Date() }); return "generated";
       });
       results.push({ id: candidateId, status: result });

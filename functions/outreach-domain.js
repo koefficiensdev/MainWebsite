@@ -32,6 +32,21 @@ function revision(row) {
 function corporateRole(row) {
   return /\b(kft|bt|zrt|nyrt)\b/i.test(row.companyName) && /^(info|iroda|kapcsolat|hello|office|ugyfelszolgalat|ajanlat|szerviz|service|sales|ertekesites)@/.test(row.recipient) && !/@(gmail|yahoo|hotmail|outlook|freemail|citromail)\./.test(row.recipient);
 }
+function automaticLegalReview(row, checkedAt = new Date()) {
+  if (corporateRole(row) && row.sourceUrl && row.emailVerifiedAt) return {
+    status: "verified_corporate_role",
+    legalBasis: "corporate_role",
+    legalNote: `Automatikusan ellenőrizve: a(z) ${row.companyName} jogi személy nyilvános üzleti forrásában a(z) ${row.recipient} saját domaines általános céges címként szerepel.`,
+    checkedAt
+  };
+  return {
+    status: "consent_required",
+    legalBasis: "",
+    legalNote: `Automatikus ellenőrzés: a(z) ${row.recipient} címhez az OVEXI-nek adott előzetes marketing-hozzájárulás nincs dokumentálva.`,
+    requiredLegalBasis: "consent",
+    checkedAt
+  };
+}
 function checkApproval(row, raw) {
   if (row.status !== "draft") fail("NOT_DRAFT");
   if (row.source === "ai_research" && (row.qualification?.version !== 2 || !["no_website","website_refresh"].includes(row.qualification?.targetMode))) fail("QUALIFICATION_REQUIRED");
@@ -50,4 +65,4 @@ function replyKind(subject, body, autoSubmitted = "") {
   const first = String(body).split(/\n>|\nOn .*wrote:|\n.*írta:/)[0].trim();
   return /^(leiratkoz[aá]s|unsubscribe|nem k[eé]rek t[oö]bb (levelet|megkeres[eé]st))[.!\s]*$/i.test(first) || /^(leiratkoz[aá]s|unsubscribe)$/i.test(String(subject).trim()) ? "unsubscribe" : "reply";
 }
-module.exports = { hash, fail, email, text, publicUrl, publicIp, draftFields, revision, corporateRole, checkApproval, FOOTER, replyIds, replyKind };
+module.exports = { hash, fail, email, text, publicUrl, publicIp, draftFields, revision, corporateRole, automaticLegalReview, checkApproval, FOOTER, replyIds, replyKind };

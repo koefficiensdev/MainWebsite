@@ -1,7 +1,7 @@
 "use strict";
 const OpenAI = require("openai");
 const { reserveAiBudget, settleAiBudget } = require("./ai-budget");
-const { hash, email, text, publicUrl, fail } = require("./outreach-domain");
+const { hash, email, text, publicUrl, fail, automaticLegalReview } = require("./outreach-domain");
 const { safeProposal } = require("./outreach-copy");
 const { verifySource, emailCandidates } = require("./outreach-source");
 const { qualificationSchema, qualify, checkEmailWebsite, isCited, citationKey } = require("./outreach-qualification");
@@ -119,6 +119,7 @@ async function research(db, apiKey, uid, raw) {
         }
         const verified = osmSeed ? { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: osmSeed.emailVerifiedAt || new Date(), verificationMethod: osmSeed.verificationMethod || "openstreetmap_public_data" } : await verifySource(sourceUrl, recipient);
         const row = { recipient, companyName: text(candidate.companyName, 160), companyDescription: text(candidate.companyDescription, 1200), proposal: safeProposal(candidate), ...verified, qualification, status: "researched", source: "ai_research", researchId: requestId, model: "gpt-5-mini", createdAt: new Date(), updatedAt: new Date() };
+        row.legalReview = automaticLegalReview(row);
         await candidateRef.create(row); found++;
       } catch(error) { excluded(error); skipped++; }
     }

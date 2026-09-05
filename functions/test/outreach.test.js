@@ -29,6 +29,12 @@ test("outreach: individual/general mailbox requires consent instead of corporate
   assert.throws(()=>d.checkApproval(individual,raw),{code:"CONSENT_REQUIRED"});
   assert.doesNotThrow(()=>d.checkApproval(individual,{...raw,legalBasis:"consent"}));
 });
+test("outreach: legal basis and evidence are derived only for a verified corporate role address",()=>{
+  const {row}=fixture(),corporate=d.automaticLegalReview(row,new Date("2026-09-05T12:00:00Z"));
+  assert.equal(corporate.status,"verified_corporate_role");assert.equal(corporate.legalBasis,"corporate_role");assert(corporate.legalNote.length>=20);assert.match(corporate.legalNote,/info@example\.hu/);
+  const personal=d.automaticLegalReview({...row,companyName:"Hair Beauty Fodrászat",recipient:"hairbeauty.kft@gmail.com"});
+  assert.equal(personal.status,"consent_required");assert.equal(personal.legalBasis,"");assert.equal(personal.requiredLegalBasis,"consent");assert.match(personal.legalNote,/nincs dokumentálva/);
+});
 test("outreach: edits, missing evidence and missing legal review block sending",()=>{
   const {row,item}=fixture();assert.throws(()=>d.checkApproval({...row,body:"Changed"},item),{code:"DRAFT_CHANGED"});
   assert.throws(()=>d.checkApproval({...row,emailVerifiedAt:null},item),{code:"SOURCE_REQUIRED"});

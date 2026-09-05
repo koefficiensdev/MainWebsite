@@ -10,7 +10,9 @@ async function approveAndSend(db, transport, uid, item) {
   const quota = db.collection("outreach_controls").doc(`day-${day}`);
   const row = await db.runTransaction(async tx => {
     const snap = await tx.get(ref); if (!snap.exists) fail("NOT_FOUND");
-    const data = snap.data(); checkApproval(data, item);
+    const data = snap.data(), automatic = data.legalReview?.status === "verified_corporate_role" ? data.legalReview : null;
+    const approval = { ...item, legalBasis: item.legalBasis || automatic?.legalBasis, legalNote: item.legalNote || automatic?.legalNote };
+    checkApproval(data, approval);
     const suppress = db.collection("outreach_suppressions").doc(hash(data.recipient));
     const contact = db.collection("outreach_contacts").doc(hash(data.recipient));
     const domain = db.collection("outreach_contacts").doc(`domain-${hash(data.recipient.split("@")[1])}`);
@@ -22,7 +24,7 @@ async function approveAndSend(db, transport, uid, item) {
     tx.set(quota, { count: Number(count.data()?.count || 0) + 1, updatedAt: now });
     tx.set(contact, { messageId: item.id, createdAt: now });
     tx.set(domain, { messageId: item.id, createdAt: now });
-    tx.update(ref, { status: "sending", approvedBy: uid, approvedAt: now, approvedRevision: item.revision, legalBasis: item.legalBasis, legalNote: item.legalNote, providerMessageId, unsubscribeTokenHash: hash(unsubscribeToken), updatedAt: now });
+    tx.update(ref, { status: "sending", approvedBy: uid, approvedAt: now, approvedRevision: item.revision, legalBasis: approval.legalBasis, legalNote: approval.legalNote, providerMessageId, unsubscribeTokenHash: hash(unsubscribeToken), updatedAt: now });
     return { ...data, providerMessageId, unsubscribeToken };
   });
   // A committed claim is never retried, even after a crash/ambiguous SMTP result.
