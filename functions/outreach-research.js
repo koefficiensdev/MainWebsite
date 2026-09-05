@@ -5,7 +5,9 @@ const { hash, email, text, publicUrl, fail } = require("./outreach-domain");
 const { safeProposal } = require("./outreach-copy");
 const { verifySource, emailCandidates } = require("./outreach-source");
 const { qualificationSchema, qualify, checkEmailWebsite, isCited } = require("./outreach-qualification");
-const discoveryTarget = count => Math.min(20, Math.max(10, count * 3));
+// Independent search rounds need a smaller pool than the former single-pass
+// request, which keeps one-company checks inexpensive while retaining replacements.
+const discoveryTarget = count => Math.min(20, Math.max(3, count * 2));
 function discoveredEmail(value) {
   const candidates=emailCandidates(value);
   if (!candidates.length) fail("INVALID_EMAIL");

@@ -3,8 +3,8 @@ const test=require("node:test"),assert=require("node:assert/strict");
 const {discoveryTarget,discoveredEmail}=require("../outreach-research");
 const fs=require("node:fs"),path=require("node:path");
 test("research examines a larger bounded pool so rejected candidates can be replaced",()=>{
-  assert.equal(discoveryTarget(1),10);
-  assert.equal(discoveryTarget(5),15);
+  assert.equal(discoveryTarget(1),3);
+  assert.equal(discoveryTarget(5),10);
   assert.equal(discoveryTarget(20),20);
 });
 test("research normalizes public email formats and selects the first verifiable address",()=>{
