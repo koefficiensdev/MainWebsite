@@ -5,7 +5,7 @@ const { hash, email, text, publicUrl, fail } = require("./outreach-domain");
 const { safeProposal } = require("./outreach-copy");
 const { verifySource, emailCandidates } = require("./outreach-source");
 const { qualificationSchema, qualify, checkEmailWebsite, isCited, citationKey } = require("./outreach-qualification");
-const { discoverOsm, normalizeTrustedSeeds } = require("./outreach-osm");
+const { discoverOsm, normalizeTrustedSeeds, osmCacheKey } = require("./outreach-osm");
 // Keep the candidate pool bounded so sparse searches remain inexpensive.
 const discoveryTarget = count => Math.min(20, Math.max(3, count * 2));
 function discoveredEmail(value) {
@@ -36,7 +36,13 @@ async function research(db, apiKey, uid, raw) {
     await ref.update({ budgetReservedUsd: 1 });
     const fields = ["companyName", "companyDescription", "recipient", "sourceUrl"], candidateTarget = discoveryTarget(count);
     const browserOsmCandidates = targetMode === "no_website" ? normalizeTrustedSeeds(raw.trustedSeedCandidates) : [];
-    const osmCandidates = browserOsmCandidates.length ? browserOsmCandidates : targetMode === "no_website" ? await discoverOsm(criteria).catch(() => []) : [];
+    let cachedOsmCandidates = [];
+    const cacheKey = targetMode === "no_website" ? osmCacheKey(criteria) : "";
+    if (!browserOsmCandidates.length && cacheKey) {
+      const cache = await db.collection("outreach_osm_cache").doc(cacheKey).get(), data = cache.data(), updatedAt = data?.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data?.updatedAt || 0);
+      if (cache.exists && Number.isFinite(updatedAt.getTime()) && Date.now() - updatedAt.getTime() <= 7 * 86400000) cachedOsmCandidates = normalizeTrustedSeeds(data.rows).map(row => ({ ...row, emailVerifiedAt: updatedAt, verificationMethod: "openstreetmap_cached_public_data" }));
+    }
+    const osmCandidates = browserOsmCandidates.length ? browserOsmCandidates : cachedOsmCandidates.length ? cachedOsmCandidates : targetMode === "no_website" ? await discoverOsm(criteria).catch(() => []) : [];
     const osmSeeds = osmCandidates.slice(0, Math.min(20, candidateTarget * 2)), osmByRecipient = new Map(osmSeeds.map(row => [row.recipient, row]));
     const proposalSchema = { type: "object", properties: {
       customerRequest: { type: "string" },
@@ -98,7 +104,7 @@ async function research(db, apiKey, uid, raw) {
         if (osmSeed && (citationKey(osmSeed.sourceUrl) !== citationKey(sourceUrl) || String(candidate.companyName).trim() !== osmSeed.companyName)) fail("OSM_IDENTITY_CHANGED");
         const sourceFetcher = osmSeed ? async (url, contactEmail, _redirects, options = {}) => {
           if (citationKey(url) !== citationKey(osmSeed.sourceUrl) || (contactEmail !== null && email(contactEmail) !== osmSeed.recipient)) return verifySource(url, contactEmail, 0, options);
-          return { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: new Date(), ...(options.includeText ? { evidenceText: osmSeed.evidenceText } : {}) };
+          return { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: osmSeed.emailVerifiedAt || new Date(), ...(options.includeText ? { evidenceText: osmSeed.evidenceText } : {}) };
         } : verifySource;
         let qualification;
         try { qualification = await qualify({ ...candidate.qualification, companyName: candidate.companyName, contactEmail: recipient }, sources, searchedQueries, sourceFetcher, new Date(), targetMode, sourceUrl); }
@@ -107,7 +113,7 @@ async function research(db, apiKey, uid, raw) {
           try { qualification.emailDomainCheck = await checkEmailWebsite(recipient); }
           catch { excludedByQualification++; skipped++; continue; }
         }
-        const verified = osmSeed ? { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: new Date(), verificationMethod: osmSeed.verificationMethod || "openstreetmap_public_data" } : await verifySource(sourceUrl, recipient);
+        const verified = osmSeed ? { sourceUrl: osmSeed.sourceUrl, sourceContentHash: osmSeed.sourceContentHash, emailVerifiedAt: osmSeed.emailVerifiedAt || new Date(), verificationMethod: osmSeed.verificationMethod || "openstreetmap_public_data" } : await verifySource(sourceUrl, recipient);
         const row = { recipient, companyName: text(candidate.companyName, 160), companyDescription: text(candidate.companyDescription, 1200), proposal: safeProposal(candidate), ...verified, qualification, status: "researched", source: "ai_research", researchId: requestId, model: "gpt-5-mini", createdAt: new Date(), updatedAt: new Date() };
         await candidateRef.create(row); found++;
       } catch(error) { excluded(error); skipped++; }

@@ -21,6 +21,12 @@ function osmPlan(criteria) {
 function osmQuery(plan) {
   return `[out:json][timeout:45];area["name"="${plan.city}"]["boundary"="administrative"]->.a;(nwr(area.a)${plan.filter}["email"][!"website"][!"contact:website"];nwr(area.a)${plan.filter}["contact:email"][!"website"][!"contact:website"];);out tags center qt;`;
 }
+function osmCacheKey(criteria) {
+  const plan = osmPlan(criteria);
+  if (!plan) return "";
+  const sector = plan.filter.match(/="([^"]+)"/)?.[1] || plan.label;
+  return `${plan.city}_${sector}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9_-]/g, "_").toLowerCase();
+}
 const OVERPASS_ENDPOINTS = [
   { hostname: "overpass-api.de", path: "/api/interpreter" },
   { hostname: "overpass.private.coffee", path: "/api/interpreter" }
@@ -55,7 +61,7 @@ function normalizeElements(payload, plan) {
     const address = [tags["addr:postcode"], plan.city, tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(" ");
     const sourceUrl = `https://www.openstreetmap.org/${item.type}/${item.id}`;
     const evidenceText = `${tags.name} ${plan.label} ${address} ${recipient}`.replace(/\s+/g," ").trim();
-    rows.push({ companyName: String(tags.name).slice(0,160), companyDescription: `${plan.city} területén nyilvántartott ${plan.label}${address ? `, ${address}` : ""}.`, recipient, sourceUrl, evidenceText, sourceContentHash: hash(JSON.stringify(tags)) });
+    rows.push({ companyName: String(tags.name).slice(0,160), companyDescription: `${plan.city} területén nyilvántartott ${plan.label}${address ? `, ${address}` : ""}.`, recipient, sourceUrl, evidenceText, sourceContentHash: hash(JSON.stringify(tags)), emailVerifiedAt: new Date(), verificationMethod: "openstreetmap_public_data" });
   }
   return rows;
 }
@@ -74,9 +80,9 @@ function normalizeTrustedSeeds(raw) {
       seen.add(recipient);
       const canonicalUrl = `https://www.openstreetmap.org${sourceUrl.pathname.replace(/\/$/, "")}`;
       const evidenceText = `${companyName} ${companyDescription} ${recipient}`.replace(/\s+/g, " ").trim();
-      rows.push({ companyName, companyDescription, recipient, sourceUrl: canonicalUrl, evidenceText, sourceContentHash: hash(evidenceText), verificationMethod: "openstreetmap_admin_public_data" });
+      rows.push({ companyName, companyDescription, recipient, sourceUrl: canonicalUrl, evidenceText, sourceContentHash: hash(evidenceText), emailVerifiedAt: new Date(), verificationMethod: "openstreetmap_admin_public_data" });
     } catch {}
   }
   return rows;
 }
-module.exports = { discoverOsm, normalizeElements, normalizeTrustedSeeds, osmPlan, osmQuery, postOverpass };
+module.exports = { discoverOsm, normalizeElements, normalizeTrustedSeeds, osmCacheKey, osmPlan, osmQuery, postOverpass };
