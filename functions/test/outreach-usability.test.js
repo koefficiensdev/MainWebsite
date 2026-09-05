@@ -4,13 +4,16 @@ const {composeProspectDraft}=require("../outreach-copy");
 const {qualify,isBusinessProfile,checkEmailWebsite}=require("../outreach-qualification");
 const {emailCandidates}=require("../outreach-source");
 const model=import("../../js/admin-model.js");
-test("new outreach copy is short plain Hungarian without unsupported promises or translated jargon",()=>{
+test("new outreach copy is tailored, purchase-ready and keeps business approval explicit",()=>{
   for(const websiteStatus of ["not_found","outdated"]){
-    const d=composeProspectDraft({companyName:"Teszt Műhely"},{websiteStatus});
-    assert.match(d.subject,/Teszt Műhely/);assert(d.body.split(/\s+/).length<=110);
-    assert.match(d.body,/69\s990 Ft/);assert.match(d.body,/fenntartás külön fizetendő/);
-    assert.doesNotMatch(d.body,/landing|konverz|szállítás|díjmentes|garantál|növeli|hárompontos|foglalás/i);
-    if(websiteStatus==="not_found")assert.match(d.body,/ha van, elnézést/);
+    const d=composeProspectDraft({companyName:"Teszt Autószerviz",companyDescription:"Független budapesti autószerviz",proposal:{customerRequest:"az ügyfél megadhatja az autó típusát, a tapasztalt hibát és a megfelelő időpontokat",businessControl:"a műhely átnézheti a kérést, további adatot kérhet, elfogadhatja vagy másik időpontot javasolhat",workflowBenefit:"kevesebb adatot kell telefonon újra bekérni, és követhető marad minden válaszra váró megkeresés"}},{websiteStatus});
+    assert.match(d.subject,/Teszt Autószerviz/);assert(d.body.split(/\s+/).length<=260);
+    assert.match(d.body,/69\s990 Ft/);assert.match(d.body,/OVEXI1EV/);assert.match(d.body,/első 12 hónap/);
+    assert.match(d.body,/https:\/\/ovexi\.hu\/\?category=website#csomagok/);
+    assert.match(d.body,/csak az Önök jóváhagyása után/);assert.match(d.body,/autó típusát/);
+    assert.match(d.body,/Legfeljebb 6 aloldalt/);assert.match(d.body,/brief alapján/);
+    assert.doesNotMatch(d.body,/landing|konverz|garantál|növeli|automatikusan elfogad/i);
+    if(websiteStatus==="not_found")assert.match(d.body,/tekintsék tárgytalannak/);
   }
 });
 test("no-website mode cannot return a company with an old existing site",async()=>{
