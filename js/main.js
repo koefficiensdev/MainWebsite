@@ -488,7 +488,13 @@ document.querySelectorAll(".catalog-tab").forEach(tab=>{const active=tab.dataset
 renderCatalog();
 renderCart();
 renderReceipt();
+const directProductId=new URLSearchParams(location.search).get("add"),directProduct=getProduct(directProductId);
 if(submission.pending)openCheckout();
+else if(directProduct&&directProduct.availability!=="retired"){
+  addToCart(directProduct.id);
+  openCart();
+  const cleanUrl=new URL(location.href);cleanUrl.searchParams.delete("add");history.replaceState(null,"",cleanUrl.pathname+cleanUrl.search+cleanUrl.hash);
+}
 window.addEventListener('beforeunload',event=>{if(submission.pending){event.preventDefault();event.returnValue='';}});
 initCookieConsent();
 logAnalytics("page_view", "storefront");

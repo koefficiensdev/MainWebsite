@@ -92,6 +92,10 @@
     ],
     "rewrites": [
       {
+        "source": "/ceges-weboldal",
+        "destination": "/pages/ceges-weboldal-landing.html"
+      },
+      {
         "source": "/mintak/autoszerviz",
         "destination": "/pages/minta-autoszerviz.html"
       },
@@ -149,6 +153,15 @@
       }
     ],
     "headers": [
+      {
+        "source": "/ceges-weboldal",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, follow"
+          }
+        ]
+      },
       {
         "source": "/mintak/**",
         "headers": [
