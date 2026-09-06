@@ -502,3 +502,56 @@ logAnalytics("page_view", "storefront");
 const paymentState = new URLSearchParams(location.search).get("payment");
 if (["success", "returned"].includes(paymentState)) showToast("Visszaérkeztél a fizetési oldalról. A fizetés állapotát a szolgáltató visszajelzése alapján ellenőrizzük.");
 if (paymentState === "cancelled") showToast("A fizetés megszakadt, a rendelésed nem veszett el.");
+
+const serviceGuide = {
+  website: { title: "Céges weboldal üzleti funkcióval", copy: "Bemutatja a vállalkozást, és rendezetten gyűjti az érdeklődők igényeit." },
+  marketing: { title: "Havi marketingcsomag", copy: "Tervezhető tartalommal és jóváhagyható kampányanyagokkal segít rendszeresen jelen lenni." },
+  maintenance: { title: "Weboldal-karbantartás", copy: "Figyelés, frissítések és mentések segítenek megelőzni a kellemetlen leállásokat." }
+};
+document.querySelectorAll("[data-guide-category]").forEach((button) => button.addEventListener("click", () => {
+  const category = button.dataset.guideCategory, item = serviceGuide[category], result = document.querySelector("[data-guide-result]");
+  document.querySelectorAll("[data-guide-category]").forEach((option) => {
+    const selected = option === button;
+    option.classList.toggle("is-selected", selected);
+    option.setAttribute("aria-pressed", String(selected));
+  });
+  document.querySelector("[data-guide-title]").textContent = item.title;
+  document.querySelector("[data-guide-copy]").textContent = item.copy;
+  result.hidden = false;
+  result.dataset.category = category;
+  logAnalytics("service_guide_selected", category);
+}));
+document.querySelector("[data-guide-action]")?.addEventListener("click", (event) => {
+  const category = event.currentTarget.closest("[data-guide-result]").dataset.category;
+  document.querySelector(`.catalog-tab[data-category="${category}"]`)?.click();
+  document.getElementById("csomagok")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+const progress = document.createElement("div");
+progress.className = "reading-progress";
+progress.setAttribute("aria-hidden", "true");
+document.body.prepend(progress);
+const updateProgress = () => {
+  const total = document.documentElement.scrollHeight - innerHeight;
+  progress.style.transform = `scaleX(${total > 0 ? Math.min(1, scrollY / total) : 0})`;
+};
+addEventListener("scroll", updateProgress, { passive: true });
+updateProgress();
+
+const revealTargets = document.querySelectorAll(".service-overview article,.showcase-card,.product-card,.process-grid li,.guardrail-cards article,.faq-list details");
+if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  revealTargets.forEach((element) => element.classList.add("ux-reveal"));
+  const revealObserver = new IntersectionObserver((entries, observer) => entries.forEach((entry) => {
+    if (entry.isIntersecting) { entry.target.classList.add("is-visible"); observer.unobserve(entry.target); }
+  }), { threshold: .12 });
+  revealTargets.forEach((element) => revealObserver.observe(element));
+}
+
+const navSections = [...document.querySelectorAll("#mainNav a[href^='#']")].map((link) => ({ link, section: document.querySelector(link.getAttribute("href")) })).filter((item) => item.section);
+if ("IntersectionObserver" in window) {
+  const navObserver = new IntersectionObserver((entries) => entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    navSections.forEach(({ link, section }) => link.classList.toggle("is-current", section === entry.target));
+  }), { rootMargin: "-25% 0px -65%", threshold: 0 });
+  navSections.forEach(({ section }) => navObserver.observe(section));
+}
