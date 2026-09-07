@@ -4,6 +4,7 @@ const assert=require("node:assert/strict");
 const fs=require("node:fs");
 const path=require("node:path");
 const model=import("../../js/admin-model.js");
+const analyticsModel=import("../../js/analytics-model.js");
 test("admin: manual contacted lead and AI drafts never count as sent email",async()=>{
   const {summarize}=await model;
   const report=summarize({leads:[{status:"contacted"}],outreach_messages:[{status:"draft"},{status:"sent",source:"manual",sentAt:1},{status:"sent",source:"provider",sentAt:1},{status:"sent",source:"provider",sentAt:1,providerMessageId:"confirmed"}]});
@@ -53,16 +54,33 @@ test("admin: expenses require real dates, known currencies and existing campaign
   assert.throws(()=>validateExpense({...input,campaignId:"missing"}));
   assert.throws(()=>validateExpense({...input,currency:"BTC"}));
 });
-test("admin: page structure groups acquisition into one of eight main panels",()=>{
+test("admin: page structure groups acquisition and analytics into nine main panels",()=>{
   const root=path.resolve(__dirname,"../..");
   const html=fs.readFileSync(path.join(root,"pages/admin.html"),"utf8"),js=fs.readFileSync(path.join(root,"js/admin.js"),"utf8");
   const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(ids.length,new Set(ids).size);
   for(const [,id] of js.matchAll(/\$\("([^"]+)"\)/g))assert.ok(ids.includes(id),`Missing ${id}`);
-  assert.equal([...html.matchAll(/data-panel=/g)].length,8);
+  assert.equal([...html.matchAll(/data-panel=/g)].length,9);
   assert.equal([...html.matchAll(/data-outreach-panel=/g)].length,6);
   assert.match(html,/data-admin-tab="outreach">03 <span>Ügyfélszerzés<\/span>/);
   assert.doesNotMatch(html,/data-admin-tab="leads"/);
+  assert.match(html,/data-admin-tab="analytics">09 <span>Statisztika/);
   assert.match(html,/id="dashboardSection"[^>]*hidden/);assert.match(js,/token\.claims\.admin!==true/);
+});
+test("admin: analytics separates sessions, sources, devices and conversions",async()=>{
+  const {analyzeAnalytics}=await analyticsModel;
+  const createdAt="2026-09-07T10:00:00Z";
+  const base={createdAt,pagePath:"/ceges-weboldal",screenW:390,userAgent:"Mozilla/5.0 (iPhone) Mobile Safari/605.1"};
+  const report=analyzeAnalytics([
+    {...base,sessionId:"session-a",eventType:"page_view",source:"google_organic"},
+    {...base,sessionId:"session-a",eventType:"session_engagement",value:"30"},
+    {...base,sessionId:"session-a",eventType:"click",value:"Ingyenes tervet kérek"},
+    {...base,sessionId:"session-a",eventType:"proposal_submitted"},
+    {...base,sessionId:"session-b",eventType:"page_view",source:"direct",screenW:1440,userAgent:"Chrome/120"}
+  ]);
+  assert.equal(report.metrics.sessions,2);assert.equal(report.metrics.views,2);assert.equal(report.metrics.conversions,1);
+  assert.equal(report.sources.find(row=>row.label==="Google kereső").value,1);
+  assert.equal(report.devices.find(row=>row.label==="Mobil").value,1);
+  assert.equal(report.funnel.at(-1).value,1);
 });
 test("admin: outbound evidence is read-only in rules, campaigns and expenses are admin-only",()=>{
   const rules=fs.readFileSync(path.resolve(__dirname,"../../firestore.rules"),"utf8");

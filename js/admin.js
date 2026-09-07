@@ -7,6 +7,7 @@ import {installBookingSettings} from "./booking-settings-ui.js?v=20260902-3";
 import {installProduction} from "./production-ui.js?v=20260902-3";
 import {installWorkflows} from "./workflow-ui.js?v=20260902-1";
 import {installOutreach} from "./outreach-ui.js?v=20260905-7";
+import {analyzeAnalytics} from "./analytics-model.js?v=20260907-1";
 
 const app=initializeApp({apiKey:"AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",authDomain:"ovexi-6ef38.firebaseapp.com",projectId:"ovexi-6ef38",storageBucket:"ovexi-6ef38.firebasestorage.app",messagingSenderId:"370083022451",appId:"1:370083022451:web:4e3ba562d07641fcef4c06"});
 const auth=getAuth(app),db=getFirestore(app),functions=getFunctions(app,"europe-west1");
@@ -53,12 +54,13 @@ async function loadSource(key,append=false,ticket=epoch){
   try{
     const constraints=[orderBy("createdAt","desc")];
     if(append&&states[key].cursor)constraints.push(startAfter(states[key].cursor));
-    constraints.push(limit(201));
+    const pageSize=key==="analytics_events"?1000:200;
+    constraints.push(limit(pageSize+1));
     const snapshot=await getDocs(query(collection(db,key),...constraints));
     if(ticket!==epoch||!isAdmin)return;
-    const docs=snapshot.docs.slice(0,200),records=docs.map(item=>({...item.data(),id:item.id}));
+    const docs=snapshot.docs.slice(0,pageSize),records=docs.map(item=>({...item.data(),id:item.id}));
     data[key]=append?[...data[key],...records]:records;
-    states[key]={status:"ready",more:snapshot.docs.length>200,cursor:docs.at(-1)||null};
+    states[key]={status:"ready",more:snapshot.docs.length>pageSize,cursor:docs.at(-1)||null};
   }catch{if(ticket!==epoch)return;states[key].status="error";if(!append)data[key]=[];}
   if(ticket===epoch)render();
 }
@@ -86,7 +88,7 @@ function render(){
   $("pipeline").innerHTML=["researched","approved","contacted","replied","won","do_not_contact"].map(status=>{const count=leads.filter(r=>r.status===status).length;return `<div class="pipeline-row"><span>${e(labels[status])}</span><strong>${states.leads.status==="ready"?count:"—"}</strong><div class="bar-track"><span style="width:${count/max*100}%"></span></div></div>`;}).join("");
   $("recentOrders").innerHTML=summary.ordersList.slice(0,5).map(r=>`<div class="compact-row"><div><strong>${e(r.companyName||"—")}</strong><p>${e(r.orderNumber||r.id)} · ${formatDate(r.createdAt)}</p></div>${badge(r.status)}</div>`).join("")||sourceEmpty("orders","Még nincs rendelés ebben az időszakban.");
   $("integrations").innerHTML=[["Rendelések","orders","Rögzített igények; a lista nem fizetési bizonyíték."],["Tranzakciós e-mail","commerce_tasks","A „kész” feladat nem igazolja a postaládába érkezést."],["Hirdető e-mailek","outreach_messages","Külön jóváhagyás után küldhető. Válaszok: Rackhost IMAP; nincs automatikus válaszadás."],["Hirdetési csatornák","campaigns","Meta / Google Ads kapcsolat nincs bekötve. Kézi nyilvántartás."],["Számlázás","payments","Számlaállapot a fizetési naplóban; Billingo aktiválás még szükséges."],["AI-gyártás","production_jobs","Szerkeszthető szöveg, HTML, kreatív és tartalomnaptár. A publikálás külön jóváhagyás."]].map(([name,key,note])=>`<article class="integration"><span class="small">${states[key].status==="ready"?"Napló elérhető":"Állapot nem ellenőrizhető"}</span><h3>${name}</h3><p>${note}</p></article>`).join("");
-  renderProposalRequests();renderOrders();renderMessages();renderCampaigns(summary);renderFinance(summary);renderLeads();renderCustomers();renderMaintenance();renderOperations();
+  renderProposalRequests();renderOrders();renderMessages();renderCampaigns(summary);renderFinance(summary);renderLeads();renderCustomers();renderMaintenance();renderOperations();renderAnalytics();
   document.querySelectorAll("[data-more]").forEach(button=>{const state=states[button.dataset.more];button.hidden=!state.more;button.disabled=state.status==="loading";});
 }
 function metric([title,total,note]){return `<article class="metric"><span>${e(title)}</span><strong>${e(total)}</strong><small>${e(note)}</small></article>`;}
@@ -130,6 +132,30 @@ function renderOperations(){
   production.render();bookingSettings.render();
   $("notificationList").innerHTML=search([...(data.customer_notifications||[]).map(r=>({...r,collection:"customer_notifications"})),...(data.internal_alerts||[]).map(r=>({...r,collection:"internal_alerts"})),...(data.booking_notifications||[]).map(r=>({...r,collection:"booking_notifications"}))]).map(row=>`<div class="compact-row"><div><strong>${e(notificationKinds[row.type]||row.title||row.type)}</strong><p>${e(data.orders.find(x=>x.id===row.orderId)?.orderNumber||row.orderId)} · ${formatDate(row.createdAt)}</p></div>${badge(row.status)}${["blocked","retry"].includes(row.status)?`<button type="button" data-retry-notification="${e(row.id)}" data-notification-collection="${e(row.collection)}">Újrapróbálás</button>`:""}</div>`).join("")||sourceEmpty("customer_notifications","Még nincs ügyfélértesítés.");
 }
+function renderAnalytics(){
+  const state=states.analytics_events;
+  if(state.status!=="ready"){
+    $("analyticsMetrics").innerHTML=state.status==="error"?empty("A statisztikai adatok nem érhetők el. Ellenőrizd az adminjogosultságot."):empty("Statisztikai adatok betöltése…");
+    for(const id of ["analyticsTrend","analyticsSources","analyticsDevices","analyticsPages","analyticsBrowsers","analyticsFunnel","analyticsTargets","analyticsReferrers"])$(id).innerHTML="";
+    return;
+  }
+  const stats=analyzeAnalytics(data.analytics_events,$("dateFrom").value,$("dateTo").value),m=stats.metrics;
+  $("analyticsCoverage").textContent=`${stats.rows.length} esemény${state.more?"+":""}`;
+  $("analyticsMetrics").innerHTML=[["Munkamenetek",m.sessions,"Hozzájárulással mért látogatások"],["Oldalmegtekintések",m.views,"Minden megnyitott oldal"],["Átlagos aktivitás",formatDuration(m.averageDuration),"Mért aktív idő"],["Ajánlat / rendelés",m.conversions,"Beküldött konverzió"],["Konverziós arány",percent(m.conversionRate),"Konverzió / munkamenet"],["Rövid látogatás",percent(m.shortRate),"Becsült, interakció nélkül"],["50%-ig görgetett",m.scroll50,"Munkamenet"],["75%-ig görgetett",m.scroll75,"Munkamenet"]].map(metric).join("");
+  $("analyticsSources").innerHTML=analyticsBars(stats.sources,"Nincs mért forgalmi forrás.");
+  $("analyticsDevices").innerHTML=analyticsBars(stats.devices,"Nincs eszközadat.");
+  $("analyticsBrowsers").innerHTML=analyticsBars(stats.browsers,"Nincs böngészőadat.");
+  $("analyticsPages").innerHTML=analyticsTable(stats.pages.map(row=>[row.label,`${row.value} megtekintés · ${row.sessions} munkamenet`]),"Nincs mért oldalmegtekintés.");
+  $("analyticsTargets").innerHTML=analyticsTable(stats.targets.slice(0,12).map(row=>[row.label,`${row.value} kattintás`]),"Még nincs mért kattintás.");
+  $("analyticsReferrers").innerHTML=analyticsTable(stats.referrers.slice(0,12).map(row=>[row.label,`${row.value} munkamenet`]),"Nincs külső hivatkozó oldal.");
+  const maxTrend=Math.max(1,...stats.trends.map(row=>row.value));
+  $("analyticsTrend").innerHTML=stats.trends.length?stats.trends.slice(-31).map(row=>`<div class="trend-column" title="${e(row.label)} · ${e(row.value)} megtekintés"><span style="height:${Math.max(5,row.value/maxTrend*100)}%"></span><small>${e(row.label.slice(5))}</small></div>`).join(""):empty("Nincs adat a kiválasztott időszakban.");
+  const maxFunnel=Math.max(1,m.sessions);$("analyticsFunnel").innerHTML=stats.funnel.map((row,index)=>`<div><span>${e(row.label)}</span><strong>${e(row.value)}</strong><i style="width:${Math.max(row.value?4:0,row.value/maxFunnel*100)}%"></i>${index?`<small>${stats.funnel[index-1].value?percent(row.value/stats.funnel[index-1].value*100):"0%"} az előző lépésből</small>`:""}</div>`).join("");
+}
+function percent(value){return `${(Number(value)||0).toLocaleString("hu-HU",{maximumFractionDigits:1})}%`;}
+function formatDuration(seconds){const value=Math.max(0,Math.round(Number(seconds)||0));return value<60?`${value} mp`:`${Math.floor(value/60)} p ${value%60} mp`;}
+function analyticsBars(rows,message){if(!rows.length)return empty(message);const max=Math.max(1,...rows.map(row=>row.value));return rows.slice(0,10).map(row=>`<div class="analytics-bar"><div><span>${e(row.label)}</span><strong>${e(row.value)}</strong></div><i><span style="width:${row.value/max*100}%"></span></i></div>`).join("");}
+function analyticsTable(rows,message){return rows.length?rows.map(([label,value])=>`<div><span>${e(label)}</span><strong>${e(value)}</strong></div>`).join(""):empty(message);}
 function navigate(panel){currentPanel=panel;document.querySelectorAll("[data-panel]").forEach(el=>el.hidden=el.dataset.panel!==panel);document.querySelectorAll("[data-admin-tab]").forEach(button=>{const active=button.dataset.adminTab===panel;button.classList.toggle("is-active",active);if(active){button.setAttribute("aria-current","page");$("pageTitle").textContent=button.querySelector("span").textContent;}else button.removeAttribute("aria-current");});}
 document.querySelectorAll("[data-admin-tab]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.adminTab)));
 document.querySelectorAll("[data-go]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.go)));

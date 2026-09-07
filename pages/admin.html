@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>OVEXI · Működési központ</title><link rel="stylesheet" href="/css/admin.css?v=20260905-2"></head>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>OVEXI · Működési központ</title><link rel="stylesheet" href="/css/admin.css?v=20260907-1"></head>
 <body>
 <header class="admin-header"><a href="/" class="admin-brand"><img src="/assets/images/logo-256.png" alt="OVEXI"><span>Működési központ</span></a><div class="admin-session"><span id="adminEmail"></span><button id="logoutButton" class="secondary" type="button" hidden>Kilépés</button></div></header>
 <main>
@@ -14,6 +14,7 @@
 <button type="button" data-admin-tab="customers">06 <span>Ügyfélmunkák</span></button>
 <button type="button" data-admin-tab="maintenance">07 <span>Karbantartás</span></button>
 <button type="button" data-admin-tab="operations">08 <span>Automatizálás</span></button>
+<button type="button" data-admin-tab="analytics">09 <span>Statisztika</span></button>
 <p class="sidebar-note">A tervezet nem kiküldött levél.<br>A keret nem elköltött összeg.</p></nav>
 <div class="workspace"><div class="dashboard-title"><div><p class="eyebrow">Átlátható működés</p><h1 id="pageTitle">Összefoglaló</h1><p id="lastUpdated" class="muted" role="status">Adatok betöltése…</p></div><button id="refreshButton" type="button" class="secondary">↻ Frissítés</button></div>
 <form id="filterForm" class="global-filters"><label>Kezdő dátum<input type="date" id="dateFrom"></label><label>Záró dátum<input type="date" id="dateTo"></label><label class="search-field">Keresés a listákban<input type="search" id="globalSearch" placeholder="Cég, e-mail, azonosító…"></label><button type="button" id="clearFilters" class="secondary">Szűrők törlése</button></form>
@@ -77,4 +78,20 @@
   <div id="maintenanceList" class="record-list"></div><button class="load-more secondary" type="button" data-more="maintenance_sites" hidden>Régebbi weboldalak</button>
 </section>
 <section id="operationsPanel" data-panel="operations" hidden><h2>Automatizálás és teljesítés</h2><div id="operationsHealth" class="surface"></div><p class="data-note">Az újrapróbálás valódi e-mailt vagy számlázási műveletet indíthat. Előtte ellenőrizd a feladatot és a kapcsolódó rendelést.</p><div id="commerceTasks" class="record-list"></div><button class="load-more secondary" type="button" data-more="commerce_tasks" hidden>Régebbi feladatok</button><section class="surface"><h3>Ügyfélértesítési napló</h3><div id="notificationList"></div><button class="load-more secondary" type="button" data-more="customer_notifications" hidden>Régebbi értesítések</button></section><section class="surface"><h3>Weboldal- és marketinganyagok</h3><div id="productionList"></div><button class="load-more secondary" type="button" data-more="production_jobs" hidden>Régebbi munkák</button></section></section>
-</div></section></main><div class="toast" id="adminToast" role="status" hidden></div><script type="module" src="/js/admin.js?v=20260905-8"></script></body></html>
+<section id="analyticsPanel" data-panel="analytics" hidden>
+  <div class="panel-toolbar"><div><h2>Weboldal-statisztika</h2><p class="small muted">Csak azok a látogatások láthatók, amelyeknél a látogató engedélyezte a statisztikai mérést.</p></div><span class="badge" id="analyticsCoverage">Legutóbbi események</span></div>
+  <div class="metric-grid analytics-metrics" id="analyticsMetrics"></div>
+  <div class="analytics-grid">
+    <section class="surface analytics-wide"><div class="section-heading"><h2>Látogatások időben</h2><span class="small muted">Budapest időzóna</span></div><div id="analyticsTrend" class="trend-chart"></div></section>
+    <section class="surface"><h2>Forgalmi források</h2><div id="analyticsSources" class="analytics-bars"></div></section>
+    <section class="surface"><h2>Eszközök</h2><div id="analyticsDevices" class="analytics-bars"></div></section>
+    <section class="surface"><h2>Legnézettebb oldalak</h2><div id="analyticsPages" class="analytics-table"></div></section>
+    <section class="surface"><h2>Böngészők</h2><div id="analyticsBrowsers" class="analytics-bars"></div></section>
+    <section class="surface analytics-wide"><h2>Érdeklődési tölcsér</h2><div id="analyticsFunnel" class="funnel"></div></section>
+    <section class="surface"><h2>Leggyakoribb kattintások</h2><div id="analyticsTargets" class="analytics-table"></div></section>
+    <section class="surface"><h2>Hivatkozó oldalak</h2><div id="analyticsReferrers" class="analytics-table"></div></section>
+  </div>
+  <p class="data-note">Az eszköz és böngésző technikai adatokból becsült kategória. Pontos földrajzi helyet és IP-címet nem tárolunk. A rövid látogatás mérőszáma becslés: egyetlen oldal, 10 másodpercnél rövidebb aktivitás és interakció nélkül.</p>
+  <button class="load-more secondary" type="button" data-more="analytics_events" hidden>Régebbi statisztikai események betöltése</button>
+</section>
+</div></section></main><div class="toast" id="adminToast" role="status" hidden></div><script type="module" src="/js/admin.js?v=20260907-1"></script></body></html>

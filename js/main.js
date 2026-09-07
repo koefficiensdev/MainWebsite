@@ -18,10 +18,9 @@ const firebaseConfig = {
   measurementId: "G-5CV4P809ZL"
 };
 
-let appPromise,functionsSdkPromise,firestoreSdkPromise;
+let appPromise,functionsSdkPromise;
 async function firebaseApp(){appPromise||=import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js").then(({initializeApp})=>initializeApp(firebaseConfig));return appPromise;}
 async function functionsSdk(){functionsSdkPromise||=Promise.all([firebaseApp(),import("https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js")]);return functionsSdkPromise;}
-async function firestoreSdk(){firestoreSdkPromise||=Promise.all([firebaseApp(),import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js")]);return firestoreSdkPromise;}
 const CART_STORAGE_KEY = "ovexi_cart_v2";
 const COOKIE_STORAGE_KEY = "ovexi_cookie_consent_v2";
 const ORDER_COOLDOWN_KEY = "ovexi_last_order_at";
@@ -176,6 +175,7 @@ function addToCart(productId) {
   }
 
   state.cart.push(productId);
+  logAnalytics("add_to_cart",product.id);
   saveCart();
   renderCart();
   showToast(`${product.name} a kosárba került.`);
@@ -381,36 +381,11 @@ function initCookieConsent() {
   document.getElementById("cookieAccept")?.addEventListener("click", () => {
     local.set(COOKIE_STORAGE_KEY, JSON.stringify({ analytics: true, updatedAt: Date.now() }));
     banner.hidden = true;
-    logAnalytics("consent_accepted", "analytics");
   });
 }
 
 async function logAnalytics(eventType, value = "") {
-  try {
-    const consent = JSON.parse(local.get(COOKIE_STORAGE_KEY) || "{}");
-    if (!consent.analytics) return;
-    const [app,{addDoc,collection,getFirestore,serverTimestamp}]=await firestoreSdk(),db=getFirestore(app);
-    await addDoc(collection(db, "analytics_events"), {
-      sessionId: getSessionId(),
-      eventType: normalize(eventType, 40),
-      pagePath: location.pathname.slice(0, 200),
-      pageUrl: (location.origin+location.pathname).slice(0, 500),
-      referrer: document.referrer ? new URL(document.referrer).origin.slice(0,500) : "",
-      source: new URLSearchParams(location.search).get("utm_source")?.slice(0, 120) || "direct",
-      lang: document.documentElement.lang,
-      screenW: window.screen.width,
-      screenH: window.screen.height,
-      viewportW: window.innerWidth,
-      viewportH: window.innerHeight,
-      userAgent: navigator.userAgent.slice(0, 320),
-      target: "storefront",
-      value: normalize(value, 320),
-      consentAnalytics: true,
-      createdAt: serverTimestamp()
-    });
-  } catch (error) {
-    console.debug("Analytics skipped", error);
-  }
+  window.ovexiAnalytics?.track(eventType,value,"storefront");
 }
 
 function getSessionId() {
@@ -497,7 +472,6 @@ else if(directProduct&&directProduct.availability!=="retired"){
 }
 window.addEventListener('beforeunload',event=>{if(submission.pending){event.preventDefault();event.returnValue='';}});
 initCookieConsent();
-logAnalytics("page_view", "storefront");
 
 const paymentState = new URLSearchParams(location.search).get("payment");
 if (["success", "returned"].includes(paymentState)) showToast("Visszaérkeztél a fizetési oldalról. A fizetés állapotát a szolgáltató visszajelzése alapján ellenőrizzük.");

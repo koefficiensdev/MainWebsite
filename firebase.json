@@ -30,6 +30,8 @@
       "functions/**",
       "tools/**",
       "docs/**",
+      ".video-work/**",
+      "exports/**",
       "ops/**",
       "script.js",
       "styles.css",
