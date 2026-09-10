@@ -8,6 +8,7 @@ import {installProduction} from "./production-ui.js?v=20260902-3";
 import {installWorkflows} from "./workflow-ui.js?v=20260902-1";
 import {installOutreach} from "./outreach-ui.js?v=20260905-7";
 import {analyzeAnalytics} from "./analytics-model.js?v=20260907-1";
+import {installSocialMarketing} from "./social-marketing-ui.js?v=20260910-1";
 
 const app=initializeApp({apiKey:"AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",authDomain:"ovexi-6ef38.firebaseapp.com",projectId:"ovexi-6ef38",storageBucket:"ovexi-6ef38.firebasestorage.app",messagingSenderId:"370083022451",appId:"1:370083022451:web:4e3ba562d07641fcef4c06"});
 const auth=getAuth(app),db=getFirestore(app),functions=getFunctions(app,"europe-west1");
@@ -29,7 +30,9 @@ const outreach=installOutreach({functions,getData:()=>data,isAdmin:()=>isAdmin,r
 const workflows=installWorkflows({getData:()=>({...data,order_workflows:search(periodRows("order_workflows")),customer_requests:search(periodRows("customer_requests"))}),isAdmin:()=>isAdmin,identity:()=>auth.currentUser?.uid||"",getEpoch:()=>epoch,call:async(name,payload)=>(await httpsCallable(functions,name,{timeout:930000})(payload)).data,refresh:()=>Promise.all(["orders","order_workflows","customer_requests"].map(key=>loadSource(key))),notify:showToast});
 const production=installProduction({getData:()=>data,identity:()=>auth.currentUser?.uid||'',call:async(name,payload)=>(await httpsCallable(functions,name,{timeout:930000})(payload)).data,refresh:()=>Promise.all(['production_jobs','production_copy_jobs','order_workflows'].map(key=>loadSource(key))),notify:showToast});
 const bookingSettings=installBookingSettings({getData:()=>data,identity:()=>auth.currentUser?.uid||'',call:async(name,payload)=>(await httpsCallable(functions,name)(payload)).data,refresh:()=>loadSource('booking_tenants'),notify:showToast});
+const socialMarketing=installSocialMarketing({isAdmin:()=>isAdmin,call:async payload=>(await httpsCallable(functions,'socialMarketing',{timeout:310000})(payload)).data});
 onAuthStateChanged(auth,async user=>{
+  socialMarketing.reset();
   production.reset();bookingSettings.reset();
   workflows.reset();
   const ticket=++epoch;isAdmin=false;resetData();
@@ -42,6 +45,8 @@ onAuthStateChanged(auth,async user=>{
     if(ticket!==epoch)return;
     if(token.claims.admin!==true)throw new Error("Ehhez a fiókhoz nincs adminjogosultság.");
     isAdmin=true;$("loginStatus").textContent="";$("loginForm").reset();$("loginSection").hidden=true;$("dashboardSection").hidden=false;$("logoutButton").hidden=false;$("adminEmail").textContent=user.email;
+    if(new URLSearchParams(location.search).has("social"))navigate("campaigns");
+    void socialMarketing.load();
     await loadData();
   }catch(error){if(ticket!==epoch)return;$("loginStatus").textContent=error.message||"Sikertelen belépés.";await signOut(auth);}
 });
