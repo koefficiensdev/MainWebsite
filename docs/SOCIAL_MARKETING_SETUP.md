@@ -6,9 +6,9 @@ Admin → Marketing → Új videó. MP4 előnézet, cím, leírás, hashtagek, c
 
 Zernio integráció, hivatalos dokumentáció alapján, ellenőrizve 2026-09-10. A szolgáltató korábban Late néven működött. Kulcs: szerveroldali `social_private/provider` dokumentum; ezt sem a publikus látogató, sem közvetlenül az adminböngésző nem olvashatja. A kapcsolatok OAuth-engedélyezése a szolgáltató felületén történik. Saját Google/TikTok API-app auditját nem állítjuk teljesítettnek.
 
-### Még nincs éles kapcsolat
+### Szolgáltató csatlakoztatva, közösségi fiókok még nincsenek bekötve
 
-A kód elkészült, de a fiókok és a szolgáltatói hozzáférés létrehozása, tényleges engedélyezése, majd egy felhasználó által jóváhagyott poszt éles ellenőrzése szükséges. Az automatikus közzététel és statisztika ezek nélkül nem működik. A fejlesztés során nem történt külső videóközzététel.
+2026-09-11: a visszaigazolt Zernio-fiókban az OVEXI-profil létrejött az alapértelmezett profil átnevezésével. Az éles szerverkonfigurációba külön, OVEXI-profilra korlátozott publikálási API-kulcs került; a kezdeti kulcsot visszavontuk. A négy platform OAuth-kapcsolódási URL-jének lekérése sikeres. A közösségi fiókok létrehozása, tényleges engedélyezése, majd egy felhasználó által jóváhagyott poszt éles ellenőrzése szükséges. Az automatikus közzététel és statisztika ezek nélkül nem működik. A fejlesztés során nem történt külső videóközzététel.
 
 ## Új OVEXI-fiókok
 
@@ -28,7 +28,7 @@ Jelszót, születési dátumot, telefonszámot nem találtunk ki és nem mentett
 
 ## Bekötés
 
-1. Zernio-fiók az OVEXI e-maillel, OVEXI profil, API-kulcs. A felhasználó havi 12 USD keretet jóváhagyott (a 2026-09-10-én látott ár: 2 ingyenes fiók, további 2 × 6 USD). A checkout tényleges ára ellenőrizendő, előfizetés még nem történt.
+1. Zernio-fiók az OVEXI e-maillel, OVEXI profil, API-kulcs. A felhasználó havi 12 USD keretet jóváhagyott (a 2026-09-10-én látott ár: 2 ingyenes fiók, további 2 × 6 USD). A checkout tényleges ára ellenőrizendő, előfizetés még nem történt. A Zernio belépés után 12 USD ingyenes kreditet jelzett; ez nem aktív fizetős előfizetés.
 2. Admin → Marketing → Fiókok → szolgáltató csatlakoztatása: kulcs és OVEXI profilazonosító mentése. A backend ellenőrzi, hogy a profil a kulcshoz tartozik.
 3. A négy „Fiók csatlakoztatása” gombbal engedélyezni a megfelelő új márkafiókokat. Kizárólag az OVEXI-profilhoz tartozó fiókok használhatók.
 4. A TikTok a tényleges alkotói adatok alapján adja a láthatóságot, maximális hosszt és interakciókat. Nincs előre kiválasztott láthatóság. OVEXI promóvideó: saját márka promóciója.
