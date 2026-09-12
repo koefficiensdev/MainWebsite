@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>OVEXI · Működési központ</title><link rel="stylesheet" href="/css/admin.css?v=20260907-1"><link rel="stylesheet" href="/css/social-marketing.css?v=20260910-1"></head>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>OVEXI · Működési központ</title><link rel="stylesheet" href="/css/admin.css?v=20260912-1"><link rel="stylesheet" href="/css/social-marketing.css?v=20260910-1"></head>
 <body>
 <header class="admin-header"><a href="/" class="admin-brand"><img src="/assets/images/logo-256.png" alt="OVEXI"><span>Működési központ</span></a><div class="admin-session"><span id="adminEmail"></span><button id="logoutButton" class="secondary" type="button" hidden>Kilépés</button></div></header>
 <main>
@@ -15,6 +15,7 @@
 <button type="button" data-admin-tab="maintenance">07 <span>Karbantartás</span></button>
 <button type="button" data-admin-tab="operations">08 <span>Automatizálás</span></button>
 <button type="button" data-admin-tab="analytics">09 <span>Statisztika</span></button>
+<button type="button" data-admin-tab="coupons">10 <span>Kuponok</span></button>
 <p class="sidebar-note">A tervezet nem kiküldött levél.<br>A keret nem elköltött összeg.</p></nav>
 <div class="workspace"><div class="dashboard-title"><div><p class="eyebrow">Átlátható működés</p><h1 id="pageTitle">Összefoglaló</h1><p id="lastUpdated" class="muted" role="status">Adatok betöltése…</p></div><button id="refreshButton" type="button" class="secondary">↻ Frissítés</button></div>
 <form id="filterForm" class="global-filters"><label>Kezdő dátum<input type="date" id="dateFrom"></label><label>Záró dátum<input type="date" id="dateTo"></label><label class="search-field">Keresés a listákban<input type="search" id="globalSearch" placeholder="Cég, e-mail, azonosító…"></label><button type="button" id="clearFilters" class="secondary">Szűrők törlése</button></form>
@@ -94,4 +95,24 @@
   <p class="data-note">Az eszköz és böngésző technikai adatokból becsült kategória. Pontos földrajzi helyet és IP-címet nem tárolunk. A rövid látogatás mérőszáma becslés: egyetlen oldal, 10 másodpercnél rövidebb aktivitás és interakció nélkül.</p>
   <button class="load-more secondary" type="button" data-more="analytics_events" hidden>Régebbi statisztikai események betöltése</button>
 </section>
-</div></section></main><div class="toast" id="adminToast" role="status" hidden></div><script type="module" src="/js/admin.js?v=20260910-1"></script></body></html>
+<section id="couponsPanel" data-panel="coupons" hidden>
+  <div id="couponAdmin">
+    <div class="panel-toolbar"><div><h2>Kuponok</h2><p class="small muted">A kupon kizárólag weboldalcsomaggal használható. A százalékos kedvezmény csak a weboldal egyszeri fejlesztési díját csökkenti.</p></div></div>
+    <div id="couponMetrics" class="metric-grid coupon-metrics"></div>
+    <form id="couponForm" class="surface coupon-form">
+      <h3>Új kupon létrehozása</h3>
+      <div class="field-grid">
+        <label>Kuponkód<input name="code" required minlength="4" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Például: INDULAS25"></label>
+        <label>Belső megnevezés<input name="name" required minlength="3" maxlength="120" placeholder="Például: Őszi kampány"></label>
+        <label>Domain átvállalása (év)<input name="domainYears" type="number" min="0" max="10" step="1" value="0" required></label>
+        <label>Tárhely átvállalása (év)<input name="hostingYears" type="number" min="0" max="10" step="1" value="0" required></label>
+        <label>Kedvezmény a weboldal árából (%)<input name="discountPercent" type="number" min="0" max="99" step="1" value="0" required></label>
+      </div>
+      <p class="small muted">Legalább egy kedvezményt adj meg. A kód létrehozás után azonnal aktív; a feltételei később nem módosulnak, de bármikor kikapcsolható.</p>
+      <p id="couponStatus" class="status" role="status"></p>
+      <div class="form-actions"><button type="submit">Kupon létrehozása</button></div>
+    </form>
+    <section class="surface"><div class="section-heading"><h3>Létrehozott kuponok</h3><span class="small muted">A beváltás csak sikeres Stripe-fizetés után nő</span></div><div id="couponList" class="record-list"></div></section>
+  </div>
+</section>
+</div></section></main><div class="toast" id="adminToast" role="status" hidden></div><script type="module" src="/js/admin.js?v=20260912-1"></script></body></html>

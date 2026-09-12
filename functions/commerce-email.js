@@ -47,7 +47,7 @@ function buildCommerceEmail(type, order) {
   const once = Number(order.onceTotal || 0);
   const monthly = Number(order.monthlyTotal || 0);
   const infrastructure = INFRASTRUCTURE_LABELS[order.infrastructurePlan] || "";
-  const promotion = order.promotion?.id === "first-year-domain-hosting" ? order.promotion : null;
+  const promotion = order.promotion?.code && order.promotion?.label ? order.promotion : null;
   const subject = `${message.subject} – ${number}`;
 
   const itemLines = items.length

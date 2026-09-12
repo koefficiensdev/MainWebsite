@@ -30,6 +30,14 @@ test("server attaches a configured infrastructure promotion without changing Str
   assert.equal(session.metadata.promoCode,"OVEXI1EV");assert.equal(session.line_items[0].price_data.unit_amount,6999000);
   assert.throws(()=>d.validateOrder({...input(),promoCode:"NINCS"},{PROMO_CODES:"OVEXI1EV"}),/érvénytelen/);
 });
+test("managed coupon freezes the discounted website price for Stripe and leaves monthly items unchanged",()=>{
+  const base=d.validateOrder({...input(),itemIds:["website-business","marketing-mini"],promoCode:"INDULAS25"},process.env,{deferPromotion:true});
+  const promotion={id:"managed-coupon",couponId:"coupon-hash",code:"INDULAS25",label:"25% kedvezmény.",discountPercent:25,domainYears:2,hostingYears:1};
+  const checked=d.withPromotion(base,promotion),session=d.checkoutPayload("abc",{...checked,orderNumber:"OVX-TEST-TEST"});
+  assert.equal(checked.originalOnceTotal,69990);assert.equal(checked.onceTotal,52493);assert.equal(checked.discountAmount,17497);
+  assert.equal(checked.monthlyTotal,4990);assert.deepEqual(session.line_items.map(item=>item.price_data.unit_amount),[5249300,499000]);
+  assert.equal(session.metadata.promoCode,"INDULAS25");
+});
 test("rejects invalid data, forged consent and incompatible carts", () => {
   for (const patch of [{ termsAccepted: false }, { operatingCostsAcknowledged: false }, { businessPurchaseConfirmed: false }, { hungarianBillingConfirmed: false }, { requestId: "guess" }, { email: "bad" }, { businessDescription: "x" }, { itemIds: ["website-onepage", "website-business"] }, { itemIds: ["marketing-mini", "marketing-pro"] }, { website: "spam" }, { contactName: {} }]) assert.throws(() => d.validateOrder({ ...input(), ...patch }));
 });

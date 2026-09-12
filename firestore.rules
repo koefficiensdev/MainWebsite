@@ -281,6 +281,8 @@ service cloud.firestore {
     match /booking_tenants/{id} { allow read: if isAdmin(); allow write: if false; }
     match /booking_notifications/{id} { allow read: if isAdmin(); allow write: if false; }
     match /operations_health/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /coupons/{id} { allow read, write: if false; }
+    match /promo_claims/{id} { allow read, write: if false; }
 
     match /analytics_events/{eventId} {
       allow create: if isValidAnalyticsCreate();

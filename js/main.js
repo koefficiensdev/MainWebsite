@@ -104,7 +104,7 @@ function updateCheckoutCopy() {
   if (promoSection) promoSection.hidden = !hasWebsite;
   if (infrastructureCheckoutNote) infrastructureCheckoutNote.hidden = !hasWebsite;
   if (operatingCostsText) operatingCostsText.textContent = hasWebsite
-    ? "Tudomásul veszem, hogy az egyszeri ár alapesetben nem tartalmazza a domain, tárhely, e-mail és külső szolgáltatások díját. Érvényes promókód esetén kizárólag az ÁSZF-ben leírt első éves domain- és tárhelyajánlat az eltérés."
+    ? "Tudomásul veszem, hogy az egyszeri ár alapesetben nem tartalmazza a domain, tárhely, e-mail és külső szolgáltatások díját. Érvényes promókód esetén az ellenőrzéskor kiírt kedvezmény és időtartam az eltérés."
     : "Tudomásul veszem, hogy a csomagban fel nem sorolt külső szolgáltatások díja külön fizetendő, és ilyen szolgáltatást csak az írásos jóváhagyásom után indítunk.";
   if (!hasWebsite) clearPromoVerification(true);
   if (submitButton) submitButton.textContent = payment ? "Megrendelem és tovább a fizetéshez" : "Igény beküldése";
@@ -175,6 +175,7 @@ function addToCart(productId) {
   }
 
   state.cart.push(productId);
+  clearPromoVerification();
   logAnalytics("add_to_cart",product.id);
   saveCart();
   renderCart();
@@ -184,6 +185,7 @@ function addToCart(productId) {
 function removeFromCart(productId) {
   if(submission.pending){showToast("A függőben lévő igény csomagjai nem módosíthatók.");return;}
   state.cart = state.cart.filter((id) => id !== productId);
+  clearPromoVerification();
   saveCart();
   renderCart();
 }
@@ -239,7 +241,7 @@ async function checkPromoCode() {
     const check=httpsCallable(getFunctions(app,"europe-west1"),"checkPromoCode",{timeout:20000});
     const result=(await check({promoCode,itemIds:[...state.cart]})).data;
     if(result?.valid!==true||result.code!==promoCode)throw Error("A promókód ellenőrzése nem sikerült.");
-    verifiedPromo={code:result.code,label:String(result.label||"")};
+    verifiedPromo={code:result.code,label:String(result.label||""),domainYears:Number(result.domainYears||0),hostingYears:Number(result.hostingYears||0),discountPercent:Number(result.discountPercent||0),discountAmount:Number(result.discountAmount||0),onceTotal:Number(result.onceTotal),monthlyTotal:Number(result.monthlyTotal)};
     promoStatus.textContent=`Érvényes kód: ${verifiedPromo.label}`;
     checkoutReview.innerHTML=orderSummaryMarkup();
     logAnalytics("promo_applied",verifiedPromo.code);
@@ -261,10 +263,12 @@ function renderReceipt(){const receipt=submission.receipt,box=document.getElemen
 
 function orderSummaryMarkup() {
   const calculated = totals();
+  const onceTotal=verifiedPromo&&Number.isSafeInteger(verifiedPromo.onceTotal)?verifiedPromo.onceTotal:calculated.once;
   return `
     <div class="summary-line"><span>Kiválasztott csomagok</span><strong>${cartProducts().length} db</strong></div>
     ${cartProducts().map((product) => `<div class="summary-line"><span>${escapeHtml(product.name)}</span><span>${formatPrice(product.price)} ${product.billing === "monthly" ? "/ hó" : ""}</span></div>`).join("")}
-    ${calculated.once ? `<div class="summary-line summary-total"><span>Egyszeri összesen</span><strong>${formatPrice(calculated.once)}</strong></div>` : ""}
+    ${verifiedPromo?.discountAmount ? `<div class="summary-line promo-summary"><span>${verifiedPromo.discountPercent}% kedvezmény a weboldalcsomagból</span><strong>−${formatPrice(verifiedPromo.discountAmount)}</strong></div>` : ""}
+    ${onceTotal ? `<div class="summary-line summary-total"><span>Egyszeri összesen</span><strong>${formatPrice(onceTotal)}</strong></div>` : ""}
     ${calculated.monthly ? `<div class="summary-line summary-total"><span>Havonta összesen</span><strong>${formatPrice(calculated.monthly)} / hó</strong></div>` : ""}
     ${verifiedPromo ? `<div class="summary-line promo-summary"><span>Promókód: ${escapeHtml(verifiedPromo.code)}</span><strong>Érvényes</strong></div><p class="checkout-note">${escapeHtml(verifiedPromo.label)}</p>` : ""}
     <p class="checkout-note">${calculated.monthly ? "A havi összeg csak a kosárba tett havi modulokat tartalmazza. " : ""}${verifiedPromo ? "A promócióban felsorolt domain- és tárhelydíjon kívüli külső szolgáltatások külön egyeztetés szerint fizetendők." : "A külső szolgáltatók üzemeltetési díjai ezen felül, külön egyeztetés szerint fizetendők."}</p>

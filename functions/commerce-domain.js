@@ -2,8 +2,8 @@
 
 const crypto = require("node:crypto");
 const { resolveProducts, calculateTotals } = require("./catalog");
-const { resolvePromotion } = require("./promo-domain");
-const TERMS_VERSION = "2026-09-03-promo-1";
+const { resolvePromotion, normalizePromoCode, applyPromotion } = require("./promo-domain");
+const TERMS_VERSION = "2026-09-12-coupons-1";
 const SUPPORTED_EVENTS = ["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "checkout.session.expired", "invoice.paid", "invoice.payment_failed", "customer.subscription.updated", "customer.subscription.deleted"];
 
 function hufToMinor(amount) {
@@ -23,7 +23,7 @@ function normalizeWebUrl(input) {
   return url.href;
 }
 
-function validateOrder(input, env = process.env) {
+function validateOrder(input, env = process.env, options = {}) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Érvénytelen rendelés.");
   if (!/^[a-f0-9-]{32,36}$/i.test(input.requestId || "")) throw new Error("Érvénytelen kérésazonosító.");
   if (input.website) throw new Error("Érvénytelen kérés.");
@@ -48,12 +48,28 @@ function validateOrder(input, env = process.env) {
   const infrastructurePlan = String(input.infrastructurePlan || "").trim();
   if (hasWebsite && !["existing", "domain_only", "new", "guidance"].includes(infrastructurePlan)) throw new Error("Válaszd ki, hogy állsz a domainnel és a tárhellyel.");
   order.infrastructurePlan = hasWebsite ? infrastructurePlan : "not_applicable";
-  const promotion = resolvePromotion(input.promoCode, products, env);
-  const totals = calculateTotals(products);
-  return { ...order, products, itemIds: products.map((p) => p.id), itemNames: products.map((p) => p.name), onceTotal: totals.once, monthlyTotal: totals.monthly,
+  const promoCode = normalizePromoCode(input.promoCode);
+  const promotion = options.deferPromotion || !promoCode ? null : resolvePromotion(promoCode, products, env);
+  const pricedProducts = applyPromotion(products, promotion);
+  const totals = calculateTotals(pricedProducts), originalTotals = calculateTotals(products);
+  return { ...order, products:pricedProducts, itemIds: products.map((p) => p.id), itemNames: products.map((p) => p.name), onceTotal: totals.once, monthlyTotal: totals.monthly,
+    originalOnceTotal:originalTotals.once, discountAmount:originalTotals.once-totals.once,
     termsAccepted: true, operatingCostsAcknowledged: true, businessPurchaseConfirmed: true, hungarianBillingConfirmed: true, termsVersion: TERMS_VERSION, marketingConsent: input.marketingConsent === true,
     source: "ovexi_storefront", requestId: input.requestId.toLowerCase(), bundleMaintenanceGift: false,
-    promoCode: promotion?.code || "", promotion };
+    promoCode, promotion };
+}
+
+function withPromotion(order, promotion) {
+  const baseProducts = order.products.map((product) => {
+    const copy = { ...product };
+    if (Number.isSafeInteger(copy.originalPrice)) copy.price = copy.originalPrice;
+    delete copy.originalPrice; delete copy.discountPercent;
+    return copy;
+  });
+  const products = applyPromotion(baseProducts, promotion);
+  const totals = calculateTotals(products), originalTotals = calculateTotals(baseProducts);
+  return { ...order, products, onceTotal:totals.once, monthlyTotal:totals.monthly, originalOnceTotal:originalTotals.once,
+    discountAmount:originalTotals.once-totals.once, promoCode:promotion?.code || "", promotion:promotion || null };
 }
 
 function fingerprint(order) {
@@ -108,4 +124,4 @@ function verifySubscriptionInvoice(invoice, order) {
   return order.products.filter((p) => initial || p.billing === "monthly");
 }
 
-module.exports = { TERMS_VERSION, SUPPORTED_EVENTS, hufToMinor, normalizeWebUrl, validateOrder, fingerprint, paymentGate, assertKeyMode, checkoutPayload, verifyCheckout, invoiceSubscriptionId, verifySubscriptionInvoice };
+module.exports = { TERMS_VERSION, SUPPORTED_EVENTS, hufToMinor, normalizeWebUrl, validateOrder, withPromotion, fingerprint, paymentGate, assertKeyMode, checkoutPayload, verifyCheckout, invoiceSubscriptionId, verifySubscriptionInvoice };

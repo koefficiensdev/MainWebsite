@@ -24,6 +24,47 @@ const publicCallableOptions = { cors: callableOptions.cors, timeoutSeconds: 15, 
 const hash = (value) => crypto.createHash("sha256").update(value).digest("hex");
 const stripeClient = () => new Stripe(stripeKey.value(), { maxNetworkRetries: 2, timeout: 20000 });
 const taskRef = (id) => db.collection("commerce_tasks").doc(id);
+const couponRef = (code) => db.collection("coupons").doc(hash(promo.normalizePromoCode(code)));
+const promotionIdentity = (promotion) => promotion?.couponId || promotion?.id || "";
+
+async function resolveOrderPromotion(order) {
+  if (!order.promoCode) return domain.withPromotion(order, null);
+  const ref = couponRef(order.promoCode), snap = await ref.get();
+  const promotion = snap.exists
+    ? promo.resolveManagedPromotion(order.promoCode, order.products, snap.data(), ref.id)
+    : promo.resolvePromotion(order.promoCode, order.products);
+  return domain.withPromotion(order, promotion);
+}
+
+function publicCoupon(id, value) {
+  const iso = (date) => {
+    if (!date) return null;
+    if (typeof date.toDate === "function") return date.toDate().toISOString();
+    const parsed = new Date(date);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  };
+  return { id, code:value.code, name:value.name, active:value.active === true, domainYears:Number(value.domainYears || 0),
+    hostingYears:Number(value.hostingYears || 0), discountPercent:Number(value.discountPercent || 0),
+    appliedCount:Number(value.appliedCount || 0), redeemedCount:Number(value.redeemedCount || 0),
+    createdAt:iso(value.createdAt), updatedAt:iso(value.updatedAt) };
+}
+
+async function migrateLegacyCoupons(uid) {
+  const codes = [...promo.configuredCodes()];
+  await Promise.all(codes.map(async (code) => {
+    const ref = couponRef(code), snapshot = await ref.get();
+    if (snapshot.exists) return;
+    const claims = await db.collection("promo_claims").where("code", "==", code).get();
+    const now = new Date();
+    try {
+      await ref.create({ code, name:"Első éves domain és tárhely", domainYears:1, hostingYears:1, discountPercent:0,
+        active:true, appliedCount:claims.size, redeemedCount:claims.docs.filter((item) => item.data().status === "redeemed").length,
+        createdAt:now, updatedAt:now, createdBy:uid, migratedFromEnvironment:true });
+    } catch (error) {
+      if (error.code !== 6 && error.code !== "already-exists") throw error;
+    }
+  }));
+}
 
 function task(type, data) {
   return { type, ...data, status: "pending", attempts: 0, nextAttemptAt: new Date(), createdAt: new Date(), updatedAt: new Date() };
@@ -40,21 +81,27 @@ async function reserveRequest(order, rawRequest) {
   const window = Math.floor(now.getTime() / 3600000);
   const rateIds = [hash(`ip:${rawRequest.ip || "unknown"}:${window}`), hash(`email:${order.email}:${window}`), `global-${window}`];
   const refs = rateIds.map((key) => db.collection("request_limits").doc(key));
-  const promoClaimRef = order.promotion ? db.collection("promo_claims").doc(hash(`${order.promotion.id}:${order.email}`)) : null;
+  const promoId = promotionIdentity(order.promotion);
+  const promoClaimRef = promoId ? db.collection("promo_claims").doc(hash(`${promoId}:${order.email}`)) : null;
+  const managedCouponRef = order.promotion?.couponId ? db.collection("coupons").doc(order.promotion.couponId) : null;
   return db.runTransaction(async (tx) => {
     const existing = await tx.get(ref);
     if (existing.exists) {
       if (existing.data().requestFingerprint !== domain.fingerprint(order)) throw new HttpsError("already-exists", "A beküldés azonosítója más adatokhoz tartozik. Frissítsd az oldalt.");
       return { ref, order: existing.data() };
     }
-    const [limits, promoClaim] = await Promise.all([
+    const [limits, promoClaim, managedCoupon] = await Promise.all([
       Promise.all(refs.map((r) => tx.get(r))),
-      promoClaimRef ? tx.get(promoClaimRef) : Promise.resolve(null)
+      promoClaimRef ? tx.get(promoClaimRef) : Promise.resolve(null),
+      managedCouponRef ? tx.get(managedCouponRef) : Promise.resolve(null)
     ]);
     if (limits.some((s, i) => Number(s.data()?.count || 0) >= (i === 2 ? 100 : 5))) throw new HttpsError("resource-exhausted", "Túl sok beküldés. Kérlek, próbáld később.");
     const promoExpiry = promoClaim?.data()?.expiresAt?.toMillis?.() || new Date(promoClaim?.data()?.expiresAt || 0).getTime();
     if (promoClaim?.exists && (promoClaim.data().status === "redeemed" || promoExpiry > now.getTime())) {
       throw new HttpsError("already-exists", "Ezt a promóciót ezzel az e-mail-címmel már igénybe vetted vagy egy folyamatban lévő rendeléshez lefoglaltad.");
+    }
+    if (managedCouponRef && (!managedCoupon?.exists || managedCoupon.data().active !== true || managedCoupon.data().code !== order.promoCode)) {
+      throw new HttpsError("failed-precondition", "A promókód időközben inaktívvá vált. Ellenőrizd a kódot.");
     }
     const block = domain.paymentGate(order);
     const saved = { ...order, orderNumber: `OVX-${now.getTime().toString(36).toUpperCase()}-${id.slice(0, 6).toUpperCase()}`, requestFingerprint: domain.fingerprint(order),
@@ -62,7 +109,8 @@ async function reserveRequest(order, rawRequest) {
     tx.create(ref, saved);
     tx.create(db.collection("order_workflows").doc(id), {orderId:id,orderNumber:saved.orderNumber,companyName:saved.companyName,...require("./operations-domain").workflowFor(saved),createdAt:now,updatedAt:now});
     limits.forEach((s, i) => tx.set(refs[i], { count: Number(s.data()?.count || 0) + 1, expiresAt: new Date(now.getTime() + 86400000) }));
-    if (promoClaimRef) tx.set(promoClaimRef, { orderId:id, promoId:order.promotion.id, code:order.promoCode, emailHash:hash(order.email), status:"reserved", expiresAt:new Date(now.getTime()+25*3600000), createdAt:now, updatedAt:now });
+    if (promoClaimRef) tx.set(promoClaimRef, { orderId:id, promoId, code:order.promoCode, emailHash:hash(order.email), status:"reserved", expiresAt:new Date(now.getTime()+25*3600000), createdAt:now, updatedAt:now });
+    if (managedCouponRef) tx.update(managedCouponRef, { appliedCount:Number(managedCoupon.data().appliedCount || 0) + 1, lastAppliedAt:now });
     tx.create(taskRef(`request-${id}`), task("order_received", { orderId: id }));
     return { ref, order: saved };
   });
@@ -71,7 +119,10 @@ async function reserveRequest(order, rawRequest) {
 exports.submitOrder = onCall(callableOptions, async (request) => {
   if (Buffer.byteLength(JSON.stringify(request.data || {})) > 16000) throw new HttpsError("invalid-argument", "Túl nagy beküldés.");
   let clean;
-  try { clean = domain.validateOrder(request.data); } catch (error) { throw new HttpsError("invalid-argument", error.message); }
+  try {
+    clean = domain.validateOrder(request.data, process.env, { deferPromotion:true });
+    clean = await resolveOrderPromotion(clean);
+  } catch (error) { throw new HttpsError("invalid-argument", error.message); }
   const { ref, order } = await reserveRequest(clean, request.rawRequest);
   const result = { orderNumber: order.orderNumber, status: "received", emailQueued: process.env.SMTP_ENABLED === "true" };
   if (domain.paymentGate(order) || ["paid", "in_production", "completed", "cancelled"].includes(order.status)) return result;
@@ -95,11 +146,49 @@ exports.checkPromoCode = onCall(publicCallableOptions, async (request) => {
   if (Buffer.byteLength(JSON.stringify(request.data || {})) > 2000) throw new HttpsError("invalid-argument", "Túl nagy kérés.");
   try {
     const products = require("./catalog").resolveProducts(request.data?.itemIds);
-    const promotion = promo.resolvePromotion(request.data?.promoCode, products);
+    const code = promo.normalizePromoCode(request.data?.promoCode);
+    const ref = couponRef(code), snap = await ref.get();
+    const promotion = snap.exists ? promo.resolveManagedPromotion(code, products, snap.data(), ref.id) : promo.resolvePromotion(code, products);
     if (!promotion) throw new Error("Adj meg egy promókódot.");
-    return { valid: true, code: promotion.code, label: promotion.label };
+    const original = require("./catalog").calculateTotals(products);
+    const priced = promo.applyPromotion(products, promotion), totals = require("./catalog").calculateTotals(priced);
+    return { valid:true, code:promotion.code, label:promotion.label, domainYears:promotion.domainYears || 0,
+      hostingYears:promotion.hostingYears || 0, discountPercent:promotion.discountPercent || 0,
+      discountAmount:original.once-totals.once, onceTotal:totals.once, monthlyTotal:totals.monthly };
   } catch (error) {
     throw new HttpsError("invalid-argument", error.message);
+  }
+});
+
+exports.couponAdmin = onCall(publicCallableOptions, async (request) => {
+  if (request.auth?.token?.admin !== true) throw new HttpsError("permission-denied", "Adminjogosultság szükséges.");
+  if (Buffer.byteLength(JSON.stringify(request.data || {})) > 4000) throw new HttpsError("invalid-argument", "Túl nagy kérés.");
+  const action = String(request.data?.action || "");
+  try {
+    if (action === "list") {
+      await migrateLegacyCoupons(request.auth.uid);
+      const snapshot = await db.collection("coupons").orderBy("createdAt", "desc").limit(200).get();
+      return { coupons:snapshot.docs.map((item) => publicCoupon(item.id, item.data())) };
+    }
+    if (action === "create") {
+      const clean = promo.validateCouponInput(request.data?.coupon), ref = couponRef(clean.code), now = new Date();
+      await ref.create({ ...clean, active:true, appliedCount:0, redeemedCount:0, createdAt:now, updatedAt:now, createdBy:request.auth.uid });
+      return { coupon:publicCoupon(ref.id, { ...clean, active:true, appliedCount:0, redeemedCount:0, createdAt:now, updatedAt:now }) };
+    }
+    if (action === "setActive") {
+      const code = promo.normalizePromoCode(request.data?.code), active = request.data?.active;
+      if (typeof active !== "boolean") throw new Error("Hibás kuponállapot.");
+      const ref = couponRef(code), snapshot = await ref.get();
+      if (!snapshot.exists || snapshot.data().code !== code) throw Object.assign(new Error("A kupon nem található."), { code:"not-found" });
+      await ref.update({ active, updatedAt:new Date(), updatedBy:request.auth.uid });
+      return { coupon:publicCoupon(ref.id, { ...snapshot.data(), active, updatedAt:new Date() }) };
+    }
+    throw new Error("Ismeretlen kuponművelet.");
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    if (error.code === 6 || error.code === "already-exists") throw new HttpsError("already-exists", "Ez a kuponkód már létezik.");
+    if (error.code === "not-found") throw new HttpsError("not-found", error.message);
+    throw new HttpsError("invalid-argument", error.message || "A kuponművelet nem sikerült.");
   }
 });
 
@@ -110,14 +199,17 @@ async function recordPayment(event, orderRef, paymentId, products, details, init
     if (payment.exists) return;
     if (!orderSnap.exists) throw new Error("Order missing");
     const order = orderSnap.data();
+    const managedCouponRef = initial && order.promotion?.couponId ? db.collection("coupons").doc(order.promotion.couponId) : null;
+    const managedCoupon = managedCouponRef ? await tx.get(managedCouponRef) : null;
     tx.create(paymentRef, { orderId: orderRef.id, eventId: event.id, products, customerDetails: details, livemode: event.livemode, status: "paid", invoiceStatus: "pending",
       createdAt: context.paidAt || new Date(Number(event.created || Date.now() / 1000) * 1000), ...(context.servicePeriod ? { servicePeriod: context.servicePeriod } : {}) });
     // First Checkout and invoice.paid events can arrive in either order.
     // Never regress a fulfilled order when the next monthly payment arrives.
     tx.update(orderRef, { ...(initial && !order.paidAt ? { status: "paid", paidAt: new Date(), initialPaymentId: paymentId } : {}), paymentStatus: "paid", invoiceStatus: "pending", lastPaymentId: paymentId, updatedAt: new Date() });
     if (initial && order.promotion?.id) {
-      const promoClaimRef=db.collection("promo_claims").doc(hash(`${order.promotion.id}:${order.email}`));
-      tx.set(promoClaimRef,{orderId:orderRef.id,promoId:order.promotion.id,code:order.promoCode,emailHash:hash(order.email),status:"redeemed",redeemedAt:new Date(),updatedAt:new Date()},{merge:true});
+      const promoId=promotionIdentity(order.promotion), promoClaimRef=db.collection("promo_claims").doc(hash(`${promoId}:${order.email}`));
+      tx.set(promoClaimRef,{orderId:orderRef.id,promoId,code:order.promoCode,emailHash:hash(order.email),status:"redeemed",redeemedAt:new Date(),updatedAt:new Date()},{merge:true});
+      if (managedCouponRef && managedCoupon?.exists) tx.update(managedCouponRef,{redeemedCount:Number(managedCoupon.data().redeemedCount || 0)+1,lastRedeemedAt:new Date()});
     }
     tx.create(taskRef(`invoice-${paymentId}`), task("invoice", { orderId: orderRef.id, paymentId }));
     tx.create(taskRef(`paid-${paymentId}`), task("payment_received", { orderId: orderRef.id, paymentId }));

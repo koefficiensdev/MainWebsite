@@ -54,6 +54,12 @@ test('checkout: no direct order write fallback, server receipt ID and hidden dem
   assert.doesNotMatch(main,/addDoc\(collection\(db,\s*"orders"/);assert.match(main,/logAnalytics\("order_submitted",result.orderNumber\)/);assert.match(main,/event.key==='Tab'/);assert.match(html,/id="orderReceipt"/);assert.match(html,/businessPurchaseConfirmed/);assert.match(main,/Megrendelem és tovább a fizetéshez/);assert.doesNotMatch(admin,/class="module-preview"/);
   assert.match(html,/id="promoSection"/);assert.match(main,/checkPromoCode/);assert.match(html,/id="infrastructureCheckoutNote" hidden/);assert.match(main,/infrastructureCheckoutNote\.hidden = !hasWebsite/);assert.match(html,/class="cart-icon" aria-hidden="true"/);assert.match(html,/class="cart-label">Kosár/);
 });
+test('checkout: coupon preview displays the server-calculated website discount',()=>{
+  const root=path.resolve(__dirname,'../..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),main=fs.readFileSync(path.join(root,'js/main.js'),'utf8');
+  assert.match(html,/százalékos kedvezményt is tartalmazhat/);
+  assert.match(main,/discountAmount:Number\(result\.discountAmount/);
+  assert.match(main,/kedvezmény a weboldalcsomagból/);
+});
 test('checkout: cookie choice can be reopened and analytics excludes query/hash data',()=>{
   const root=path.resolve(__dirname,'../..'),main=fs.readFileSync(path.join(root,'js/main.js'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),policy=fs.readFileSync(path.join(root,'pages/cookie-policy.html'),'utf8');
   assert.match(main,/getElementById\('openCookieSettings'\)/);assert.match(html,/id="openCookieSettings"/);assert.doesNotMatch(main,/pageUrl: location.href/);assert.match(policy,/ovexi_pending_request_v1/);assert.doesNotMatch(policy,/#contact|#services/);

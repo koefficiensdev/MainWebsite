@@ -30,7 +30,7 @@ function workflowFor(order) {
   const steps = [{ id:"intake", label:"Igény rögzítve", note:"Az igény beérkezett; ez nem fizetés és nem az üzleti tartalom jóváhagyása.", done:true }];
   if (website) {
     steps.push({ id:"site-plan", label:"Oldalstruktúra és tartalom", note:"A szükséges oldalak, szövegek és funkciók előkészítése.", done:false });
-    if (order.promotion?.id === "first-year-domain-hosting") steps.push({ id:"promo-infrastructure", label:"Promóciós domain és tárhely", note:"A standard .hu domain és az 1 GB webtárhely első 12 hónapjának aktiválása, a megrendelő tulajdonában.", done:false });
+    if (order.promotion?.id === "first-year-domain-hosting" || order.promotion?.domainYears || order.promotion?.hostingYears) steps.push({ id:"promo-infrastructure", label:"Promóciós domain és tárhely", note:order.promotion.label || "A standard .hu domain és az 1 GB webtárhely első 12 hónapjának aktiválása, a megrendelő tulajdonában.", done:false });
     steps.push({ id:"site-build", label:"Weboldal elkészítése", note:"Mobilnézet, funkciók és mérés beállítása.", done:false });
   }
   if (marketing) steps.push({ id:"marketing-plan", label:"Marketinganyagok előkészítése", note:"Tartalom- és kampányterv az elfogadott briefből.", done:false });
