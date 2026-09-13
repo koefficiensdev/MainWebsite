@@ -100,6 +100,14 @@ service cloud.firestore {
           'pageUrl',
           'referrer',
           'source',
+          'campaignSource',
+          'campaignMedium',
+          'campaignName',
+          'campaignContent',
+          'campaignId',
+          'adPlatform',
+          'paidTraffic',
+          'landingPage',
           'lang',
           'screenW',
           'screenH',
@@ -117,6 +125,23 @@ service cloud.firestore {
         && request.resource.data.pageUrl is string
         && request.resource.data.referrer is string
         && request.resource.data.source is string
+        && (!request.resource.data.keys().hasAny(['campaignSource', 'campaignMedium', 'campaignName', 'campaignContent', 'campaignId', 'adPlatform', 'paidTraffic', 'landingPage'])
+          || (request.resource.data.keys().hasAll(['campaignSource', 'campaignMedium', 'campaignName', 'campaignContent', 'campaignId', 'adPlatform', 'paidTraffic', 'landingPage'])
+            && request.resource.data.campaignSource is string
+            && request.resource.data.campaignMedium is string
+            && request.resource.data.campaignName is string
+            && request.resource.data.campaignContent is string
+            && request.resource.data.campaignId is string
+            && request.resource.data.adPlatform is string
+            && request.resource.data.paidTraffic is bool
+            && request.resource.data.landingPage is string
+            && request.resource.data.campaignSource.size() <= 80
+            && request.resource.data.campaignMedium.size() <= 80
+            && request.resource.data.campaignName.size() <= 160
+            && request.resource.data.campaignContent.size() <= 160
+            && request.resource.data.campaignId.size() <= 120
+            && request.resource.data.adPlatform.size() <= 40
+            && request.resource.data.landingPage.size() <= 200))
         && request.resource.data.lang is string
         && request.resource.data.screenW is int
         && request.resource.data.screenH is int

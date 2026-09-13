@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>OVEXI · Működési központ</title><link rel="stylesheet" href="/css/admin.css?v=20260912-1"><link rel="stylesheet" href="/css/social-marketing.css?v=20260910-1"></head>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>OVEXI · Működési központ</title><link rel="stylesheet" href="/css/admin.css?v=20260913-1"><link rel="stylesheet" href="/css/social-marketing.css?v=20260910-1"></head>
 <body>
 <header class="admin-header"><a href="/" class="admin-brand"><img src="/assets/images/logo-256.png" alt="OVEXI"><span>Működési központ</span></a><div class="admin-session"><span id="adminEmail"></span><button id="logoutButton" class="secondary" type="button" hidden>Kilépés</button></div></header>
 <main>
@@ -82,9 +82,18 @@
 <section id="analyticsPanel" data-panel="analytics" hidden>
   <div class="panel-toolbar"><div><h2>Weboldal-statisztika</h2><p class="small muted">Csak azok a látogatások láthatók, amelyeknél a látogató engedélyezte a statisztikai mérést.</p></div><span class="badge" id="analyticsCoverage">Legutóbbi események</span></div>
   <div class="metric-grid analytics-metrics" id="analyticsMetrics"></div>
+  <form id="trackingLinkForm" class="surface tracking-link-builder">
+    <div class="section-heading"><div><h2>Hirdetési mérési link</h2><p class="small muted">Minden hirdetéshez készíts külön linket. A kampány és a hirdetés neve később pontosan megjelenik a statisztikában.</p></div></div>
+    <div class="field-grid"><label>Platform<select name="source" required><option value="tiktok">TikTok</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="google">Google</option></select></label><label>Kampány neve<input name="campaign" required maxlength="80" placeholder="Például: weboldal_indulas"></label><label>Hirdetés / videó neve<input name="content" required maxlength="80" placeholder="Például: mennyibe_kerul_video"></label><label>Céloldal<select name="destination"><option value="/ceges-weboldal">Céges weboldal landing</option><option value="/">OVEXI főoldal</option></select></label></div>
+    <div class="tracking-link-output"><input id="trackingLinkOutput" readonly aria-label="Elkészült mérési link" placeholder="Itt jelenik meg a mérési link"><button id="copyTrackingLink" type="button" class="secondary" disabled>Link másolása</button></div>
+    <p id="trackingLinkStatus" class="status" role="status"></p><button type="submit">Mérési link elkészítése</button>
+  </form>
   <div class="analytics-grid">
     <section class="surface analytics-wide"><div class="section-heading"><h2>Látogatások időben</h2><span class="small muted">Budapest időzóna</span></div><div id="analyticsTrend" class="trend-chart"></div></section>
     <section class="surface"><h2>Forgalmi források</h2><div id="analyticsSources" class="analytics-bars"></div></section>
+    <section class="surface"><h2>Hirdetési platformok</h2><div id="analyticsAdPlatforms" class="analytics-table"></div></section>
+    <section class="surface"><h2>Hirdetési kampányok</h2><div id="analyticsAdCampaigns" class="analytics-table"></div></section>
+    <section class="surface analytics-wide"><h2>Konkrét hirdetések / videók</h2><div id="analyticsAdCreatives" class="analytics-performance-table"></div></section>
     <section class="surface"><h2>Eszközök</h2><div id="analyticsDevices" class="analytics-bars"></div></section>
     <section class="surface"><h2>Legnézettebb oldalak</h2><div id="analyticsPages" class="analytics-table"></div></section>
     <section class="surface"><h2>Böngészők</h2><div id="analyticsBrowsers" class="analytics-bars"></div></section>
@@ -115,4 +124,4 @@
     <section class="surface"><div class="section-heading"><h3>Létrehozott kuponok</h3><span class="small muted">A beváltás csak sikeres Stripe-fizetés után nő</span></div><div id="couponList" class="record-list"></div></section>
   </div>
 </section>
-</div></section></main><div class="toast" id="adminToast" role="status" hidden></div><script type="module" src="/js/admin.js?v=20260912-1"></script></body></html>
+</div></section></main><div class="toast" id="adminToast" role="status" hidden></div><script type="module" src="/js/admin.js?v=20260913-1"></script></body></html>

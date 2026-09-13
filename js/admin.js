@@ -7,7 +7,7 @@ import {installBookingSettings} from "./booking-settings-ui.js?v=20260902-3";
 import {installProduction} from "./production-ui.js?v=20260902-3";
 import {installWorkflows} from "./workflow-ui.js?v=20260902-1";
 import {installOutreach} from "./outreach-ui.js?v=20260905-7";
-import {analyzeAnalytics} from "./analytics-model.js?v=20260907-1";
+import {analyzeAnalytics} from "./analytics-model.js?v=20260913-1";
 import {installSocialMarketing} from "./social-marketing-ui.js?v=20260910-1";
 import {installCouponAdmin} from "./coupon-admin-ui.js?v=20260912-1";
 
@@ -145,13 +145,16 @@ function renderAnalytics(){
   const state=states.analytics_events;
   if(state.status!=="ready"){
     $("analyticsMetrics").innerHTML=state.status==="error"?empty("A statisztikai adatok nem érhetők el. Ellenőrizd az adminjogosultságot."):empty("Statisztikai adatok betöltése…");
-    for(const id of ["analyticsTrend","analyticsSources","analyticsDevices","analyticsPages","analyticsBrowsers","analyticsFunnel","analyticsTargets","analyticsReferrers"])$(id).innerHTML="";
+    for(const id of ["analyticsTrend","analyticsSources","analyticsAdPlatforms","analyticsAdCampaigns","analyticsAdCreatives","analyticsDevices","analyticsPages","analyticsBrowsers","analyticsFunnel","analyticsTargets","analyticsReferrers"])$(id).innerHTML="";
     return;
   }
   const stats=analyzeAnalytics(data.analytics_events,$("dateFrom").value,$("dateTo").value),m=stats.metrics;
   $("analyticsCoverage").textContent=`${stats.rows.length} esemény${state.more?"+":""}`;
-  $("analyticsMetrics").innerHTML=[["Munkamenetek",m.sessions,"Hozzájárulással mért látogatások"],["Oldalmegtekintések",m.views,"Minden megnyitott oldal"],["Átlagos aktivitás",formatDuration(m.averageDuration),"Mért aktív idő"],["Ajánlat / rendelés",m.conversions,"Beküldött konverzió"],["Konverziós arány",percent(m.conversionRate),"Konverzió / munkamenet"],["Rövid látogatás",percent(m.shortRate),"Becsült, interakció nélkül"],["50%-ig görgetett",m.scroll50,"Munkamenet"],["75%-ig görgetett",m.scroll75,"Munkamenet"]].map(metric).join("");
+  $("analyticsMetrics").innerHTML=[["Munkamenetek",m.sessions,"Hozzájárulással mért látogatások"],["Hirdetésből érkezett",m.paidSessions,"TikTok, Instagram és más fizetett forrás"],["Hirdetési konverzió",m.paidConversions,"Ajánlatkérés vagy rendelés"],["Hirdetési konverziós arány",percent(m.paidConversionRate),"Konverzió / hirdetési munkamenet"],["Oldalmegtekintések",m.views,"Minden megnyitott oldal"],["Átlagos aktivitás",formatDuration(m.averageDuration),"Mért aktív idő"],["Ajánlat / rendelés",m.conversions,"Összes beküldött konverzió"],["Konverziós arány",percent(m.conversionRate),"Konverzió / munkamenet"],["Rövid látogatás",percent(m.shortRate),"Becsült, interakció nélkül"],["50%-ig görgetett",m.scroll50,"Munkamenet"],["75%-ig görgetett",m.scroll75,"Munkamenet"]].map(metric).join("");
   $("analyticsSources").innerHTML=analyticsBars(stats.sources,"Nincs mért forgalmi forrás.");
+  $("analyticsAdPlatforms").innerHTML=analyticsTable(stats.adPlatforms.map(row=>[row.label,`${row.sessions} látogató · ${row.conversions} konverzió`]),"Még nincs mérési linkkel azonosított hirdetési látogatás.");
+  $("analyticsAdCampaigns").innerHTML=analyticsTable(stats.adCampaigns.map(row=>[row.label,`${row.sessions} látogató · ${percent(row.conversionRate)}`]),"Még nincs azonosított kampány.");
+  $("analyticsAdCreatives").innerHTML=analyticsPerformanceTable(stats.adCreatives);
   $("analyticsDevices").innerHTML=analyticsBars(stats.devices,"Nincs eszközadat.");
   $("analyticsBrowsers").innerHTML=analyticsBars(stats.browsers,"Nincs böngészőadat.");
   $("analyticsPages").innerHTML=analyticsTable(stats.pages.map(row=>[row.label,`${row.value} megtekintés · ${row.sessions} munkamenet`]),"Nincs mért oldalmegtekintés.");
@@ -165,12 +168,15 @@ function percent(value){return `${(Number(value)||0).toLocaleString("hu-HU",{max
 function formatDuration(seconds){const value=Math.max(0,Math.round(Number(seconds)||0));return value<60?`${value} mp`:`${Math.floor(value/60)} p ${value%60} mp`;}
 function analyticsBars(rows,message){if(!rows.length)return empty(message);const max=Math.max(1,...rows.map(row=>row.value));return rows.slice(0,10).map(row=>`<div class="analytics-bar"><div><span>${e(row.label)}</span><strong>${e(row.value)}</strong></div><i><span style="width:${row.value/max*100}%"></span></i></div>`).join("");}
 function analyticsTable(rows,message){return rows.length?rows.map(([label,value])=>`<div><span>${e(label)}</span><strong>${e(value)}</strong></div>`).join(""):empty(message);}
+function analyticsPerformanceTable(rows){return rows.length?rows.slice(0,20).map(row=>`<div><span>${e(row.label)}</span><strong>${e(row.sessions)} látogató</strong><strong>${e(row.conversions)} konverzió</strong><strong>${e(percent(row.conversionRate))}</strong></div>`).join(""):empty("Még nincs külön névvel mért hirdetés vagy videó.");}
 function navigate(panel){currentPanel=panel;document.querySelectorAll("[data-panel]").forEach(el=>el.hidden=el.dataset.panel!==panel);document.querySelectorAll("[data-admin-tab]").forEach(button=>{const active=button.dataset.adminTab===panel;button.classList.toggle("is-active",active);if(active){button.setAttribute("aria-current","page");$("pageTitle").textContent=button.querySelector("span").textContent;}else button.removeAttribute("aria-current");});}
 document.querySelectorAll("[data-admin-tab]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.adminTab)));
 document.querySelectorAll("[data-go]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.go)));
 $("filterForm").addEventListener("submit",event=>event.preventDefault());
 for(const id of ["dateFrom","dateTo","globalSearch","orderFilter","messageFilter"])$(id).addEventListener("input",render);
 $("clearFilters").addEventListener("click",()=>{$("filterForm").reset();$("orderFilter").value="all";$("messageFilter").value="all";render();});
+$("trackingLinkForm").addEventListener("submit",event=>{event.preventDefault();const values=Object.fromEntries(new FormData(event.currentTarget)),slug=value=>String(value||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"").slice(0,80),url=new URL(values.destination,"https://ovexi.hu");url.search=new URLSearchParams({utm_source:values.source,utm_medium:"paid_social",utm_campaign:slug(values.campaign),utm_content:slug(values.content)});$("trackingLinkOutput").value=url.href;$("copyTrackingLink").disabled=false;$("trackingLinkStatus").textContent="A link elkészült. Ezt add meg a hirdetés céloldalaként.";});
+$("copyTrackingLink").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("trackingLinkOutput").value);$("trackingLinkStatus").textContent="A mérési linket kimásoltuk.";}catch{$("trackingLinkOutput").select();$("trackingLinkStatus").textContent="Jelöld ki és másold ki a linket.";}});
 document.querySelectorAll("[data-more]").forEach(button=>button.addEventListener("click",()=>loadSource(button.dataset.more,true)));
 document.querySelectorAll("[data-open-form]").forEach(button=>button.addEventListener("click",()=>openForm(button.dataset.openForm)));
 document.querySelectorAll("[data-close-form]").forEach(button=>button.addEventListener("click",()=>{$(button.dataset.closeForm).hidden=true;}));

@@ -84,6 +84,13 @@ test("admin: analytics separates sessions, sources, devices and conversions",asy
   assert.equal(report.devices.find(row=>row.label==="Mobil").value,1);
   assert.equal(report.funnel.at(-1).value,1);
 });
+test("admin: analytics attributes paid sessions and conversions to platform, campaign and creative",async()=>{
+  const {analyzeAnalytics}=await analyticsModel,createdAt="2026-09-13T10:00:00Z",campaign={paidTraffic:true,adPlatform:"tiktok",campaignSource:"tiktok",campaignMedium:"paid_social",campaignName:"weboldal_indulas",campaignContent:"ar_video"};
+  const report=analyzeAnalytics([{createdAt,sessionId:"paid-a",eventType:"page_view",pagePath:"/ceges-weboldal",...campaign},{createdAt,sessionId:"paid-a",eventType:"proposal_submitted",...campaign},{createdAt,sessionId:"organic-b",eventType:"page_view",pagePath:"/",source:"direct"}]);
+  assert.equal(report.metrics.paidSessions,1);assert.equal(report.metrics.paidConversions,1);assert.equal(report.metrics.paidConversionRate,100);
+  assert.deepEqual(report.adPlatforms[0],{label:"TikTok",sessions:1,conversions:1,conversionRate:100});
+  assert.equal(report.adCampaigns[0].label,"weboldal_indulas");assert.equal(report.adCreatives[0].label,"TikTok · weboldal_indulas · ar_video");
+});
 test("admin: outbound evidence is read-only in rules, campaigns and expenses are admin-only",()=>{
   const rules=fs.readFileSync(path.resolve(__dirname,"../../firestore.rules"),"utf8");
   assert.match(rules,/match \/outreach_messages\/\{messageId\} \{\s*allow read: if isAdmin\(\);\s*allow write: if false;/);
