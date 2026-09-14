@@ -28,6 +28,11 @@ async function dispatch(request){
   if(c?.key)try{rows=safeAccounts(await accounts(c));}catch(error){connectionError=error.message;}
   return {configured:Boolean(c?.key),profileId:c?.profileId||null,accounts:rows,connectionError,posts:snap.docs.map(s=>{const p=s.data();return {id:s.id,title:p.metadata.title,description:p.metadata.description,hashtags:p.metadata.hashtags,targets:p.metadata.targets,status:p.status,platforms:p.platforms||[],analytics:p.analytics||null,analyticsError:p.analyticsError||null,createdAt:p.createdAt.toDate().toISOString(),analyticsAt:p.analyticsAt?.toDate().toISOString()||null,error:p.error||null,providerId:p.providerId||null,videoUrl:d.mediaUrl(p.asset?.publicUrl)};})};
  }
+ if(raw.action==='delete'){
+  const ref=db.collection('social_posts').doc(d.id(raw.id));
+  await db.runTransaction(async tx=>{const snap=await tx.get(ref);if(!snap.exists)d.fail('A videóbejegyzés már nem található.','not-found');tx.delete(ref);});
+  return {deleted:true,id:ref.id,externalPostsUnchanged:true};
+ }
  if(raw.action==='configure'){
   if(typeof raw.key!=='string'||raw.key.length<16||raw.key.length>512)d.fail('Érvényes szolgáltatói API-kulcs szükséges.');
   const profileId=d.id(raw.profileId),api=provider(raw.key.trim()),profiles=await api('/profiles');

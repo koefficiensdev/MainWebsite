@@ -8,7 +8,7 @@ import {installProduction} from "./production-ui.js?v=20260902-3";
 import {installWorkflows} from "./workflow-ui.js?v=20260902-1";
 import {installOutreach} from "./outreach-ui.js?v=20260905-7";
 import {analyzeAnalytics} from "./analytics-model.js?v=20260913-1";
-import {installSocialMarketing} from "./social-marketing-ui.js?v=20260914-1";
+import {installSocialMarketing} from "./social-marketing-ui.js?v=20260914-2";
 import {installCouponAdmin} from "./coupon-admin-ui.js?v=20260912-1";
 
 const app=initializeApp({apiKey:"AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",authDomain:"ovexi-6ef38.firebaseapp.com",projectId:"ovexi-6ef38",storageBucket:"ovexi-6ef38.firebasestorage.app",messagingSenderId:"370083022451",appId:"1:370083022451:web:4e3ba562d07641fcef4c06"});
