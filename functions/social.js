@@ -26,7 +26,7 @@ async function dispatch(request){
   const c=(await configRef.get()).data(),snap=await db.collection('social_posts').orderBy('createdAt','desc').limit(60).get();
   let rows=[],connectionError=null;
   if(c?.key)try{rows=safeAccounts(await accounts(c));}catch(error){connectionError=error.message;}
-  return {configured:Boolean(c?.key),profileId:c?.profileId||null,accounts:rows,connectionError,posts:snap.docs.map(s=>{const p=s.data();return {id:s.id,title:p.metadata.title,description:p.metadata.description,hashtags:p.metadata.hashtags,targets:p.metadata.targets,status:p.status,platforms:p.platforms||[],analytics:p.analytics||null,analyticsError:p.analyticsError||null,createdAt:p.createdAt.toDate().toISOString(),analyticsAt:p.analyticsAt?.toDate().toISOString()||null,error:p.error||null,providerId:p.providerId||null};})};
+  return {configured:Boolean(c?.key),profileId:c?.profileId||null,accounts:rows,connectionError,posts:snap.docs.map(s=>{const p=s.data();return {id:s.id,title:p.metadata.title,description:p.metadata.description,hashtags:p.metadata.hashtags,targets:p.metadata.targets,status:p.status,platforms:p.platforms||[],analytics:p.analytics||null,analyticsError:p.analyticsError||null,createdAt:p.createdAt.toDate().toISOString(),analyticsAt:p.analyticsAt?.toDate().toISOString()||null,error:p.error||null,providerId:p.providerId||null,videoUrl:d.mediaUrl(p.asset?.publicUrl)};})};
  }
  if(raw.action==='configure'){
   if(typeof raw.key!=='string'||raw.key.length<16||raw.key.length>512)d.fail('Érvényes szolgáltatói API-kulcs szükséges.');
