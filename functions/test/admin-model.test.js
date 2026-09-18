@@ -61,10 +61,13 @@ test("admin: page structure groups acquisition, analytics and coupons into ten m
   for(const [,id] of js.matchAll(/\$\("([^"]+)"\)/g))assert.ok(ids.includes(id),`Missing ${id}`);
   assert.equal([...html.matchAll(/data-panel=/g)].length,10);
   assert.equal([...html.matchAll(/data-outreach-panel=/g)].length,6);
-  assert.match(html,/data-admin-tab="outreach">03 <span>Ügyfélszerzés<\/span>/);
+  assert.match(html,/data-admin-tab="outreach"><span>Ügyfélszerzés<\/span>/);
   assert.doesNotMatch(html,/data-admin-tab="leads"/);
-  assert.match(html,/data-admin-tab="analytics">09 <span>Statisztika/);
-  assert.match(html,/data-admin-tab="coupons">10 <span>Kuponok/);
+  assert.match(html,/data-admin-tab="analytics"><span>Statisztika/);
+  assert.match(html,/data-admin-tab="coupons"><span>Kuponok/);
+  assert.equal([...html.matchAll(/data-admin-tab="/g)].length,10);
+  assert.equal([...html.matchAll(/<button[^>]*data-admin-tab="[^"]+"[^>]*><span>/g)].length,10,"every tab label lives in a span");
+  assert.equal([...html.matchAll(/class="tab-group"/g)].length,3,"ten panels are grouped, not one flat list");
   assert.match(html,/id="couponForm"/);assert.match(js,/couponAdmin/);
   assert.match(html,/id="dashboardSection"[^>]*hidden/);assert.match(js,/token\.claims\.admin!==true/);
 });

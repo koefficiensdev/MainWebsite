@@ -19,184 +19,49 @@
     <meta name="twitter:title" content="Cookie Tájékoztató | OVEXI">
     <meta name="twitter:description" content="Részletes cookie tájékoztató és beállítási információk az OVEXI weboldalán.">
     <meta name="twitter:image" content="https://ovexi.hu/assets/images/logo-256.png">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --secondary: #8b5cf6;
-            --accent: #22d3ee;
-            --dark: #0f172a;
-            --dark-light: #1e293b;
-            --text: #cbd5e1;
-            --text-dark: #94a3b8;
-            --white: #ffffff;
-            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            color: var(--text);
-            line-height: 1.62;
-            background:
-                radial-gradient(130% 100% at 0% 0%, rgba(99, 102, 241, 0.2), rgba(15, 23, 42, 0)),
-                radial-gradient(120% 90% at 100% 0%, rgba(34, 211, 238, 0.16), rgba(15, 23, 42, 0)),
-                var(--dark);
-            min-height: 100vh;
-        }
-
-        .page {
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 2rem 1rem 3rem;
-        }
-
-        .hero {
-            border: 1px solid rgba(148, 163, 184, 0.34);
-            border-radius: 20px;
-            background: linear-gradient(160deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
-            box-shadow: 0 18px 44px rgba(2, 6, 23, 0.5);
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        h1 {
-            margin: 0;
-            color: var(--white);
-            font-size: clamp(1.5rem, 2.6vw, 2.1rem);
-        }
-
-        .meta {
-            margin: 0.45rem 0 0;
-            color: var(--text-dark);
-            font-size: 0.92rem;
-        }
-
-        .hero-text {
-            margin: 0.85rem 0 1.1rem;
-            color: #d6deea;
-        }
-
-        .actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.62rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.92rem;
-            letter-spacing: 0.01em;
-            padding: 0.66rem 1rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .btn-primary {
-            color: var(--white);
-            background: var(--gradient);
-            box-shadow: 0 10px 24px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-secondary {
-            color: #dbeafe;
-            border: 1px solid rgba(147, 197, 253, 0.45);
-            background: rgba(15, 23, 42, 0.72);
-        }
-
-        .grid {
-            display: grid;
-            gap: 0.9rem;
-        }
-
-        .card {
-            background: rgba(30, 41, 59, 0.58);
-            border: 1px solid rgba(148, 163, 184, 0.24);
-            border-radius: 16px;
-            padding: 1.1rem;
-            backdrop-filter: blur(2px);
-        }
-
-        h2 {
-            margin: 0 0 0.5rem;
-            color: var(--white);
-            font-size: 1.1rem;
-        }
-
-        p {
-            margin: 0;
-        }
-
-        ul {
-            margin: 0;
-            padding-left: 1.15rem;
-        }
-
-        li + li {
-            margin-top: 0.32rem;
-        }
-
-        strong {
-            color: #e2e8f0;
-        }
-
-        a {
-            color: #93c5fd;
-        }
-
-        .footer-actions {
-            margin-top: 1rem;
-            display: flex;
-            justify-content: center;
-            gap: 0.62rem;
-            flex-wrap: wrap;
-        }
-
-        @media (max-width: 640px) {
-            .page {
-                padding: 1rem 0.75rem 2rem;
-            }
-
-            .hero,
-            .card {
-                padding: 0.95rem;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .actions,
-            .footer-actions {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-sans-latin.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-latin.woff2" crossorigin>
+    <meta name="theme-color" content="#fbfaf8">
+    <link rel="stylesheet" href="/css/fonts.css?v=20260917-1">
+    <link rel="stylesheet" href="/css/tokens.css?v=20260917-1">
+    <link rel="stylesheet" href="/css/legal.css?v=20260917-1">
 </head>
 <body>
-    <main class="page">
-        <section class="hero">
+  <a class="skip-link" href="#main">Ugrás a tartalomhoz</a>
+
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="/" aria-label="OVEXI főoldal">
+        <img src="/assets/images/logo-lockup-2x.png" srcset="/assets/images/logo-lockup-2x.png 2x, /assets/images/logo-lockup-3x.png 3x" width="207" height="68" alt="OVEXI">
+      </a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mainNav">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M2 4h12M2 8h12M2 12h12"></path>
+        </svg>
+        Menü
+      </button>
+      <nav class="main-nav" id="mainNav" aria-label="Fő navigáció">
+        <a href="/weboldal-keszites">Weboldal készítés</a>
+        <a href="/marketing-kisvallalkozasoknak">Marketing</a>
+        <a href="/weboldal-karbantartas">Karbantartás</a>
+        <a href="/#mintak">Minták</a>
+        <a href="/#gyik">GYIK</a>
+        <a class="main-nav-cta" href="/#csomagok">Csomagot választok</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="button button-primary button-small nav-cta" href="/#csomagok">Csomagot választok</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="legal-shell">
+        <header class="legal-header">
+            <p>Jogi dokumentum</p>
             <h1>Cookie- és böngészőtárolási tájékoztató</h1>
             <p class="meta">Technikai állapot frissítve: 2026. szeptember 13.</p>
             <p class="hero-text">Az alábbi leírás az OVEXI jelenlegi kosarához, igénybeküldéséhez és opcionális látogatottsági statisztikájához használt böngészőtárolást mutatja be.</p>
-            <div class="actions"><a class="btn btn-primary" href="/">Vissza a főoldalra</a><a class="btn btn-secondary" href="mailto:info@ovexi.hu">Kapcsolat</a></div>
-        </section>
+            <div class="actions"><a class="button button-primary" href="/">Vissza a főoldalra</a><a class="button button-secondary" href="mailto:info@ovexi.hu">Kapcsolat</a></div>
+        </header>
         <section class="grid" aria-label="Böngészőtárolási részletek">
             <article class="card"><h2>1. Kosár és működési beállítások</h2><p>A kosárban kiválasztott csomagazonosítókat, a cookie-választást és az utolsó sikeres igénybeküldés időpontját a böngésző helyi tárolója (localStorage) őrzi. Ez nem bankkártyaadat és nem fizetési igazolás.</p><p>Tárolási kulcsok: ovexi_cart_v2, ovexi_cookie_consent_v2, ovexi_last_order_at. Ezek a böngészőadatok törléséig megmaradhatnak; a kosár sikeres igénybeküldés után kiürül.</p></article>
             <article class="card"><h2>2. Biztonságos újrapróbálás</h2><p>Beküldéskor a böngészőlap munkamenet-tárolójába (sessionStorage) kerülhet a megadott kapcsolattartási adat, brief, csomagválasztás és kérésazonosító. Így bizonytalan hálózati válasz vagy frissítés után ugyanaz a kérés folytatható.</p><p>Kulcs: ovexi_pending_request_v1. Sikeres szerver-visszaigazolás után töröljük. A böngészőlap munkamenetéhez tartozik; a böngésző munkamenet-visszaállítása befolyásolhatja a megőrzést. Közös eszközön használat után zárd be a lapot, és szükség esetén töröld az oldal tárolt adatait.</p></article>
@@ -205,7 +70,44 @@
             <article class="card"><h2>5. Beállítások módosítása</h2><p>A főoldal láblécében található „Cookie-beállítások” gombbal bármikor újranyithatod a választást. A „Csak szükséges” választás leállítja a további opcionális eseményküldést. A korábban rögzített szerveradatokat nem törli automatikusan.</p><p>A helyi adatok a böngésző webhelyadat-kezelőjében törölhetők. A függőben lévő igény tárolásának törlése előtt ellenőrizd, megérkezett-e az igény, hogy ne küldd be véletlenül újra.</p></article>
             <article class="card"><h2>6. További adatkezelés és kapcsolat</h2><p>A szerveren tárolt igényekről, szolgáltatókról és kapcsolattartásról az <a href="/adatkezeles">adatkezelési tájékoztatóban</a> találsz további információt.</p><p>Kérdés vagy törlési kérés: <a href="mailto:info@ovexi.hu">info@ovexi.hu</a>.</p></article>
         </section>
-        <div class="footer-actions"><a class="btn btn-primary" href="/">Vissza a weboldalra</a><a class="btn btn-secondary" href="/#csomagok">Csomagok megtekintése</a></div>
+        <div class="footer-actions"><a class="button button-primary" href="/">Vissza a weboldalra</a><a class="button button-secondary" href="/#csomagok">Csomagok megtekintése</a></div>
     <section><h2>Ügyféltér és munkafolyamat</h2><p>Az ügyféltér belépési azonosítóját és a bizonytalan mentések folytatásához szükséges adatokat a böngészőlap munkamenet-tárolója őrzi (ovexi_customer_token, ovexi_workspace_*). Az adminfelület ugyanígy őrizheti a függő mentéseket (ovexi_admin_*). Ezek a működéshez szükséges adatok; sikeres mentéskor a függő kérés törlődik. Letiltott tárolásnál csak a nyitott lap memóriájában folytatható a művelet.</p></section><section><h2>Foglalás és tartalomkészítés</h2><p>A foglalás folytatásához a vendég adatai, kérésazonosítója, visszaigazolása és lemondási azonosítója legfeljebb 24 óráig maradhat a lap munkamenet-tárolójában (ovexi-booking:*, ovexi-booking-cancel:*). A vállalkozói módosítások és az admin tartalomkészítés függő kérései ugyanitt tárolhatók (ovexi-booking-owner:*, ovexi-production:*). A sikeresen visszaigazolt függő kérés törlődik. A lemondási linket bizalmasan kezeld; közös eszközön használat után töröld az oldal tárolt adatait.</p></section></main>
-<script type="module" src="/js/site-analytics.js?v=20260913-2"></script></body>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img class="footer-logo" src="/assets/images/logo-mark-2x.png" srcset="/assets/images/logo-mark-2x.png 2x, /assets/images/logo-mark-3x.png 3x" width="62" height="64" alt="" loading="lazy" decoding="async"><span class="footer-wordmark">OVEXI</span>
+        <p>Weboldal, marketing és karbantartás kisvállalkozásoknak.</p>
+      </div>
+      <div class="footer-col">
+        <h2>Szolgáltatások</h2>
+        <a href="/weboldal-keszites">Weboldal készítés</a>
+        <a href="/marketing-kisvallalkozasoknak">Marketing</a>
+        <a href="/weboldal-karbantartas">Karbantartás</a>
+      </div>
+      <div class="footer-col">
+        <h2>Útmutatók</h2>
+        <a href="/weboldal-keszites-arak">Weboldal költségei</a>
+        <a href="/weboldal-karbantartas-mit-tartalmaz">Karbantartási útmutató</a>
+        <a href="/#mintak">Interaktív minták</a>
+        <a href="/ugyfelter">Ügyféltér</a>
+      </div>
+      <div class="footer-col">
+        <h2>Kapcsolat</h2>
+        <a href="mailto:info@ovexi.hu">info@ovexi.hu</a>
+        <a href="tel:+36705723437">+36&nbsp;70&nbsp;572&nbsp;3437</a>
+        <a href="/adatkezeles">Adatkezelés</a>
+        <a href="/aszf">ÁSZF</a>
+        <a href="/cookie-policy">Cookie tájékoztató</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© 2026 OVEXI — Turai Sándor Attila e.v.</span>
+      <span>Minden ár alanyi adómentes, fizetendő végösszeg.</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/js/site-analytics.js?v=20260917-1"></script>
+  <script type="module" src="/js/nav.js?v=20260917-1"></script>
+</body>
 </html>

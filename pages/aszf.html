@@ -4,10 +4,42 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,follow">
   <title>Általános szerződési feltételek | OVEXI</title>
-  <link rel="stylesheet" href="/css/legal.css?v=20260903-5">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-sans-latin.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-latin.woff2" crossorigin>
+  <meta name="theme-color" content="#fbfaf8">
+  <link rel="stylesheet" href="/css/fonts.css?v=20260917-1">
+  <link rel="stylesheet" href="/css/tokens.css?v=20260917-1">
+  <link rel="stylesheet" href="/css/legal.css?v=20260917-1">
 </head>
-<body><div class="legal-shell">
-  <nav class="legal-nav"><a href="/"><img src="/assets/images/logo-256.png" alt="OVEXI"></a><a href="/">Vissza a főoldalra</a></nav>
+<body>
+  <a class="skip-link" href="#main">Ugrás a tartalomhoz</a>
+
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="/" aria-label="OVEXI főoldal">
+        <img src="/assets/images/logo-lockup-2x.png" srcset="/assets/images/logo-lockup-2x.png 2x, /assets/images/logo-lockup-3x.png 3x" width="207" height="68" alt="OVEXI">
+      </a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mainNav">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M2 4h12M2 8h12M2 12h12"></path>
+        </svg>
+        Menü
+      </button>
+      <nav class="main-nav" id="mainNav" aria-label="Fő navigáció">
+        <a href="/weboldal-keszites">Weboldal készítés</a>
+        <a href="/marketing-kisvallalkozasoknak">Marketing</a>
+        <a href="/weboldal-karbantartas">Karbantartás</a>
+        <a href="/#mintak">Minták</a>
+        <a href="/#gyik">GYIK</a>
+        <a class="main-nav-cta" href="/#csomagok">Csomagot választok</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="button button-primary button-small nav-cta" href="/#csomagok">Csomagot választok</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="legal-shell">
   <header class="legal-header"><p>Jogi dokumentum</p><h1>Általános szerződési feltételek</h1><div class="meta">Frissítve: 2026. szeptember 12. · kuponfeltételek</div></header>
   <p class="notice"><strong>Fontos:</strong> a kosár és a brief beküldése önmagában nem von le pénzt. A szerződés a Stripe fizetési oldalán teljesített sikeres fizetéssel jön létre; a terhelést a megrendelő ott, külön hagyja jóvá.</p>
   <h2>1. Szolgáltató</h2>
@@ -35,4 +67,43 @@
   <p>A végleges, kifizetett egyedi tartalmak felhasználási joga az egyedi visszaigazolásban meghatározott terjedelemben kerül átadásra. Harmadik fél licencei, betűtípusai, bővítményei és stock anyagai a saját licencfeltételeik szerint használhatók.</p>
   <h2>9. Panaszkezelés</h2>
   <p>Panasz az <a href="mailto:info@ovexi.hu">info@ovexi.hu</a> címen nyújtható be. A szolgáltató a panaszt a vonatkozó jogszabályok szerint kivizsgálja és megválaszolja. Fogyasztói jogvita esetén a fogyasztó a lakóhelye vagy tartózkodási helye szerint illetékes békéltető testülethez, illetve a fogyasztóvédelmi hatósághoz fordulhat.</p>
-</div><script type="module" src="/js/site-analytics.js?v=20260913-2"></script></body></html>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img class="footer-logo" src="/assets/images/logo-mark-2x.png" srcset="/assets/images/logo-mark-2x.png 2x, /assets/images/logo-mark-3x.png 3x" width="62" height="64" alt="" loading="lazy" decoding="async"><span class="footer-wordmark">OVEXI</span>
+        <p>Weboldal, marketing és karbantartás kisvállalkozásoknak.</p>
+      </div>
+      <div class="footer-col">
+        <h2>Szolgáltatások</h2>
+        <a href="/weboldal-keszites">Weboldal készítés</a>
+        <a href="/marketing-kisvallalkozasoknak">Marketing</a>
+        <a href="/weboldal-karbantartas">Karbantartás</a>
+      </div>
+      <div class="footer-col">
+        <h2>Útmutatók</h2>
+        <a href="/weboldal-keszites-arak">Weboldal költségei</a>
+        <a href="/weboldal-karbantartas-mit-tartalmaz">Karbantartási útmutató</a>
+        <a href="/#mintak">Interaktív minták</a>
+        <a href="/ugyfelter">Ügyféltér</a>
+      </div>
+      <div class="footer-col">
+        <h2>Kapcsolat</h2>
+        <a href="mailto:info@ovexi.hu">info@ovexi.hu</a>
+        <a href="tel:+36705723437">+36&nbsp;70&nbsp;572&nbsp;3437</a>
+        <a href="/adatkezeles">Adatkezelés</a>
+        <a href="/aszf">ÁSZF</a>
+        <a href="/cookie-policy">Cookie tájékoztató</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© 2026 OVEXI — Turai Sándor Attila e.v.</span>
+      <span>Minden ár alanyi adómentes, fizetendő végösszeg.</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/js/site-analytics.js?v=20260917-1"></script>
+  <script type="module" src="/js/nav.js?v=20260917-1"></script>
+</body>
+</html>

@@ -4,26 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#fbfaf8">
     <title>OVEXI | 404 - Az oldal nem található</title>
-    <link rel="stylesheet" href="/css/error-pages.css">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/images/favicon-48.png">
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-sans-latin.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-latin.woff2" crossorigin>
+    <link rel="stylesheet" href="/css/fonts.css?v=20260917-1">
+    <link rel="stylesheet" href="/css/tokens.css?v=20260917-1">
+    <link rel="stylesheet" href="/css/error-pages.css?v=20260917-1">
 </head>
 <body>
-    <main class="error-shell">
+  <a class="skip-link" href="#main">Ugrás a tartalomhoz</a>
+    <main class="error-shell" id="main">
         <section class="error-card">
             <a class="error-brand" href="/">
-                <img class="error-logo" src="/assets/images/logo.png" alt="OVEXI logó">
+                <img class="error-logo" src="/assets/images/logo-lockup-2x.png" srcset="/assets/images/logo-lockup-2x.png 2x, /assets/images/logo-lockup-3x.png 3x" width="207" height="68" alt="">
                 <span class="error-brand-text">OVEXI</span>
             </a>
-            <span class="error-code">ERROR 404</span>
-            <h1>Hoppá... <span class="error-title-highlight">ez az oldal nem található.</span></h1>
+            <span class="error-code">Hiba 404</span>
+            <h1>Ez az oldal <span class="error-title-highlight">nem található.</span></h1>
             <p>Úgy tűnik, ez a hivatkozás rossz helyre mutat. Lehet, hogy az oldal át lett helyezve, át lett nevezve, vagy már nem létezik.</p>
-            <p class="error-kicker">Ha gyors segítség kell, írj nekünk, és megmutatjuk a pontos oldalt.</p>
+            <p class="error-kicker">Ha gyors segítség kell, írj az <a href="mailto:info@ovexi.hu">info@ovexi.hu</a> címre, és megmutatjuk a pontos oldalt.</p>
             <div class="error-actions">
-                <a class="error-btn error-btn-primary" href="/">Vissza a főoldalra</a>
-                <a class="error-btn error-btn-secondary" href="/#services">Csomagok megtekintése</a>
-                <a class="error-btn error-btn-secondary" href="/pages/cookie-policy.html">Cookie tájékoztató</a>
+                <a class="button button-primary" href="/">Vissza a főoldalra</a>
+                <a class="button button-secondary" href="/#csomagok">Csomagok megtekintése</a>
+                <a class="button button-ghost" href="/weboldal-keszites">Weboldal készítés</a>
             </div>
-            <div class="error-meta">OVEXI • 404 Az oldal nem található</div>
+            <div class="error-meta">OVEXI — 404, az oldal nem található</div>
         </section>
     </main>
 </body>

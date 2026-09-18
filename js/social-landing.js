@@ -1,0 +1,15 @@
+const firebaseConfig={apiKey:"AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",authDomain:"ovexi-6ef38.firebaseapp.com",projectId:"ovexi-6ef38",storageBucket:"ovexi-6ef38.firebasestorage.app",messagingSenderId:"370083022451",appId:"1:370083022451:web:4e3ba562d07641fcef4c06"};
+const form=document.querySelector('[data-social-proposal]'),status=form?.querySelector('[data-form-status]'),loadedAt=Date.now();let busy=false,requestId='',sdkPromise;
+const functionsSdk=()=>sdkPromise||=Promise.all([import('https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js'),import('https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js')]).then(([{initializeApp},functions])=>[initializeApp(firebaseConfig,'ovexi-social-landing'),functions]);
+const escapeHtml=value=>String(value).replace(/[&<>\"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[char]);
+const clean=(value,max)=>String(value||'').trim().slice(0,max);
+function attribution(){const query=new URLSearchParams(location.search);return{campaignSource:clean(query.get('utm_source'),40).toLowerCase(),campaignName:clean(query.get('utm_campaign'),80),campaignContent:clean(query.get('utm_content'),80)};}
+form?.addEventListener('submit',async event=>{
+  event.preventDefault();if(busy)return;const data=new FormData(form),button=form.querySelector('[type="submit"]');if(data.get('website'))return;
+  if(Date.now()-loadedAt<1800){status.textContent='Ellenőrizd az adatokat, majd küldd el újra.';status.classList.add('error');return;}
+  requestId||=crypto.randomUUID();const consent=data.get('consentConfirm')==='on';const payload={...Object.fromEntries(data),...attribution(),requestId,needs:data.getAll('needs'),contactConsent:consent,privacyAccepted:consent};
+  delete payload.consentConfirm;busy=true;button.disabled=true;status.classList.remove('error');status.textContent='A kérés biztonságos rögzítése folyamatban…';
+  try{const [app,{getFunctions,httpsCallable}]=await functionsSdk();const submit=httpsCallable(getFunctions(app,'europe-west1'),'submitProposalRequest',{timeout:30000});const result=(await submit(payload)).data;requestId='';window.ovexiAnalytics?.track('proposal_submitted',result.proposalNumber,'social_landing_proposal');form.innerHTML=`<div class="form-success" tabindex="-1"><span>ELLENŐRZÉS KÉRVE</span><h2>Köszönjük, megkaptuk.</h2><p>Azonosító: <strong>${escapeHtml(result.proposalNumber)}</strong></p><p>Kézzel átnézzük a vállalkozásod online megjelenését, és a megadott e-mail-címen jelentkezünk.</p><a href="#mintak" onclick="document.querySelector('.examples')?.scrollIntoView()">Addig megnézem a mintákat →</a></div>`;form.querySelector('.form-success')?.focus();}
+  catch(error){status.textContent=error.code==='functions/invalid-argument'?String(error.message||'Ellenőrizd a megadott adatokat.').replace(/^Firebase:\s*/i,'').slice(0,300):'A beküldést most nem tudtuk visszaigazolni. Próbáld újra, vagy írj az info@ovexi.hu címre.';status.classList.add('error');}
+  finally{busy=false;if(button.isConnected)button.disabled=false;}
+});

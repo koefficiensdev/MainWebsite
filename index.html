@@ -7,7 +7,7 @@
   <meta name="description" content="Weboldal készítés kisvállalkozásoknak 39 990 Ft-tól, külön választható marketinggel és weboldal-karbantartással. Átlátható árak és jóváhagyható folyamat.">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <link rel="canonical" href="https://ovexi.hu/">
-  <meta name="theme-color" content="#07111f">
+  <meta name="theme-color" content="#fbfaf8">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="OVEXI">
   <meta property="og:locale" content="hu_HU">
@@ -24,7 +24,11 @@
   <meta name="twitter:image" content="https://ovexi.hu/assets/images/og-ovexi-1200.jpg">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/images/favicon-48.png">
   <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/icon-192.png">
-  <link rel="stylesheet" href="css/site.css?v=20260906-13">
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-sans-latin.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-latin.woff2" crossorigin>
+  <link rel="stylesheet" href="/css/fonts.css?v=20260917-5">
+  <link rel="stylesheet" href="/css/tokens.css?v=20260917-5">
+  <link rel="stylesheet" href="/css/site.css?v=20260917-5">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -53,180 +57,194 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Ugrás a tartalomhoz</a>
+<div class="cookie-banner" id="cookieBanner" hidden>
+    <p><strong>Sütik.</strong> A működéshez szükséges tárolás mindig aktív, a látogatottsági statisztika opcionális. <a href="/cookie-policy">Részletek</a></p>
+    <div class="cookie-actions">
+      <button type="button" class="button button-ghost button-small" id="cookieReject">Csak szükséges</button>
+      <button type="button" class="button button-primary button-small" id="cookieAccept">Elfogadom</button>
+    </div>
+  </div>
+
 
   <header class="site-header" id="top">
     <div class="nav-shell">
-      <a class="brand" href="#top" aria-label="OVEXI főoldal">
-        <img src="/assets/images/logo-256.png" width="256" height="60" alt="OVEXI">
+      <a class="brand" href="/" aria-label="OVEXI főoldal">
+        <img src="/assets/images/logo-lockup-2x.png" srcset="/assets/images/logo-lockup-2x.png 2x, /assets/images/logo-lockup-3x.png 3x" width="207" height="68" alt="OVEXI">
       </a>
-      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mainNav">Menü</button>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mainNav">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M2 4h12M2 8h12M2 12h12"></path>
+        </svg>
+        Menü
+      </button>
       <nav class="main-nav" id="mainNav" aria-label="Fő navigáció">
         <a href="#szolgaltatasok">Szolgáltatások</a>
         <a href="#mintak">Minták</a>
         <a href="#csomagok">Árak</a>
-        <a href="#folyamat">Hogyan működik?</a>
-        <a href="#garancia">Garanciák</a>
+        <a href="#folyamat">Folyamat</a>
         <a href="#gyik">GYIK</a>
       </nav>
-      <button class="cart-button" id="openCartButton" type="button">
-        <svg class="cart-icon" aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="20" r="1"></circle>
-          <circle cx="19" cy="20" r="1"></circle>
-          <path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.5h7.7a2 2 0 0 0 2-1.6L21 7H6"></path>
-        </svg>
-        <span class="cart-label">Kosár</span>
-        <span id="cartCount" aria-live="polite">0</span>
-      </button>
+      <div class="nav-actions">
+        <button class="cart-button" id="openCartButton" type="button">
+          <svg class="cart-icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="20" r="1"></circle>
+            <circle cx="19" cy="20" r="1"></circle>
+            <path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.5h7.7a2 2 0 0 0 2-1.6L21 7H6"></path>
+          </svg>
+          <span class="cart-label">Kosár</span>
+          <span id="cartCount" aria-live="polite">0</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <main id="main">
+
+    <!-- Hero: the headline runs the full measure on two lines and the
+         supporting row anchors the right edge, so the composition fills the
+         width instead of leaving a void beside a narrow column. -->
     <section class="hero">
-      <div class="hero-glow" aria-hidden="true"></div>
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow">Digitális növekedés, felesleges körök nélkül</p>
-          <h1>Weboldal, marketing és karbantartás kisvállalkozásoknak.</h1>
-          <p class="hero-lead">Válaszd ki, mire van szükséged, töltsd ki a rövid briefet, és egy átlátható folyamatban elkészítjük. Minden megjelenő csomag azonnal megrendelhető, külön-külön vagy együtt is.</p>
+      <div class="container">
+        <p class="eyebrow">Weboldal · Marketing · Karbantartás</p>
+        <h1>Weboldal, ami nem csak szép, hanem hoz is ügyfelet.</h1>
+
+        <div class="hero-support">
+          <p class="lead">Kisvállalkozásoknak készítünk weboldalt, és mellé — ha kell — marketinget és karbantartást. Előre látod az árat, a tartalmat és a határidőt, és a jóváhagyásod nélkül semmi nem kerül ki.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#csomagok">Csomagot választok</a>
-            <a class="button button-ghost" href="#javaslat">Ingyenes javaslatot kérek</a>
+            <button class="button button-ghost" type="button" data-open-proposal>Ingyenes javaslatot kérek</button>
           </div>
-          <div class="hero-guide" data-service-guide>
-            <p>Mi a legfontosabb célod most?</p>
-            <div class="hero-guide-options" role="group" aria-label="Szolgáltatás kiválasztása">
-              <button type="button" data-guide-category="website" aria-pressed="false">Új weboldal</button>
-              <button type="button" data-guide-category="marketing" aria-pressed="false">Több érdeklődő</button>
-              <button type="button" data-guide-category="maintenance" aria-pressed="false">Biztonságos működés</button>
-            </div>
-            <div class="hero-guide-result" data-guide-result hidden aria-live="polite">
-              <span>Javasolt következő lépés</span>
-              <strong data-guide-title></strong>
-              <p data-guide-copy></p>
-              <button type="button" data-guide-action>Csomagok megmutatása →</button>
-            </div>
-          </div>
-          <ul class="hero-proof">
-            <li>Átlátható árak, rejtett tételek nélkül</li>
-            <li>Online fizetés és azonnali számla</li>
-            <li>Jóváhagyás nélkül semmi nem kerül ki</li>
-          </ul>
         </div>
-        <aside class="hero-panel" aria-label="Kezdőárak">
-          <p class="panel-kicker">Induló csomagok</p>
-          <div class="price-snapshot">
-            <span>Weboldal</span><strong>39 990 Ft-tól</strong>
-          </div>
-          <div class="price-snapshot">
-            <span>Marketing</span><strong>4 990 Ft / hó-tól</strong>
-          </div>
-          <div class="price-snapshot">
-            <span>Karbantartás</span><strong>2 990 Ft / hó-tól</strong>
-          </div>
-          <small>Minden ár fizetendő végösszeg. Alanyi adómentes szolgáltatás.</small>
-          <p class="checkout-note">A weboldal ára az elkészítés és átadás egyszeri díja. A domain, tárhely, e-mail és külső szolgáltatások folyamatos díjai külön költségek.</p>
-          <div class="panel-note">
-            <span class="status-dot"></span>
-            Új megrendeléseket fogadunk
-          </div>
-        </aside>
+
+        <div class="price-rail">
+          <a class="price-rail-item" href="/weboldal-keszites">
+            <span class="price-rail-label">Weboldal készítés</span>
+            <strong class="numeric">39 990 Ft-tól</strong>
+            <span class="price-rail-note">egyszeri fejlesztési díj</span>
+          </a>
+          <a class="price-rail-item" href="/marketing-kisvallalkozasoknak">
+            <span class="price-rail-label">Marketing</span>
+            <strong class="numeric">4 990 Ft / hó-tól</strong>
+            <span class="price-rail-note">havi tartalomcsomag</span>
+          </a>
+          <a class="price-rail-item" href="/weboldal-karbantartas">
+            <span class="price-rail-label">Karbantartás</span>
+            <strong class="numeric">2 990 Ft / hó-tól</strong>
+            <span class="price-rail-note">figyelés és frissítés</span>
+          </a>
+          <p class="price-rail-foot">Minden ár fizetendő végösszeg. Alanyi adómentes szolgáltatás. A domain, tárhely és e-mail folyamatos díja külön költség.</p>
+        </div>
       </div>
     </section>
 
-    <section class="service-overview" id="szolgaltatasok">
+    <!-- Services: editorial rows, not three identical cards. -->
+    <section class="section section--lg" id="szolgaltatasok">
       <div class="container">
-        <p class="eyebrow">Három önálló szolgáltatás</p>
-        <h2>Digitális jelenlét egy átlátható rendszerben</h2>
-        <div class="service-overview-grid">
-          <article><h3>Weboldal készítés</h3><p>Mobilbarát bemutatkozó oldal, céges weboldal vagy webshop, világos csomagtartalommal és egyszeri fejlesztési díjjal.</p><a href="/weboldal-keszites">Weboldalcsomagok részletesen →</a></article>
-          <article><h3>Marketing kisvállalkozásoknak</h3><p>Jóváhagyható havi posztok, kreatívok és kampányszövegek önállóan vagy weboldal mellé.</p><a href="/marketing-kisvallalkozasoknak">Marketingcsomagok részletesen →</a></article>
-          <article><h3>Weboldal-karbantartás</h3><p>Elérhetőség- és SSL-figyelés, frissítések, ellenőrzések és csomagtól függő kisebb módosítások.</p><a href="/weboldal-karbantartas">Karbantartás részletesen →</a></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="trust-strip" aria-label="Szolgáltatási jellemzők">
-      <div class="container trust-grid">
-        <span>Mobilbarát kivitelezés</span>
-        <span>SEO-alapok</span>
-        <span>Biztonságos folyamat</span>
-        <span>Magyar támogatás</span>
-      </div>
-    </section>
-
-    <section class="showcase-section" id="mintak">
-      <div class="container">
-        <div class="section-heading">
-          <div><p class="eyebrow">Három külön vállalkozás, három külön rendszer</p><h2>Nézd meg működés közben</h2></div>
-          <p>Ezek fiktív vállalkozások számára készített, interaktív bemutatók. Nem ügyfélreferenciák: azt mutatják meg, hogyan igazítható a weboldal és az ügyfélkezelés az eltérő munkafolyamatokhoz.</p>
-        </div>
-        <div class="showcase-grid">
-          <article class="showcase-card showcase-garage">
-            <div class="showcase-visual" aria-hidden="true"><span>Teljes szervizfolyamat</span><strong>ML–1048</strong><i>Igény → Átvizsgálás → Ajánlat → Javítás</i></div>
-            <p class="showcase-label">Autószerviz · ajánlatkérés</p><h3>Műhely 47</h3>
-            <p>Ügyféloldali munkalap, tételes jóváhagyás, állapotkövetés és műhelyoldali feladattábla egy rendszerben.</p>
-            <a class="button button-ghost button-full" href="/mintak/autoszerviz">Interaktív minta megnyitása</a>
-          </article>
-          <article class="showcase-card showcase-salon">
-            <div class="showcase-visual" aria-hidden="true"><span>Szolgáltatásfüggő idő</span><strong>60–150 perc</strong><i>Vendégkérés → Egyeztetés → Szalonnaptár</i></div>
-            <p class="showcase-label">Fodrászat · időpontkezelés</p><h3>Selyem Stúdió</h3>
-            <p>A választott kezeléshez igazodó kérdések, kiszámított időigény és szakember által kezelhető napi naptár.</p>
-            <a class="button button-ghost button-full" href="/mintak/fodraszat">Interaktív minta megnyitása</a>
-          </article>
-          <article class="showcase-card showcase-service">
-            <div class="showcase-visual" aria-hidden="true"><span>Terepi munkaközpont</span><strong>5 mai kiszállás</strong><i>Felmérés → Besorolás → Szervezés → Visszajelzés</i></div>
-            <p class="showcase-label">Helyszíni szolgáltató · igényfelvétel</p><h3>OtthonPont</h3>
-            <p>Válaszfüggő hibafelmérésből rendezett munkalap, prioritás és átlátható napi kiszállási lista készül.</p>
-            <a class="button button-ghost button-full" href="/mintak/szolgaltato">Interaktív minta megnyitása</a>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="proposal-section" id="javaslat">
-      <div class="container proposal-layout">
-        <div class="proposal-copy">
-          <p class="eyebrow">Díjmentes első lépés</p>
-          <h2>Kérj személyre szabott, hárompontos javaslatot</h2>
-          <p>Írd le röviden, hogyan dolgozik a vállalkozásod és mi viszi el a legtöbb időt. Átnézzük, majd olyan weboldal- és rendszerjavaslatot küldünk, amely a te működésedhez illik.</p>
-          <ol class="proposal-steps"><li><strong>1.</strong> Megismerjük a jelenlegi folyamatot.</li><li><strong>2.</strong> Kiválasztjuk a három leghasznosabb fejlesztést.</li><li><strong>3.</strong> Konkrét megvalósítást és megfelelő csomagot javaslunk.</li></ol>
-          <p class="proposal-promise">A javaslat díjmentes és nem kötelez vásárlásra. Automatikus értékesítési levélsorozatot nem indítunk.</p>
-        </div>
-        <form id="proposalForm" class="proposal-form">
-          <div class="form-grid">
-            <label>Név<input name="contactName" autocomplete="name" minlength="2" maxlength="80" required></label>
-            <label>Vállalkozás neve<input name="companyName" autocomplete="organization" minlength="2" maxlength="120" required></label>
-            <label>E-mail<input type="email" name="email" autocomplete="email" maxlength="160" required></label>
-            <label>Telefonszám <small>(nem kötelező)</small><input type="tel" name="phone" autocomplete="tel" maxlength="32"></label>
-            <label class="form-wide">Mivel foglalkozik a vállalkozás?<input name="businessType" minlength="3" maxlength="120" placeholder="Például autószerviz Budapesten" required></label>
-            <label class="form-wide">Weboldal vagy közösségi oldal <small>(nem kötelező)</small><input name="currentUrl" inputmode="url" autocomplete="url" maxlength="300" placeholder="például facebook.com/vallalkozas"></label>
-          </div>
-          <fieldset class="proposal-needs"><legend>Miben lenne a leghasznosabb segítség?</legend>
-            <label><input type="checkbox" name="needs" value="website"> Weboldal vagy megújítás</label>
-            <label><input type="checkbox" name="needs" value="inquiries"> Érdeklődők kezelése</label>
-            <label><input type="checkbox" name="needs" value="appointments"> Időpontok kezelése</label>
-            <label><input type="checkbox" name="needs" value="quotes"> Ajánlatkérések kezelése</label>
-            <label><input type="checkbox" name="needs" value="administration"> Kevesebb kézi adminisztráció</label>
-            <label><input type="checkbox" name="needs" value="unsure"> Még nem tudom</label>
-          </fieldset>
-          <label class="proposal-challenge">Mi okozza most a legtöbb nehézséget?<textarea name="mainChallenge" minlength="15" maxlength="1200" placeholder="Például telefonon és üzenetekben érkeznek az igények, ezért nehéz követni, kinek válaszoltunk már." required></textarea></label>
-          <label class="check-row"><input type="checkbox" name="contactConsent" required><span>Kérem, hogy az OVEXI a megadott e-mail-címen vagy telefonszámon kapcsolatba lépjen velem kizárólag ennek a javaslatkérésnek az egyeztetéséhez.</span></label>
-          <label class="check-row"><input type="checkbox" name="privacyAccepted" required><span>Elolvastam az <a href="/adatkezeles" target="_blank">adatkezelési tájékoztatót</a>.</span></label>
-          <div class="bot-trap" aria-hidden="true"><label>Másodlagos webhely<input name="website" tabindex="-1" autocomplete="off"></label></div>
-          <p class="form-status" id="proposalStatus" aria-live="polite"></p>
-          <button class="button button-primary button-full" type="submit">Kérem a hárompontos javaslatot</button>
-        </form>
-      </div>
-    </section>
-
-    <section class="catalog-section" id="csomagok">
-      <div class="container">
-        <div class="section-heading">
+        <div class="section-head">
           <div>
-            <p class="eyebrow">Önállóan is megvásárolható modulok</p>
+            <p class="eyebrow">Három önálló szolgáltatás</p>
+            <h2>Csak azt vedd meg, amire tényleg szükséged van</h2>
+          </div>
+          <p>Mindhárom külön rendelhető és szabadon kombinálható. Nincs kötelező csomagban vásárlás.</p>
+        </div>
+
+        <ol class="service-rows">
+          <li class="service-row">
+            <span class="service-row-index numeric" aria-hidden="true">01</span>
+            <div class="service-row-body">
+              <h3>Weboldal készítés</h3>
+              <p class="showcase-desc">Mobilbarát bemutatkozó oldal, céges weboldal vagy webshop, világos csomagtartalommal és egyszeri fejlesztési díjjal.</p>
+            </div>
+            <div class="service-row-meta">
+              <span class="numeric">39 990 Ft-tól</span>
+              <a class="link-arrow" href="/weboldal-keszites">Csomagok<span class="sr-only"> – weboldal készítés</span></a>
+            </div>
+          </li>
+          <li class="service-row">
+            <span class="service-row-index numeric" aria-hidden="true">02</span>
+            <div class="service-row-body">
+              <h3>Marketing kisvállalkozásoknak</h3>
+              <p class="showcase-desc">Jóváhagyható havi posztok, kreatívok és kampányszövegek — önállóan vagy weboldal mellé.</p>
+            </div>
+            <div class="service-row-meta">
+              <span class="numeric">4 990 Ft / hó-tól</span>
+              <a class="link-arrow" href="/marketing-kisvallalkozasoknak">Csomagok<span class="sr-only"> – marketing</span></a>
+            </div>
+          </li>
+          <li class="service-row">
+            <span class="service-row-index numeric" aria-hidden="true">03</span>
+            <div class="service-row-body">
+              <h3>Weboldal-karbantartás</h3>
+              <p class="showcase-desc">Elérhetőség- és SSL-figyelés, frissítések, ellenőrzések és csomagtól függő kisebb módosítások.</p>
+            </div>
+            <div class="service-row-meta">
+              <span class="numeric">2 990 Ft / hó-tól</span>
+              <a class="link-arrow" href="/weboldal-karbantartas">Csomagok<span class="sr-only"> – karbantartás</span></a>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Demos: the strongest asset, so it gets a dark band, real photography
+         and an asymmetric grid instead of three gradient rectangles. -->
+    <section class="section section--lg section--dark showcase" id="mintak">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Nézd meg működés közben</p>
+            <h2>Három vállalkozás, három különböző rendszer</h2>
+          </div>
+          <p>Fiktív vállalkozásokra épített, végigkattintható bemutatók — nem ügyfélreferenciák. Azt mutatják meg, hogyan igazítható a weboldal az eltérő munkafolyamatokhoz.</p>
+        </div>
+
+        <div class="showcase-grid">
+          <a class="showcase-card" href="/mintak/autoszerviz">
+            <span class="showcase-media">
+              <img src="/assets/images/demo-ui-garage-1024.webp" srcset="/assets/images/demo-ui-garage-640.webp 640w, /assets/images/demo-ui-garage-1024.webp 1024w" sizes="(min-width: 900px) 370px, 100vw" width="1024" height="640" alt="Műhely 47 műhelyoldali feladattábla: beérkező igények, jóváhagyásra váró ajánlat és folyamatban lévő munkák" loading="lazy" decoding="async">
+            </span>
+            <span class="showcase-kicker">Autószerviz · ajánlatkérés</span>
+            <h3>Műhely 47</h3>
+            <span class="showcase-desc">Ügyféloldali munkalap, tételes jóváhagyás, állapotkövetés és műhelyoldali feladattábla egy rendszerben.</span>
+            <ul class="showcase-flow"><li>Igény</li><li>Átvizsgálás</li><li>Ajánlat</li><li>Javítás</li></ul>
+            <span class="showcase-go">Minta megnyitása<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </a>
+
+          <a class="showcase-card" href="/mintak/fodraszat">
+            <span class="showcase-media">
+              <img src="/assets/images/demo-ui-salon-1024.webp" srcset="/assets/images/demo-ui-salon-640.webp 640w, /assets/images/demo-ui-salon-1024.webp 1024w" sizes="(min-width: 900px) 370px, 100vw" width="1024" height="640" alt="Selyem Stúdió időpontkérő felülete a választott szolgáltatáshoz kiszámított időigénnyel" loading="lazy" decoding="async">
+            </span>
+            <span class="showcase-kicker">Fodrászat · időpontkezelés</span>
+            <h3>Selyem Stúdió</h3>
+            <span class="showcase-desc">A választott kezeléshez igazodó kérdések, kiszámított időigény és szakember által kezelhető napi naptár.</span>
+            <ul class="showcase-flow"><li>Vendégkérés</li><li>Egyeztetés</li><li>Szalonnaptár</li></ul>
+            <span class="showcase-go">Minta megnyitása<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </a>
+
+          <a class="showcase-card" href="/mintak/szolgaltato">
+            <span class="showcase-media">
+              <img src="/assets/images/demo-ui-field-1024.webp" srcset="/assets/images/demo-ui-field-640.webp 640w, /assets/images/demo-ui-field-1024.webp 1024w" sizes="(min-width: 900px) 370px, 100vw" width="1024" height="640" alt="OtthonPont igényfelvétele: feladattípus, válaszfüggő kérdések és a belőlük készülő munkalap" loading="lazy" decoding="async">
+            </span>
+            <span class="showcase-kicker">Helyszíni szolgáltató · igényfelvétel</span>
+            <h3>OtthonPont</h3>
+            <span class="showcase-desc">Válaszfüggő hibafelmérésből rendezett munkalap, prioritás és átlátható napi kiszállási lista készül.</span>
+            <ul class="showcase-flow"><li>Felmérés</li><li>Besorolás</li><li>Szervezés</li><li>Visszajelzés</li></ul>
+            <span class="showcase-go">Minta megnyitása<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Packages: the one place a card grid is the right answer, because the
+         user's job here is comparing options side by side. -->
+    <section class="section section--lg catalog-section" id="csomagok">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Árak</p>
             <h2>Állítsd össze, ami tényleg kell</h2>
           </div>
-          <p>A weboldal, a marketing és a karbantartás külön is kérhető, és szabadon kombinálható. A brief beküldése után a Stripe biztonságos fizetési oldala nyílik meg. Az árak alanyi adómentes, fizetendő végösszegek.</p>
+          <p>A brief beküldése után a Stripe biztonságos fizetési oldala nyílik meg. Az árak alanyi adómentes, fizetendő végösszegek.</p>
         </div>
 
         <div class="catalog-tabs" role="tablist" aria-label="Csomagkategóriák">
@@ -234,64 +252,141 @@
           <button class="catalog-tab" type="button" data-category="marketing" role="tab" aria-selected="false">Marketing</button>
           <button class="catalog-tab" type="button" data-category="maintenance" role="tab" aria-selected="false">Karbantartás</button>
           <button class="catalog-tab" type="button" data-category="oneoff" role="tab" aria-selected="false">Egyszeri csomagok</button>
+          <p class="catalog-count" id="catalogCount" aria-live="polite"></p>
         </div>
 
         <div class="product-grid" id="productGrid" aria-live="polite"></div>
 
         <div class="bundle-banner">
           <div>
-            <p class="eyebrow">Kombinálható</p>
-            <h3>Egyszeri elkészítés. Külön, átlátható üzemeltetés.</h3>
-            <p>A weboldal díja nem örök ingyenes működtetés. A domain, tárhely, e-mail és külső rendszerek külön szolgáltatói díját azok elindítása előtt írásban pontosítjuk. A marketing és karbantartás külön választható; a karbantartási csomag nem tárhely-előfizetés.</p>
+            <h3>Egyszeri elkészítés, külön és átlátható üzemeltetés</h3>
+            <p>A weboldal díja nem örök ingyenes működtetés. A domain, tárhely, e-mail és külső rendszerek szolgáltatói díját azok elindítása előtt írásban pontosítjuk. A marketing és a karbantartás külön választható; a karbantartási csomag nem tárhely-előfizetés.</p>
           </div>
           <button class="button button-secondary" type="button" data-open-category="website">Weboldalt választok</button>
         </div>
       </div>
     </section>
 
-    <section class="process-section" id="folyamat">
+    <!-- Process: a timeline rail, not five more cards. -->
+    <section class="section section--lg section--dark process-section" id="folyamat">
       <div class="container">
-        <div class="section-heading compact">
+        <div class="section-head">
           <div>
             <p class="eyebrow">Egyszerű rendelési folyamat</p>
             <h2>Az ötlettől az átadásig</h2>
           </div>
-          <p>A brief után a Stripe fizetési oldala nyílik meg, és a sikeres fizetést e-mail, valamint számla követi. Minden megrendelés saját azonosítót kap.</p>
+          <p>A brief után a Stripe fizetési oldala nyílik meg, a sikeres fizetést pedig e-mail és számla követi. Minden megrendelés saját azonosítót kap.</p>
         </div>
-        <ol class="process-grid">
-          <li><span>01</span><h3>Csomagválasztás</h3><p>Tedd kosárba a különálló vagy kombinált szolgáltatásokat.</p></li>
-          <li><span>02</span><h3>Rövid brief</h3><p>Add meg a vállalkozást, célokat, hangnemet és a meglévő anyagokat.</p></li>
-          <li><span>03</span><h3>Első változat</h3><p>Elkészül az előnézet vagy a havi tartalomcsomag.</p></li>
-          <li><span>04</span><h3>Jóváhagyás</h3><p>Átnézed, és a csomagban lévő javítási körökben pontosítunk.</p></li>
-          <li><span>05</span><h3>Átadás</h3><p>Publikáljuk vagy átadjuk az anyagokat, és indulhat a folyamatos szolgáltatás.</p></li>
+        <ol class="process-rail">
+          <li><span class="process-step numeric">01</span><h3>Csomagválasztás</h3><p>Tedd kosárba a különálló vagy kombinált szolgáltatásokat.</p></li>
+          <li><span class="process-step numeric">02</span><h3>Rövid brief</h3><p>Add meg a vállalkozást, célokat, hangnemet és a meglévő anyagokat.</p></li>
+          <li><span class="process-step numeric">03</span><h3>Első változat</h3><p>Elkészül az előnézet vagy a havi tartalomcsomag.</p></li>
+          <li><span class="process-step numeric">04</span><h3>Jóváhagyás</h3><p>Átnézed, és a csomagban lévő javítási körökben pontosítunk.</p></li>
+          <li><span class="process-step numeric">05</span><h3>Átadás</h3><p>Publikáljuk vagy átadjuk az anyagokat, és indulhat a folyamatos szolgáltatás.</p></li>
         </ol>
       </div>
     </section>
 
-    <section class="guardrails-section" id="garancia">
+    <!-- Guarantees: a definition list under a sticky heading. No cards. -->
+    <section class="section section--lg" id="garancia">
       <div class="container guardrails-grid">
-        <div>
+        <div class="guardrails-intro">
           <p class="eyebrow">Kiszámítható együttműködés</p>
           <h2>Olcsóbb folyamat, kontrollált minőség</h2>
-          <p class="section-copy">A gyors munkafolyamat csökkenti az árat, de nem veszi ki a kezedből az irányítást. A végleges publikálás mindig jóváhagyáshoz kötött.</p>
+          <p class="lead">A gyors munkafolyamat csökkenti az árat, de nem veszi ki a kezedből az irányítást. A végleges publikálás mindig jóváhagyáshoz kötött.</p>
         </div>
-        <div class="guardrail-cards">
-          <article><strong>Jóváhagyás</strong><p>A marketinganyagok és weboldalak csak elfogadás után kerülnek ki.</p></article>
-          <article><strong>Rögzített keretek</strong><p>Minden csomagnál előre látható a tartalom, a módosítás és a havidíj.</p></article>
-          <article><strong>Adatvédelem</strong><p>Csak a teljesítéshez szükséges üzleti adatokat kérjük be és kezeljük.</p></article>
-          <article><strong>Könnyű váltás</strong><p>A havi modulok külön kezelhetők; csomagváltás bármikor kérhető.</p></article>
+        <dl class="guardrail-list">
+          <div>
+            <dt>Jóváhagyás</dt>
+            <dd>A marketinganyagok és weboldalak csak az elfogadásod után kerülnek ki.</dd>
+          </div>
+          <div>
+            <dt>Rögzített keretek</dt>
+            <dd>Minden csomagnál előre látható a tartalom, a módosítási kör és a havidíj.</dd>
+          </div>
+          <div>
+            <dt>Adatvédelem</dt>
+            <dd>Csak a teljesítéshez szükséges üzleti adatokat kérjük be és kezeljük.</dd>
+          </div>
+          <div>
+            <dt>Könnyű váltás</dt>
+            <dd>A havi modulok külön kezelhetők, csomagváltás bármikor kérhető.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- Proposal form: now after the prices, because "I'm not sure which one"
+         is a question you only have once you have seen the options. -->
+    <section class="section section--lg section--alt proposal-section" id="javaslat">
+      <div class="container proposal-layout">
+        <div class="proposal-copy">
+          <p class="eyebrow">Díjmentes első lépés</p>
+          <h2>Nem tudod, melyik kell? Kérj hárompontos javaslatot.</h2>
+          <p class="lead">Írd le röviden, hogyan dolgozik a vállalkozásod és mi viszi el a legtöbb időt. Átnézzük, majd olyan weboldal- és rendszerjavaslatot küldünk, amely a te működésedhez illik.</p>
+          <ol class="proposal-steps">
+            <li><span class="numeric">1</span> Megismerjük a jelenlegi folyamatot.</li>
+            <li><span class="numeric">2</span> Kiválasztjuk a három leghasznosabb fejlesztést.</li>
+            <li><span class="numeric">3</span> Konkrét megvalósítást és megfelelő csomagot javaslunk.</li>
+          </ol>
+          <p class="callout">A javaslat díjmentes és nem kötelez vásárlásra. Automatikus értékesítési levélsorozatot nem indítunk.</p>
+        </div>
+
+        <!-- The dialog borrows this exact node, so there is only ever one
+             proposal form on the page. See js/proposal-modal.js. -->
+        <div id="proposalFormSlot">
+        <form id="proposalForm" class="proposal-form">
+          <p class="form-note"><abbr class="req" title="kötelező">*</abbr> A csillaggal jelölt mező kitöltése kötelező.</p>
+          <div class="form-grid">
+            <label class="field">
+              <span>E-mail <abbr class="req" title="kötelező">*</abbr></span>
+              <input type="email" name="email" autocomplete="email" maxlength="160" required>
+            </label>
+            <label class="field">
+              <span>Név</span>
+              <input name="contactName" autocomplete="name" maxlength="80">
+            </label>
+            <label class="field">
+              <span>Vállalkozás neve</span>
+              <input name="companyName" autocomplete="organization" maxlength="120">
+            </label>
+            <label class="field">
+              <span>Telefonszám</span>
+              <input type="tel" name="phone" autocomplete="tel" maxlength="32">
+            </label>
+            <label class="field form-wide">
+              <span>Mivel foglalkozik a vállalkozás?</span>
+              <input name="businessType" maxlength="120" placeholder="Például autószerviz Budapesten">
+            </label>
+            <label class="field form-wide">
+              <span>Weboldal vagy közösségi oldal</span>
+              <input name="currentUrl" inputmode="url" autocomplete="url" maxlength="300" placeholder="például facebook.com/vallalkozas">
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Megjegyzés</span>
+            <textarea name="mainChallenge" maxlength="1200" placeholder="Ha van bármi, amit érdemes előre tudnunk, írd ide."></textarea>
+          </label>
+
+          <label class="check-row"><input type="checkbox" name="contactConsent" required><span>Hozzájárulok, hogy az OVEXI a megadott elérhetőségen kapcsolatba lépjen velem ehhez a javaslatkéréshez, és megismertem az <a href="/adatkezeles" target="_blank" rel="noopener">adatkezelési tájékoztatót</a>.</span></label>
+
+          <div class="bot-trap" aria-hidden="true"><label>Másodlagos webhely<input name="website" tabindex="-1" autocomplete="off"></label></div>
+          <p class="form-status" id="proposalStatus" aria-live="polite"></p>
+          <button class="button button-primary button-full" type="submit">Kérem a hárompontos javaslatot</button>
+        </form>
         </div>
       </div>
     </section>
 
-    <section class="faq-section" id="gyik">
+    <section class="section section--lg faq-section" id="gyik">
       <div class="container faq-grid">
-        <div>
+        <div class="faq-intro">
           <p class="eyebrow">Gyakori kérdések</p>
           <h2>A rendelés előtt</h2>
-          <p class="section-copy">Ha nem találod a választ, írj az <a href="mailto:info@ovexi.hu">info@ovexi.hu</a> címre.</p>
+          <p>Ha nem találod a választ, írj az <a href="mailto:info@ovexi.hu">info@ovexi.hu</a> címre.</p>
         </div>
-        <div class="faq-list">
+        <div class="accordion faq-list">
           <details><summary>Mit tartalmaz a 69 990 Ft-os Céges weboldal?</summary><p>Legfeljebb 6 aloldalt és egy, a vállalkozáshoz illő alap üzleti modult. Ez lehet például egy szolgáltató naptárával működő időpontkérés, strukturált ajánlatkérés vagy igényfelvétel. A brief alapján együtt választjuk ki a legjobban illő megoldást. Több felhasználó, online fizetés, SMS és külső rendszerintegráció külön egyeztetendő.</p></details>
           <details><summary>Az egyszeri ár örök ingyenes üzemeltetést jelent?</summary><p>Nem. Az egyszeri ár a megállapodott weboldal elkészítésére és átadására vonatkozik. A domain megújítása, tárhely, e-mail, adatbázis és külső szolgáltatások folyamatos költsége külön fizetendő. A választást és a díjakat a külső szolgáltatás elindítása előtt egyeztetjük; új fizetős előfizetést nem indítunk külön jóváhagyás nélkül.</p></details>
           <details><summary>Mit adhat egy promókód?</summary><p>Az aktív kód a rajta feltüntetett időtartamra átvállalhatja egy standard .hu domain és legfeljebb 1 GB webtárhely díját, valamint kedvezményt adhat a weboldalcsomag egyszeri fejlesztési díjából. A kódot a rendelés elküldése előtt kell megadni, és csak weboldalcsomaggal használható. A pontos kedvezményt a kosár a kód ellenőrzésekor kiírja.</p></details>
@@ -305,49 +400,96 @@
       </div>
     </section>
 
-    <section class="final-cta">
-      <div class="container final-cta-inner">
-        <div>
-          <p class="eyebrow">Kezdjük el</p>
-          <h2>Válaszd ki az első csomagod</h2>
-          <p>A brief kitöltése általában kevesebb mint öt perc.</p>
+    <!-- Who actually does the work. The single strongest trust signal for a
+         one-person business. Sits after the FAQ so the last thing read
+         before the closing CTA is who is on the other end. -->
+    <section class="section section--alt maker" id="rolam">
+      <div class="container maker-grid">
+        <div class="maker-copy">
+          <p class="eyebrow">Ki dolgozik a projekteden</p>
+          <blockquote class="maker-quote">
+            <p>Nem ügynökség vagyok, hanem egy ember, aki elkészíti és utána is kézben tartja az oldaladat. Ezért tudom előre megmondani az árat, és ezért nem kerül ki semmi a jóváhagyásod nélkül.</p>
+          </blockquote>
+          <p class="maker-name">Turai Sándor Attila<span>OVEXI · egyéni vállalkozó</span></p>
+          <div class="maker-contact">
+            <a class="link-arrow" href="mailto:info@ovexi.hu">info@ovexi.hu</a>
+            <a class="link-arrow" href="tel:+36705723437">+36&nbsp;70&nbsp;572&nbsp;3437</a>
+          </div>
         </div>
-        <a class="button button-primary" href="#csomagok">Csomagok megtekintése</a>
+        <dl class="maker-facts">
+          <div>
+            <dt>Kapcsolattartás</dt>
+            <dd>Közvetlenül velem, nem ügyfélszolgálaton keresztül.</dd>
+          </div>
+          <div>
+            <dt>Számlázás</dt>
+            <dd>Magyar számla a Billingón keresztül, alanyi adómentesen.</dd>
+          </div>
+          <div>
+            <dt>Fizetés</dt>
+            <dd>Stripe biztonságos fizetési oldalán. Kártyaadatot nem látok és nem tárolok.</dd>
+          </div>
+          <div>
+            <dt>Tulajdonjog</dt>
+            <dd>A domain és a tárhely a te nevedre kerül, nem az enyémre.</dd>
+          </div>
+        </dl>
       </div>
     </section>
+
+    <section class="section--dark final-cta">
+      <div class="container final-cta-inner">
+        <h2>Kezdjük el.</h2>
+        <p class="lead">A brief kitöltése általában kevesebb mint öt perc, és semmi nem kerül ki a jóváhagyásod nélkül.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#csomagok">Csomagok megtekintése</a>
+          <a class="button button-ghost" href="#javaslat">Inkább javaslatot kérek</a>
+        </div>
+      </div>
+    </section>
+
     <section class="container order-receipt" id="orderReceipt" tabindex="-1" aria-live="polite" hidden></section>
   </main>
 
   <footer class="site-footer">
     <div class="container footer-grid">
-      <div>
-        <img src="/assets/images/logo-256.png" width="256" height="60" alt="OVEXI" class="footer-logo" loading="lazy" decoding="async">
+      <div class="footer-brand">
+        <img class="footer-logo" src="/assets/images/logo-mark-2x.png" srcset="/assets/images/logo-mark-2x.png 2x, /assets/images/logo-mark-3x.png 3x" width="62" height="64" alt="" loading="lazy" decoding="async"><span class="footer-wordmark">OVEXI</span>
         <p>Weboldal, marketing és karbantartás kisvállalkozásoknak.</p>
       </div>
-      <div>
-        <strong>Kapcsolat</strong>
-        <a href="mailto:info@ovexi.hu">info@ovexi.hu</a>
-        <a href="tel:+36705723437">+36&nbsp;70&nbsp;572&nbsp;3437</a>
-      </div>
-      <div>
-        <strong>Információk</strong>
+      <div class="footer-col">
+        <h2>Szolgáltatások</h2>
         <a href="/weboldal-keszites">Weboldal készítés</a>
         <a href="/marketing-kisvallalkozasoknak">Marketing</a>
-        <a href="/weboldal-karbantartas">Karbantartás</a><a href="/weboldal-keszites-arak">Weboldal költségei</a><a href="/weboldal-karbantartas-mit-tartalmaz">Karbantartási útmutató</a>
-        <a href="/cookie-policy">Cookie tájékoztató</a>
-        <button class="button button-ghost button-small" id="openCookieSettings" type="button">Cookie-beállítások</button>
+        <a href="/weboldal-karbantartas">Karbantartás</a>
+      </div>
+      <div class="footer-col">
+        <h2>Útmutatók</h2>
+        <a href="/weboldal-keszites-arak">Weboldal költségei</a>
+        <a href="/weboldal-karbantartas-mit-tartalmaz">Karbantartási útmutató</a>
+        <a href="/#mintak">Interaktív minták</a>
         <a href="/ugyfelter">Ügyféltér</a>
+      </div>
+      <div class="footer-col">
+        <h2>Kapcsolat</h2>
+        <a href="mailto:info@ovexi.hu">info@ovexi.hu</a>
+        <a href="tel:+36705723437">+36&nbsp;70&nbsp;572&nbsp;3437</a>
         <a href="/adatkezeles">Adatkezelés</a>
         <a href="/aszf">ÁSZF</a>
+        <a href="/cookie-policy">Cookie tájékoztató</a>
+        <button id="openCookieSettings" type="button">Cookie-beállítások</button>
       </div>
     </div>
-    <div class="container footer-bottom">© 2026 OVEXI. Minden jog fenntartva.</div>
+    <div class="container footer-bottom">
+      <span>© 2026 OVEXI — Turai Sándor Attila e.v.</span>
+      <span>Minden ár alanyi adómentes, fizetendő végösszeg.</span>
+    </div>
   </footer>
 
   <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
   <aside class="cart-drawer" id="cartDrawer" inert aria-labelledby="cartTitle">
     <div class="drawer-header">
-      <div><p class="eyebrow">Megrendelés</p><h2 id="cartTitle">A kosarad</h2></div>
+      <h2 id="cartTitle">A kosarad</h2>
       <button class="icon-button" id="closeCartButton" type="button" aria-label="Kosár bezárása">×</button>
     </div>
     <div class="cart-items" id="cartItems"></div>
@@ -358,47 +500,55 @@
   <div class="modal-backdrop" id="checkoutBackdrop" hidden>
     <section class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
       <div class="modal-header">
-        <div><p class="eyebrow">Megrendelés indítása</p><h2 id="checkoutTitle">Mesélj a vállalkozásodról</h2></div>
+        <div>
+          <p class="eyebrow">Megrendelés indítása</p>
+          <h2 id="checkoutTitle">Mesélj a vállalkozásodról</h2>
+        </div>
         <button class="icon-button" id="closeCheckoutButton" type="button" aria-label="Ablak bezárása">×</button>
       </div>
       <form id="checkoutForm" class="checkout-form">
         <div class="form-section">
           <h3>Kapcsolattartás</h3>
           <div class="form-grid">
-            <label>Kapcsolattartó neve<input type="text" name="contactName" autocomplete="name" minlength="2" maxlength="80" required></label>
-            <label>Cégnév<input type="text" name="companyName" autocomplete="organization" minlength="2" maxlength="120" required></label>
-            <label>E-mail<input type="email" name="email" autocomplete="email" maxlength="160" required></label>
-            <label>Telefonszám<input type="tel" name="phone" autocomplete="tel" maxlength="32"></label>
+            <label class="field"><span>Kapcsolattartó neve</span><input type="text" name="contactName" autocomplete="name" minlength="2" maxlength="80" required></label>
+            <label class="field"><span>Cégnév</span><input type="text" name="companyName" autocomplete="organization" minlength="2" maxlength="120" required></label>
+            <label class="field"><span>E-mail</span><input type="email" name="email" autocomplete="email" maxlength="160" required></label>
+            <label class="field"><span>Telefonszám</span><input type="tel" name="phone" autocomplete="tel" maxlength="32"></label>
           </div>
         </div>
+
         <div class="form-section">
           <h3>Rövid brief</h3>
           <div class="form-grid">
-            <label class="form-wide">Mivel foglalkozik a vállalkozás?<textarea name="businessDescription" minlength="10" maxlength="1200" placeholder="Írj legalább egy rövid mondatot a szolgáltatásaidról." required></textarea></label>
-            <label>Célcsoport<input type="text" name="targetAudience" maxlength="300" placeholder="Például budapesti kisvállalkozók"></label>
-            <label>Weboldal vagy közösségi oldal<input type="text" inputmode="url" autocomplete="url" name="currentUrl" maxlength="300" placeholder="például ovexi.hu"></label>
-            <label id="infrastructurePlanRow" hidden>Domain és tárhely helyzete<select name="infrastructurePlan"><option value="">Válassz…</option><option value="existing">Van domainem és tárhelyem</option><option value="domain_only">Van domainem, tárhelyet kérek</option><option value="new">Domaint és tárhelyet is kérek</option><option value="guidance">Segítséget kérek a választáshoz</option></select><small>A domain és a tárhely a te neveden marad; a külső szolgáltató díja külön fizetendő.</small></label>
-            <label>Elsődleges cél<select name="primaryGoal" required><option value="">Válassz…</option><option>Több ajánlatkérés</option><option>Online értékesítés</option><option>Ismertség növelése</option><option>Rendszeres kommunikáció</option><option>Technikai biztonság</option></select></label>
-            <label>Kommunikáció hangneme<select name="tone"><option>Professzionális</option><option>Közvetlen és barátságos</option><option>Prémium</option><option>Fiatalos</option><option>Oktató jellegű</option></select></label>
-            <label class="form-wide">Fontos részletek, kérések<textarea name="notes" maxlength="1600" placeholder="Színek, példaképek, határidő vagy bármilyen külön kérés"></textarea></label>
+            <label class="field form-wide"><span>Mivel foglalkozik a vállalkozás?</span><textarea name="businessDescription" minlength="10" maxlength="1200" placeholder="Írj legalább egy rövid mondatot a szolgáltatásaidról." required></textarea></label>
+            <label class="field"><span>Célcsoport</span><input type="text" name="targetAudience" maxlength="300" placeholder="Például budapesti kisvállalkozók"></label>
+            <label class="field"><span>Weboldal vagy közösségi oldal</span><input type="text" inputmode="url" autocomplete="url" name="currentUrl" maxlength="300" placeholder="például ovexi.hu"></label>
+            <label class="field" id="infrastructurePlanRow" hidden><span>Domain és tárhely helyzete</span><select name="infrastructurePlan"><option value="">Válassz…</option><option value="existing">Van domainem és tárhelyem</option><option value="domain_only">Van domainem, tárhelyet kérek</option><option value="new">Domaint és tárhelyet is kérek</option><option value="guidance">Segítséget kérek a választáshoz</option></select><small>A domain és a tárhely a te neveden marad; a külső szolgáltató díja külön fizetendő.</small></label>
+            <label class="field"><span>Elsődleges cél</span><select name="primaryGoal" required><option value="">Válassz…</option><option>Több ajánlatkérés</option><option>Online értékesítés</option><option>Ismertség növelése</option><option>Rendszeres kommunikáció</option><option>Technikai biztonság</option></select></label>
+            <label class="field"><span>Kommunikáció hangneme</span><select name="tone"><option>Professzionális</option><option>Közvetlen és barátságos</option><option>Prémium</option><option>Fiatalos</option><option>Oktató jellegű</option></select></label>
+            <label class="field form-wide"><span>Fontos részletek, kérések</span><textarea name="notes" maxlength="1600" placeholder="Színek, példaképek, határidő vagy bármilyen külön kérés"></textarea></label>
           </div>
         </div>
+
         <div class="form-section promo-section" id="promoSection" hidden>
           <h3>Promókód</h3>
-          <p>Ha e-mailben vagy hirdetésben kaptál kódot, itt érvényesítheted. A kód domain- vagy tárhelyidőt, illetve százalékos kedvezményt is tartalmazhat; a pontos előnyt ellenőrzés után látod.</p>
+          <p class="text-sm muted">Ha e-mailben vagy hirdetésben kaptál kódot, itt érvényesítheted. A kód domain- vagy tárhelyidőt, illetve százalékos kedvezményt is tartalmazhat; a pontos előnyt ellenőrzés után látod.</p>
           <div class="promo-control">
-            <label>Promókód<input type="text" name="promoCode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Például: KOD123"></label>
+            <label class="field"><span>Promókód</span><input type="text" name="promoCode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Például: KOD123"></label>
             <button class="button button-ghost" id="applyPromoButton" type="button">Kód ellenőrzése</button>
           </div>
           <p class="promo-status" id="promoStatus" role="status" aria-live="polite"></p>
         </div>
+
         <div class="order-review" id="checkoutReview"></div>
         <p class="checkout-note" id="infrastructureCheckoutNote" hidden>Az egyszeri weboldaldíj a fejlesztésre és az átadásra szól. Ha domainre vagy tárhelyre is szükséged van, segítünk a saját neveden létrehozni. Ezek díja alapesetben külön fizetendő; érvényes promókódnál az ellenőrzéskor kiírt időtartam és kedvezmény érvényes.</p>
-        <label class="check-row"><input type="checkbox" name="termsAccepted" required><span>Elolvastam és elfogadom az <a href="/aszf" target="_blank">ÁSZF-et</a> és az <a href="/adatkezeles" target="_blank">adatkezelési tájékoztatót</a>.</span></label>
+
+        <label class="check-row"><input type="checkbox" name="termsAccepted" required><span>Elolvastam és elfogadom az <a href="/aszf" target="_blank" rel="noopener">ÁSZF-et</a> és az <a href="/adatkezeles" target="_blank" rel="noopener">adatkezelési tájékoztatót</a>.</span></label>
         <label class="check-row"><input type="checkbox" name="operatingCostsAcknowledged" required><span id="operatingCostsText">Tudomásul veszem a csomagon kívüli külső szolgáltatások külön díját.</span></label>
         <label class="check-row"><input type="checkbox" name="businessPurchaseConfirmed" required><span>Megerősítem, hogy a szolgáltatást vállalkozási vagy szakmai tevékenységemhez rendelem meg, és jogosult vagyok a megadott vállalkozás képviseletére.</span></label>
         <label class="check-row"><input type="checkbox" name="hungarianBillingConfirmed" required><span>Megerősítem, hogy a számlázási cím Magyarországon van. A Stripe fizetési oldalán ugyanezt a valós számlázási címet adom meg.</span></label>
         <label class="check-row"><input type="checkbox" name="marketingConsent"><span>Szeretnék hasznos tippeket és ajánlatokat kapni e-mailben. Ez nem feltétele a rendelésnek.</span></label>
+
         <div class="bot-trap" aria-hidden="true"><label>Webhely<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <p class="form-status" id="checkoutStatus" aria-live="polite"></p>
         <button class="button button-primary button-full" type="submit">Igény beküldése</button>
@@ -408,21 +558,33 @@
     </section>
   </div>
 
+  <!-- Always-reachable free-proposal action. The dialog body is filled at
+       open time with the real #proposalForm node. -->
+  <button class="floating-cta" type="button" data-open-proposal>
+    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v18M3 12h18"></path>
+    </svg>
+    <span>Díjmentes első lépés</span>
+  </button>
+
+  <dialog class="proposal-dialog" id="proposalDialog" aria-labelledby="proposalDialogTitle">
+    <div class="proposal-dialog-head">
+      <div>
+        <p class="eyebrow">Díjmentes első lépés</p>
+        <h2 id="proposalDialogTitle">Kérj hárompontos javaslatot</h2>
+        <p class="proposal-dialog-sub">Írd le röviden, hogyan dolgozik a vállalkozásod. Átnézzük, és konkrét javaslatot küldünk. Nem kötelez vásárlásra.</p>
+      </div>
+      <button class="icon-button" type="button" data-close-proposal aria-label="Ablak bezárása">×</button>
+    </div>
+    <div class="proposal-dialog-body" id="proposalDialogBody"></div>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <div class="cookie-banner" id="cookieBanner" hidden>
-    <div>
-      <strong>Cookie-beállítások</strong>
-      <p>A szükséges tárolást az oldal működéséhez használjuk. A látogatottsági statisztika opcionális, és később is kikapcsolható.</p>
-    </div>
-    <div class="cookie-actions">
-      <button type="button" class="button button-ghost button-small" id="cookieReject">Csak szükséges</button>
-      <button type="button" class="button button-secondary button-small" id="cookieAccept">Elfogadom</button>
-    </div>
-  </div>
-
   <noscript>Az online csomagválasztó használatához engedélyezd a JavaScriptet, vagy írj az info@ovexi.hu címre.</noscript>
-  <script type="module" src="/js/site-analytics.js?v=20260913-2"></script>
-  <script type="module" src="js/main.js?v=20260912-1"></script>
+  <script type="module" src="/js/site-analytics.js?v=20260917-5"></script>
+  <script type="module" src="/js/nav.js?v=20260917-5"></script>
+  <script type="module" src="/js/main.js?v=20260917-5"></script>
+  <script type="module" src="/js/proposal-modal.js?v=20260917-5"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +7,13 @@
     <title>OVEXI - Statistics Dashboard</title>
     <style>
         :root {
-            --primary: #6366f1;
-            --accent: #22d3ee;
-            --dark: #0f172a;
-            --dark-light: #1e293b;
-            --text: #cbd5e1;
-            --white: #ffffff;
-            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary: #93cdb0;
+            --accent: #8fb4d9;
+            --dark: #14161a;
+            --dark-light: #1d2026;
+            --text: #d7dbe1;
+            --white: #fbfaf8;
+            --gradient: linear-gradient(135deg, #1b3a2f 0%, #24503f 100%);
         }
 
         * {
@@ -22,11 +22,8 @@
 
         body {
             margin: 0;
-            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background:
-                radial-gradient(120% 90% at 20% 0%, rgba(99, 102, 241, 0.24), rgba(15, 23, 42, 0)),
-                radial-gradient(110% 80% at 100% 10%, rgba(34, 211, 238, 0.14), rgba(15, 23, 42, 0)),
-                var(--dark);
+            font-family: var(--font-body), "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+            background: var(--dark);
             color: var(--text);
             min-height: 100vh;
         }
@@ -61,8 +58,8 @@
             min-width: 150px;
             padding: 0.52rem 0.88rem;
             border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.38);
-            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(155, 162, 171, 0.38);
+            background: rgba(29, 32, 38, 0.85);
             color: var(--white);
             font: inherit;
             font-size: 0.86rem;
@@ -86,8 +83,8 @@
         }
 
         .btn.secondary {
-            background: rgba(30, 41, 59, 0.85);
-            border: 1px solid rgba(148, 163, 184, 0.38);
+            background: rgba(29, 32, 38, 0.85);
+            border: 1px solid rgba(155, 162, 171, 0.38);
         }
 
         .grid {
@@ -97,11 +94,11 @@
         }
 
         .card {
-            background: linear-gradient(160deg, rgba(30, 41, 59, 0.93), rgba(15, 23, 42, 0.97));
-            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: linear-gradient(160deg, rgba(29, 32, 38, 0.93), rgba(20, 22, 26, 0.97));
+            border: 1px solid rgba(155, 162, 171, 0.28);
             border-radius: 16px;
             padding: 1rem;
-            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.45);
+            box-shadow: 0 18px 40px rgba(20, 22, 26, 0.45);
         }
 
         .metric {
@@ -143,7 +140,7 @@
         .metric p {
             margin: 0;
             font-size: 1.7rem;
-            color: #dbeafe;
+            color: #d7dbe1;
             font-weight: 800;
         }
 
@@ -162,12 +159,12 @@
         td {
             text-align: left;
             padding: 0.42rem 0.3rem;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            border-bottom: 1px solid rgba(155, 162, 171, 0.2);
             vertical-align: top;
         }
 
         th {
-            color: #dbeafe;
+            color: #d7dbe1;
             font-weight: 700;
         }
 
@@ -176,15 +173,15 @@
             inset: 0;
             display: grid;
             place-items: center;
-            background: rgba(2, 6, 23, 0.8);
+            background: rgba(20, 22, 26, 0.8);
             backdrop-filter: blur(5px);
             z-index: 10;
         }
 
         .auth-box {
             width: min(420px, 92vw);
-            background: linear-gradient(160deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.99));
-            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: linear-gradient(160deg, rgba(29, 32, 38, 0.98), rgba(20, 22, 26, 0.99));
+            border: 1px solid rgba(155, 162, 171, 0.3);
             border-radius: 18px;
             padding: 1.2rem;
         }
@@ -196,13 +193,13 @@
 
         .auth-box p {
             margin: 0 0 0.7rem;
-            color: #a6b5c9;
+            color: #9ba2ab;
             font-size: 0.92rem;
         }
 
         .auth-hint {
             margin: 0.1rem 0 0.75rem;
-            color: #93c5fd;
+            color: #8fb4d9;
             font-size: 0.82rem;
         }
 
@@ -210,8 +207,8 @@
             width: 100%;
             padding: 0.7rem;
             border-radius: 10px;
-            border: 1px solid rgba(148, 163, 184, 0.42);
-            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(155, 162, 171, 0.42);
+            background: rgba(20, 22, 26, 0.82);
             color: var(--white);
             margin-bottom: 0.65rem;
         }
@@ -234,51 +231,51 @@
             }
         }
     </style>
-</head>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-sans-latin.woff2" crossorigin><link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-latin.woff2" crossorigin><link rel="stylesheet" href="/css/fonts.css?v=20260917-1"></head>
 <body>
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-box">
-            <h2>Statistics Access</h2>
-            <p>Enter password to open analytics dashboard.</p>
+            <h2>Statisztika belépés</h2>
+            <p>Add meg a jelszót a statisztikák megnyitásához.</p>
             <input type="password" id="statsPassword" placeholder="Password">
-            <button class="btn" id="statsLoginBtn" type="button">Open dashboard</button>
+            <button class="btn" id="statsLoginBtn" type="button">Megnyitás</button>
             <p class="error" id="statsAuthError"></p>
-            <a class="btn secondary" href="../index.html" style="margin-top:0.45rem;">Back to website</a>
+            <a class="btn secondary" href="../index.html" style="margin-top:0.45rem;">Vissza a weboldalra</a>
         </div>
     </div>
 
     <div class="wrap hidden" id="statsApp">
         <div class="topbar">
-            <h1 class="title">OVEXI Statistics Dashboard</h1>
+            <h1 class="title">OVEXI statisztika</h1>
             <div class="top-actions">
                 <select class="stats-filter" id="statsRangeFilter" aria-label="Statistics date range">
-                    <option value="24h">Last 24 hours</option>
-                    <option value="7d">Last 7 days</option>
-                    <option value="30d" selected>Last 30 days</option>
-                    <option value="all">All time</option>
+                    <option value="24h">Elmúlt 24 óra</option>
+                    <option value="7d">Elmúlt 7 nap</option>
+                    <option value="30d" selected>Elmúlt 30 nap</option>
+                    <option value="all">Teljes időszak</option>
                 </select>
-                <button class="btn secondary" type="button" id="refreshStatsBtn">Refresh</button>
-                <a class="btn secondary" href="../index.html">Back to site</a>
+                <button class="btn secondary" type="button" id="refreshStatsBtn">Frissítés</button>
+                <a class="btn secondary" href="../index.html">Vissza a weboldalra</a>
             </div>
         </div>
 
         <div class="grid">
-            <section class="card metric"><h3>Total events</h3><p id="metricEvents">0</p></section>
-            <section class="card metric"><h3>Unique sessions</h3><p id="metricSessions">0</p></section>
-            <section class="card metric"><h3>Page views</h3><p id="metricViews">0</p></section>
-            <section class="card metric"><h3>Button/link clicks</h3><p id="metricClicks">0</p></section>
-            <section class="card metric"><h3>Avg. duration on site</h3><p id="metricAvgDuration">0s</p></section>
-            <section class="card metric"><h3>Reached 75% scroll</h3><p id="metricScroll75">0%</p></section>
-            <section class="card metric"><h3>Reached 100% scroll</h3><p id="metricScroll100">0%</p></section>
+            <section class="card metric"><h3>Összes esemény</h3><p id="metricEvents">0</p></section>
+            <section class="card metric"><h3>Egyedi munkamenetek</h3><p id="metricSessions">0</p></section>
+            <section class="card metric"><h3>Oldalmegtekintések</h3><p id="metricViews">0</p></section>
+            <section class="card metric"><h3>Gomb- és linkkattintások</h3><p id="metricClicks">0</p></section>
+            <section class="card metric"><h3>Átlagos idő az oldalon</h3><p id="metricAvgDuration">0s</p></section>
+            <section class="card metric"><h3>75%-ig görgetett</h3><p id="metricScroll75">0%</p></section>
+            <section class="card metric"><h3>100%-ig görgetett</h3><p id="metricScroll100">0%</p></section>
 
-            <section class="card chart-wide"><h3>Events by type</h3><div class="chart-canvas"><canvas id="eventsByTypeChart"></canvas></div></section>
-            <section class="card chart-wide"><h3>Top traffic sources</h3><div class="chart-canvas"><canvas id="sourceChart"></canvas></div></section>
-            <section class="card chart-wide"><h3>Top clicked elements</h3><div class="chart-canvas"><canvas id="clickTargetsChart"></canvas></div></section>
-            <section class="card chart-full"><h3>Hourly activity (UTC)</h3><div class="chart-canvas"><canvas id="hourlyChart"></canvas></div></section>
-            <section class="card chart-full"><h3>Average duration by page</h3><div class="table-wrap"><table><thead><tr><th>Page</th><th>Sessions with duration</th><th>Average duration</th></tr></thead><tbody id="pageDurationTable"></tbody></table></div></section>
-            <section class="card chart-full"><h3>CTA/button CTR</h3><div class="table-wrap"><table><thead><tr><th>Page</th><th>Element ID/Class</th><th>Label</th><th>Clicks</th><th>Page views</th><th>CTR</th></tr></thead><tbody id="ctaCtrTable"></tbody></table></div></section>
-            <section class="card chart-full"><h3>Click breakdown (all elements)</h3><div class="table-wrap"><table><thead><tr><th>Element ID/Class</th><th>Label</th><th>Clicks</th></tr></thead><tbody id="clickBreakdownTable"></tbody></table></div></section>
-            <section class="card chart-full"><h3>Recent events</h3><div class="table-wrap"><table><thead><tr><th>Time</th><th>Type</th><th>Source</th><th>Path</th><th>Target</th><th>Value</th></tr></thead><tbody id="recentEventsTable"></tbody></table></div></section>
+            <section class="card chart-wide"><h3>Események típus szerint</h3><div class="chart-canvas"><canvas id="eventsByTypeChart"></canvas></div></section>
+            <section class="card chart-wide"><h3>Legfőbb forgalmi források</h3><div class="chart-canvas"><canvas id="sourceChart"></canvas></div></section>
+            <section class="card chart-wide"><h3>Legtöbbet kattintott elemek</h3><div class="chart-canvas"><canvas id="clickTargetsChart"></canvas></div></section>
+            <section class="card chart-full"><h3>Óránkénti aktivitás (UTC)</h3><div class="chart-canvas"><canvas id="hourlyChart"></canvas></div></section>
+            <section class="card chart-full"><h3>Átlagos időtartam oldalanként</h3><div class="table-wrap"><table><thead><tr><th>Oldal</th><th>Mért munkamenetek</th><th>Átlagos időtartam</th></tr></thead><tbody id="pageDurationTable"></tbody></table></div></section>
+            <section class="card chart-full"><h3>CTA- és gombátkattintás</h3><div class="table-wrap"><table><thead><tr><th>Oldal</th><th>Elem azonosító/osztály</th><th>Megnevezés</th><th>Kattintás</th><th>Oldalmegtekintések</th><th>CTR</th></tr></thead><tbody id="ctaCtrTable"></tbody></table></div></section>
+            <section class="card chart-full"><h3>Kattintások részletesen</h3><div class="table-wrap"><table><thead><tr><th>Elem azonosító/osztály</th><th>Megnevezés</th><th>Kattintás</th></tr></thead><tbody id="clickBreakdownTable"></tbody></table></div></section>
+            <section class="card chart-full"><h3>Legutóbbi események</h3><div class="table-wrap"><table><thead><tr><th>Időpont</th><th>Típus</th><th>Forrás</th><th>Útvonal</th><th>Cél</th><th>Value</th></tr></thead><tbody id="recentEventsTable"></tbody></table></div></section>
         </div>
     </div>
 
@@ -408,8 +405,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { labels: { color: "#cbd5e1" } } },
                     scales: {
-                        x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.12)" } },
-                        y: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.12)" } }
+                        x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(155, 162, 171,0.12)" } },
+                        y: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(155, 162, 171,0.12)" } }
                     }
                 }
             });
@@ -428,8 +425,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { labels: { color: "#cbd5e1" } } },
                     scales: {
-                        x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.12)" } },
-                        y: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.12)" } }
+                        x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(155, 162, 171,0.12)" } },
+                        y: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(155, 162, 171,0.12)" } }
                     }
                 }
             });

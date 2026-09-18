@@ -16,6 +16,7 @@ function safeUrl(value) {
 }
 
 function validateProposal(input = {}) {
+  const landingVariant = text(input.landingVariant, 32) === "social" ? "social" : "";
   const result = {
     requestId: text(input.requestId, 80),
     contactName: text(input.contactName, 80),
@@ -27,15 +28,23 @@ function validateProposal(input = {}) {
     mainChallenge: text(input.mainChallenge, 1200),
     needs: [...new Set(Array.isArray(input.needs) ? input.needs.map(item => text(item, 32)) : [])].filter(item => allowedNeeds.has(item)),
     contactConsent: input.contactConsent === true,
+    // One tick now covers both statements; kept as separate stored flags so
+    // existing records stay comparable.
     privacyAccepted: input.privacyAccepted === true,
-    source: "website_proposal_form"
+    landingVariant,
+    campaignSource: text(input.campaignSource, 40),
+    campaignName: text(input.campaignName, 80),
+    campaignContent: text(input.campaignContent, 80),
+    source: landingVariant === "social" ? "social_landing" : "website_proposal_form"
   };
+  // Only two things are genuinely needed: a way to reply, and permission to
+  // use it. Everything else is helpful context the visitor may skip — the
+  // form asked for a name, a company, a trade, a tagged area and a 15+
+  // character brief before it would accept anything.
   if (!/^[0-9a-f-]{36}$/i.test(result.requestId)) throw new Error("A kérés azonosítója hibás. Frissítsd az oldalt.");
-  if (result.contactName.length < 2 || result.companyName.length < 2 || result.businessType.length < 3) throw new Error("Add meg a nevedet, a vállalkozást és a tevékenységet.");
-  if (!emailPattern.test(result.email)) throw new Error("Adj meg egy működő e-mail-címet.");
-  if (result.mainChallenge.length < 15) throw new Error("Írd le legalább egy mondatban, miben segíthetne a rendszer.");
-  if (!result.needs.length) throw new Error("Jelölj meg legalább egy területet.");
-  if (!result.contactConsent || !result.privacyAccepted) throw new Error("A javaslat elkészítéséhez szükséges jelölőnégyzeteket el kell fogadnod.");
+  if (!emailPattern.test(result.email)) throw new Error("Adj meg egy működő e-mail-címet, hogy válaszolni tudjunk.");
+  if (!result.contactConsent) throw new Error("A válaszhoz szükséges elfogadnod a kapcsolatfelvételt.");
+  if (!result.privacyAccepted) throw new Error("A beküldéshez szükséges megismerned az adatkezelési tájékoztatót.");
   return result;
 }
 

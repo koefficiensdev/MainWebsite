@@ -94,6 +94,10 @@
     ],
     "rewrites": [
       {
+        "source": "/weboldal-ellenorzes",
+        "destination": "/pages/social-weboldal-landing.html"
+      },
+      {
         "source": "/ceges-weboldal",
         "destination": "/pages/ceges-weboldal-landing.html"
       },
@@ -155,6 +159,15 @@
       }
     ],
     "headers": [
+      {
+        "source": "/weboldal-ellenorzes",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, follow"
+          }
+        ]
+      },
       {
         "source": "/ceges-weboldal",
         "headers": [

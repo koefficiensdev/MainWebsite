@@ -115,6 +115,8 @@ function updateCheckoutCopy() {
 
 function renderCatalog() {
   const products = PRODUCT_CATALOG.filter((product) => product.category === state.category && product.availability !== "retired");
+  const count = document.getElementById("catalogCount");
+  if (count) count.textContent = `${products.length} csomag ebben a kategóriában`;
   productGrid.innerHTML = products.map((product) => `
     <article class="product-card${product.featured ? " is-featured" : ""}">
       <span class="product-badge">${escapeHtml(product.badge)}</span>
@@ -122,8 +124,8 @@ function renderCatalog() {
       <p class="product-description">${escapeHtml(product.description)}</p>
       <div class="product-price"><strong>${formatPrice(product.price)}</strong><span>${billingLabel(product)}</span></div>
       <ul class="product-features">${product.features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("")}</ul>
-      ${product.availabilityNote ? `<p class="checkout-note">${escapeHtml(product.availabilityNote)}</p>` : ""}
-      <button class="button ${product.featured ? "button-primary" : "button-ghost"} button-full" type="button" data-add-product="${product.id}">
+      <p class="checkout-note">${product.availabilityNote ? escapeHtml(product.availabilityNote) : ""}</p>
+      <button class="button button-primary button-full" type="button" data-add-product="${product.id}">
         ${state.cart.includes(product.id) ? "A kosárban" : product.availability === "request_only" ? "Igényfelmérést kérek" : "Kosárba teszem"}
       </button>
     </article>
@@ -336,10 +338,11 @@ async function submitProposal(event){
   const button=proposalForm.querySelector('[type="submit"]'),formData=new FormData(proposalForm);
   if(formData.get("website"))return;
   if(Date.now()-proposalLoadedAt<2000){proposalStatus.textContent="Ellenőrizd az adatokat, majd küldd el újra.";proposalStatus.classList.add("is-error");return;}
-  const needs=formData.getAll("needs");
-  if(!needs.length){proposalStatus.textContent="Jelölj meg legalább egy területet, amelyben segítséget kérsz.";proposalStatus.classList.add("is-error");return;}
   proposalRequestId ||= crypto.randomUUID();
-  const payload={...Object.fromEntries(formData),requestId:proposalRequestId,needs,contactConsent:formData.get("contactConsent")==="on",privacyAccepted:formData.get("privacyAccepted")==="on"};
+  // One tick states both the contact permission and that the privacy notice
+  // was read, so it sets both stored flags.
+  const consent=formData.get("contactConsent")==="on";
+  const payload={...Object.fromEntries(formData),requestId:proposalRequestId,needs:formData.getAll("needs"),contactConsent:consent,privacyAccepted:consent};
   proposalBusy=true;button.disabled=true;proposalStatus.classList.remove("is-error");proposalStatus.textContent="A javaslatkérés biztonságos rögzítése folyamatban…";
   try{
     const [app,{getFunctions,httpsCallable}]=await functionsSdk();
@@ -376,7 +379,7 @@ function showToast(message) {
 
 function initCookieConsent() {
   const banner = document.getElementById("cookieBanner");
-  document.getElementById('openCookieSettings')?.addEventListener('click',()=>{banner.hidden=false;document.getElementById('cookieReject')?.focus();});
+  document.getElementById('openCookieSettings')?.addEventListener('click',()=>{banner.hidden=false;document.getElementById('cookieReject')?.focus({preventScroll:true});banner.scrollIntoView({block:'start',behavior:'instant'});});
   if (!local.get(COOKIE_STORAGE_KEY)) banner.hidden = false;
   document.getElementById("cookieReject")?.addEventListener("click", () => {
     local.set(COOKIE_STORAGE_KEY, JSON.stringify({ analytics: false, updatedAt: Date.now() }));
@@ -442,15 +445,7 @@ checkoutForm.elements.namedItem("currentUrl")?.addEventListener("blur",(event)=>
 checkoutForm.elements.namedItem("promoCode")?.addEventListener("input",()=>{clearPromoVerification();checkoutReview.innerHTML=orderSummaryMarkup();});
 applyPromoButton?.addEventListener("click",checkPromoCode);
 
-document.getElementById("navToggle")?.addEventListener("click", (event) => {
-  const nav = document.getElementById("mainNav");
-  const open = nav.classList.toggle("is-open");
-  event.currentTarget.setAttribute("aria-expanded", String(open));
-});
-document.querySelectorAll("#mainNav a").forEach((link) => link.addEventListener("click", () => {
-  document.getElementById("mainNav")?.classList.remove("is-open");
-  document.getElementById("navToggle")?.setAttribute("aria-expanded", "false");
-}));
+/* Mobile nav lives in js/nav.js so every page shares one implementation. */
 
 document.addEventListener("keydown", (event) => {
   if(event.key==='Tab'){
@@ -481,30 +476,6 @@ const paymentState = new URLSearchParams(location.search).get("payment");
 if (["success", "returned"].includes(paymentState)) showToast("Visszaérkeztél a fizetési oldalról. A fizetés állapotát a szolgáltató visszajelzése alapján ellenőrizzük.");
 if (paymentState === "cancelled") showToast("A fizetés megszakadt, a rendelésed nem veszett el.");
 
-const serviceGuide = {
-  website: { title: "Céges weboldal üzleti funkcióval", copy: "Bemutatja a vállalkozást, és rendezetten gyűjti az érdeklődők igényeit." },
-  marketing: { title: "Havi marketingcsomag", copy: "Tervezhető tartalommal és jóváhagyható kampányanyagokkal segít rendszeresen jelen lenni." },
-  maintenance: { title: "Weboldal-karbantartás", copy: "Figyelés, frissítések és mentések segítenek megelőzni a kellemetlen leállásokat." }
-};
-document.querySelectorAll("[data-guide-category]").forEach((button) => button.addEventListener("click", () => {
-  const category = button.dataset.guideCategory, item = serviceGuide[category], result = document.querySelector("[data-guide-result]");
-  document.querySelectorAll("[data-guide-category]").forEach((option) => {
-    const selected = option === button;
-    option.classList.toggle("is-selected", selected);
-    option.setAttribute("aria-pressed", String(selected));
-  });
-  document.querySelector("[data-guide-title]").textContent = item.title;
-  document.querySelector("[data-guide-copy]").textContent = item.copy;
-  result.hidden = false;
-  result.dataset.category = category;
-  logAnalytics("service_guide_selected", category);
-}));
-document.querySelector("[data-guide-action]")?.addEventListener("click", (event) => {
-  const category = event.currentTarget.closest("[data-guide-result]").dataset.category;
-  document.querySelector(`.catalog-tab[data-category="${category}"]`)?.click();
-  document.getElementById("csomagok")?.scrollIntoView({ behavior: "smooth", block: "start" });
-});
-
 const progress = document.createElement("div");
 progress.className = "reading-progress";
 progress.setAttribute("aria-hidden", "true");
@@ -516,7 +487,7 @@ const updateProgress = () => {
 addEventListener("scroll", updateProgress, { passive: true });
 updateProgress();
 
-const revealTargets = document.querySelectorAll(".service-overview article,.showcase-card,.product-card,.process-grid li,.guardrail-cards article,.faq-list details");
+const revealTargets = document.querySelectorAll(".service-row,.showcase-card,.product-card,.process-rail li,.guardrail-list > div,.maker-facts > div,.faq-list details");
 if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
   revealTargets.forEach((element) => element.classList.add("ux-reveal"));
   const revealObserver = new IntersectionObserver((entries, observer) => entries.forEach((entry) => {

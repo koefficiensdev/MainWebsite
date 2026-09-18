@@ -1,0 +1,1029 @@
+/* ==========================================================================
+   OVEXI design system — foundation
+   Load css/fonts.css before this file, then the page-specific stylesheet.
+
+   Direction: light editorial. Warm paper, near-black ink, one deep green
+   accent. Typography and whitespace carry the design; no gradient glows,
+   no decorative blobs, no 1px-bordered cards stacked on cards.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Tokens
+   -------------------------------------------------------------------------- */
+:root {
+  /* Colour — light surfaces. Every text pair below is >= 4.5:1. */
+  --paper:        #fbfaf8;  /* page base, warm off-white */
+  --paper-2:      #f3f1ec;  /* alternating band */
+  --paper-3:      #eae7e0;  /* inset wells, table stripes */
+  --card:         #ffffff;
+
+  --ink:          #14161a;  /* headings, primary text — 17.4:1 on paper */
+  --ink-2:        #3a4048;  /* body text — 10.0:1 */
+  --ink-3:        #62686f;  /* meta, captions — 5.4:1 */
+
+  --line:         #e2ded6;  /* decorative hairlines */
+  --line-2:       #d3cec3;  /* stronger dividers */
+  --line-input:   #8e887a;  /* form control borders — 3.4:1, meets 1.4.11 */
+
+  /* Colour — accent. One green, used deliberately. */
+  --accent:       #1b3a2f;  /* primary buttons, links, dark headings */
+  --accent-hover: #24503f;
+  --accent-soft:  #e7eee9;  /* tinted callout background */
+  --accent-line:  #c2d5c9;
+
+  /* Colour — dark sections (inverted band). */
+  --ink-surface:  #14161a;
+  --ink-surface-2:#1d2026;
+  --on-dark:      #fbfaf8;  /* 17.4:1 */
+  --on-dark-2:    #b9bec6;  /* 9.7:1 */
+  --on-dark-3:    #9ba2ab;  /* 7.0:1 */
+  --on-dark-line: #2c3038;
+  --on-dark-input:#6b7280;  /* >= 3:1 on ink */
+  --accent-on-dark: #93cdb0;/* 10.0:1 */
+
+  /* Colour — status */
+  --danger:       #9b2c1e;
+  --danger-on-dark: #ff9b8a;
+  --success:      #1b3a2f;
+
+  /* Typography — --font-display / --font-body come from fonts.css */
+
+  /* A real gap between display and h2 — the old site had them nearly equal,
+     which is why every section title read like a page title. */
+  --fs-display: clamp(2.5rem, 5.4vw, 4.25rem);
+  --fs-h2:      clamp(1.75rem, 3vw, 2.5rem);
+  --fs-h3:      1.25rem;
+  --fs-h4:      1rem;
+  --fs-lead:    clamp(1.0625rem, 1.4vw, 1.1875rem);
+  --fs-body:    1rem;
+  --fs-sm:      0.9375rem;
+  --fs-xs:      0.8125rem;
+  --fs-eyebrow: 0.75rem;
+
+  --lh-display: 1.04;
+  --lh-heading: 1.16;
+  --lh-body:    1.65;
+
+  /* Space — 4px base, no arbitrary values anywhere else. */
+  --s-1: 0.25rem;  /*  4 */
+  --s-2: 0.5rem;   /*  8 */
+  --s-3: 0.75rem;  /* 12 */
+  --s-4: 1rem;     /* 16 */
+  --s-5: 1.5rem;   /* 24 */
+  --s-6: 2rem;     /* 32 */
+  --s-7: 3rem;     /* 48 */
+  --s-8: 4rem;     /* 64 */
+  --s-9: 6rem;     /* 96 */
+
+  /* Two section rhythms, not five. */
+  --section-y:    clamp(3.5rem, 7vw, 6rem);
+  --section-y-lg: clamp(4.5rem, 10vw, 8.5rem);
+
+  /* Radius — four steps. */
+  --r-sm:   6px;
+  --r-md:   12px;
+  --r-lg:   20px;
+  --r-full: 999px;
+
+  /* Elevation — light theme needs restraint. */
+  --shadow-sm: 0 1px 2px rgba(20, 22, 26, .06), 0 1px 1px rgba(20, 22, 26, .04);
+  --shadow-md: 0 4px 16px rgba(20, 22, 26, .07), 0 1px 3px rgba(20, 22, 26, .05);
+  --shadow-lg: 0 24px 60px rgba(20, 22, 26, .10), 0 2px 8px rgba(20, 22, 26, .05);
+
+  /* Motion */
+  --dur:  180ms;
+  --ease: cubic-bezier(.2, .6, .3, 1);
+
+  /* Layout */
+  --max:        1200px;
+  --max-text:   68ch;
+  --gutter:     clamp(1.25rem, 5vw, 2.5rem);
+  --header-h:   72px;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-feature-settings: "cv05" 1, "ss03" 1;  /* Inter: single-storey l, curved r */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body.is-locked { overflow: hidden; }
+
+img, svg, video { max-width: 100%; height: auto; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
+
+h1, h2, h3, h4, p, figure, ul, ol { margin-top: 0; }
+
+h1, h2, h3, h4 {
+  margin-bottom: var(--s-4);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--lh-heading);
+  letter-spacing: -0.02em;
+  /* Hungarian compounds are long. `break-word` only breaks when a word
+     genuinely cannot fit — unlike `anywhere`, which splits mid-syllable.
+     No `hyphens: auto`: Chrome's Hungarian dictionary splits compounds at the
+     wrong seam ("hárompon-tos" instead of "három-pontos"), and hyphenated
+     display type reads as a typesetting accident anyway. */
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: -0.032em;
+  margin-bottom: var(--s-5);
+}
+h2 { font-size: var(--fs-h2); letter-spacing: -0.024em; }
+h3 { font-size: var(--fs-h3); }
+h4 { font-size: var(--fs-h4); }
+p  { margin-bottom: var(--s-4); text-wrap: pretty; }
+p:last-child { margin-bottom: 0; }
+
+strong, b { font-weight: 600; color: var(--ink); }
+
+/* Focus: one visible ring everywhere, never removed. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+.on-dark :focus-visible,
+.section--dark :focus-visible { outline-color: var(--accent-on-dark); }
+
+::selection { background: var(--accent); color: var(--paper); }
+
+/* --------------------------------------------------------------------------
+   Layout primitives
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container--text { max-width: calc(var(--max-text) + var(--gutter) * 2); }
+
+.section    { padding-block: var(--section-y); }
+.section--lg{ padding-block: var(--section-y-lg); }
+.section--tight { padding-block: var(--s-8); }
+
+.section--alt  { background: var(--paper-2); }
+.section--dark { background: var(--ink-surface); color: var(--on-dark-2); }
+.section--dark h1,
+.section--dark h2,
+.section--dark h3,
+.section--dark h4,
+.section--dark strong { color: var(--on-dark); }
+.section--dark .eyebrow { color: var(--accent-on-dark); }
+.section--dark a:not(.button) { color: var(--accent-on-dark); }
+
+/* Escape hatch: a light card sitting inside a dark band (e.g. the lead form
+   on a landing hero). Without this the .section--dark rules below leak into
+   it and paint dark-on-dark text and inputs. */
+.section--dark .on-light,
+.on-dark .on-light { color: var(--ink-2); }
+.section--dark .on-light h1,
+.section--dark .on-light h2,
+.section--dark .on-light h3,
+.section--dark .on-light h4,
+.section--dark .on-light strong,
+.on-dark .on-light h1,
+.on-dark .on-light h2,
+.on-dark .on-light h3,
+.on-dark .on-light h4,
+.on-dark .on-light strong { color: var(--ink); }
+.section--dark .on-light .eyebrow,
+.section--dark .on-light a:not(.button),
+.on-dark .on-light .eyebrow,
+.on-dark .on-light a:not(.button) { color: var(--accent); }
+.section--dark .on-light input,
+.section--dark .on-light select,
+.section--dark .on-light textarea,
+.on-dark .on-light input,
+.on-dark .on-light select,
+.on-dark .on-light textarea {
+  background: var(--card);
+  border-color: var(--line-input);
+  color: var(--ink);
+}
+.section--dark .on-light input:focus,
+.section--dark .on-light select:focus,
+.section--dark .on-light textarea:focus,
+.on-dark .on-light input:focus,
+.on-dark .on-light select:focus,
+.on-dark .on-light textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(27, 58, 47, .22);
+}
+.section--dark .on-light .button-primary,
+.on-dark .on-light .button-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+.section--dark .on-light .button-primary:hover,
+.on-dark .on-light .button-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.section--dark .on-light :focus-visible,
+.on-dark .on-light :focus-visible { outline-color: var(--accent); }
+
+/* Anchor jumps have to clear the sticky header. */
+:target,
+section[id],
+[id].order-receipt { scroll-margin-top: calc(var(--header-h) + var(--s-4)); }
+
+.skip-link {
+  position: fixed;
+  left: var(--s-4);
+  top: -100px;
+  z-index: 3000;
+  padding: var(--s-3) var(--s-4);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--r-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: top var(--dur) var(--ease);
+}
+.skip-link:focus { top: var(--s-4); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Type helpers
+   -------------------------------------------------------------------------- */
+.eyebrow {
+  display: block;
+  margin-bottom: var(--s-3);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.lead {
+  max-width: var(--max-text);
+  color: var(--ink-2);
+  font-size: var(--fs-lead);
+  line-height: 1.58;
+}
+.section--dark .lead { color: var(--on-dark-2); }
+
+.muted { color: var(--ink-3); }
+.section--dark .muted { color: var(--on-dark-3); }
+.text-sm { font-size: var(--fs-sm); }
+.text-xs { font-size: var(--fs-xs); }
+
+/* Numerals in prices and data should align and never look like body text. */
+.numeric {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Section header: title left, supporting copy right. */
+.section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  align-items: end;
+  gap: var(--s-5) var(--s-7);
+  margin-bottom: var(--s-7);
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+.section--dark .section-head { border-bottom-color: var(--on-dark-line); }
+.section-head > :first-child { min-width: 0; }
+.section-head h2 { margin-bottom: 0; }
+.section-head p  { margin-bottom: 0; color: var(--ink-3); }
+.section--dark .section-head p { color: var(--on-dark-3); }
+.section-head--stack { grid-template-columns: minmax(0, 1fr); align-items: start; }
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 48px;
+  padding: var(--s-3) var(--s-5);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.button-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+.button-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.button-secondary {
+  background: var(--card);
+  border-color: var(--line-2);
+  color: var(--ink);
+}
+.button-secondary:hover { border-color: var(--ink); }
+
+.button-ghost {
+  background: transparent;
+  border-color: var(--line-2);
+  color: var(--ink);
+}
+.button-ghost:hover { background: var(--paper-3); border-color: var(--ink-3); }
+
+/* Inverted variants for dark bands. */
+.section--dark .button-primary,
+.on-dark .button-primary {
+  background: var(--accent-on-dark);
+  border-color: var(--accent-on-dark);
+  color: var(--ink);
+}
+.section--dark .button-primary:hover,
+.on-dark .button-primary:hover { background: #adddc4; border-color: #adddc4; }
+
+.section--dark .button-ghost,
+.section--dark .button-secondary,
+.on-dark .button-ghost,
+.on-dark .button-secondary {
+  background: transparent;
+  border-color: var(--on-dark-input);
+  color: var(--on-dark);
+}
+.section--dark .button-ghost:hover,
+.section--dark .button-secondary:hover,
+.on-dark .button-ghost:hover,
+.on-dark .button-secondary:hover { border-color: var(--on-dark); }
+
+.button-small { min-height: 40px; padding: var(--s-2) var(--s-4); font-size: var(--fs-xs); }
+.button-full  { width: 100%; }
+.button:disabled,
+.button[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+
+/* Text link that behaves like a button in reading flow. */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+.link-arrow::after {
+  content: "→";
+  transition: transform var(--dur) var(--ease);
+}
+.link-arrow:hover { text-decoration: underline; text-underline-offset: 3px; }
+.link-arrow:hover::after { transform: translateX(3px); }
+.section--dark .link-arrow { color: var(--accent-on-dark); }
+
+/* Inline prose links stay underlined — that is what makes them obvious. */
+.prose a,
+.rich-text a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.prose a:hover,
+.rich-text a:hover { text-decoration-thickness: 2px; }
+
+/* --------------------------------------------------------------------------
+   Forms
+   -------------------------------------------------------------------------- */
+.field {
+  display: grid;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+.field > span,
+.form-label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+.field small,
+.field .hint {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+}
+
+input, select, textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--fs-body);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  /* --accent-soft is barely visible on white; this ring has to read as a
+     focus indicator on its own (WCAG 2.4.7). */
+  box-shadow: 0 0 0 3px rgba(27, 58, 47, .22);
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+input[type="checkbox"], input[type="radio"] {
+  width: 20px;
+  min-height: 0;
+  height: 20px;
+  padding: 0;
+  flex: 0 0 auto;
+  accent-color: var(--accent);
+}
+textarea { min-height: 120px; padding-block: var(--s-3); resize: vertical; line-height: 1.6; }
+select {
+  appearance: none;
+  padding-right: var(--s-7);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2362686f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--s-4) center;
+}
+
+.section--dark input,
+.section--dark select,
+.section--dark textarea,
+.on-dark input,
+.on-dark select,
+.on-dark textarea {
+  background: var(--ink-surface-2);
+  border-color: var(--on-dark-input);
+  color: var(--on-dark);
+}
+.section--dark input:focus,
+.section--dark select:focus,
+.section--dark textarea:focus,
+.on-dark input:focus,
+.on-dark select:focus,
+.on-dark textarea:focus {
+  border-color: var(--accent-on-dark);
+  box-shadow: 0 0 0 3px rgba(147, 205, 176, .3);
+}
+.section--dark input:focus-visible,
+.section--dark select:focus-visible,
+.section--dark textarea:focus-visible,
+.on-dark input:focus-visible,
+.on-dark select:focus-visible,
+.on-dark textarea:focus-visible { outline-color: var(--accent-on-dark); }
+
+/* Checkbox rows: the whole row is the target, so it stays tappable. */
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+  padding: var(--s-2) 0;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  cursor: pointer;
+}
+.check-row input { margin-top: 2px; }
+
+.form-status {
+  min-height: 1.5rem;
+  margin: var(--s-3) 0;
+  color: var(--accent);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.form-status.is-error { color: var(--danger); }
+.section--dark .form-status { color: var(--accent-on-dark); }
+.section--dark .form-status.is-error { color: var(--danger-on-dark); }
+
+.bot-trap {
+  position: absolute !important;
+  left: -10000px !important;
+  width: 1px !important; height: 1px !important;
+  overflow: hidden !important;
+}
+
+/* --------------------------------------------------------------------------
+   Site header — one header for every page.
+   -------------------------------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(251, 250, 248, .88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-shell {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  height: var(--header-h);
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;      /* the wide logo must never be squeezed by the flex row */
+  margin-right: auto;
+  min-height: 44px;
+}
+.brand img { flex: 0 0 auto; width: auto; height: 34px; object-fit: contain; }
+
+.main-nav { display: flex; align-items: center; gap: var(--s-6); }
+.main-nav a {
+  position: relative;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--dur) var(--ease);
+}
+.main-nav a:hover { color: var(--ink); }
+.main-nav a.is-current { color: var(--ink); font-weight: 600; }
+.main-nav a.is-current::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.nav-actions { display: flex; align-items: center; gap: var(--s-3); }
+
+/* Subpage header CTA. On narrow phones the logo + Menü + this button no
+   longer fit on one row, so it moves into the nav panel instead. */
+.main-nav-cta { display: none; }
+
+.nav-toggle {
+  display: none;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cart-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: var(--s-2) var(--s-4);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease);
+}
+.cart-button:hover { border-color: var(--ink); }
+.cart-icon { flex: 0 0 auto; }
+.cart-button #cartCount {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding-inline: 5px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--paper);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Site footer — one footer for every page.
+   -------------------------------------------------------------------------- */
+.site-footer {
+  padding-top: var(--s-8);
+  padding-bottom: var(--s-5);
+  background: var(--ink-surface);
+  color: var(--on-dark-3);
+  font-size: var(--fs-sm);
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: var(--s-7) var(--s-6);
+}
+.footer-brand p { max-width: 34ch; margin-top: var(--s-4); color: var(--on-dark-3); }
+.footer-logo {
+  width: auto;
+  height: 34px;
+  vertical-align: middle;
+}
+.footer-wordmark {
+  display: inline-block;
+  margin-left: var(--s-3);
+  vertical-align: middle;
+  color: var(--on-dark);
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1;
+}
+
+.footer-col h2 {
+  margin-bottom: var(--s-4);
+  color: var(--on-dark);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.footer-col a,
+.footer-col button {
+  display: block;
+  padding-block: var(--s-2);
+  padding-inline: 0;
+  border: 0;
+  background: none;
+  color: var(--on-dark-3);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.footer-col a:hover,
+.footer-col button:hover { color: var(--on-dark); text-decoration: underline; text-underline-offset: 3px; }
+
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-top: var(--s-8);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--on-dark-line);
+  font-size: var(--fs-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Shared components
+   -------------------------------------------------------------------------- */
+
+/* Card — flat, no border stack. Depth comes from the background step. */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--s-5);
+  border-radius: var(--r-md);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+.section--alt .card { background: var(--card); }
+.section--dark .card { background: var(--ink-surface-2); box-shadow: none; }
+.card h3 { margin-bottom: var(--s-2); }
+.card p  { color: var(--ink-3); font-size: var(--fs-sm); }
+.section--dark .card p { color: var(--on-dark-3); }
+
+/* Definition list used for specs, prices, contents. Replaces checkmark lists. */
+.spec-list { margin: 0; padding: 0; list-style: none; }
+.spec-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s-4);
+  padding-block: var(--s-3);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+.spec-list li:first-child { border-top: 0; }
+.spec-list li > :last-child { color: var(--ink); font-weight: 600; text-align: right; }
+.section--dark .spec-list li { border-top-color: var(--on-dark-line); }
+.section--dark .spec-list li > :last-child { color: var(--on-dark); }
+
+/* Plain feature list — a rule per row instead of a checkmark per row. */
+.rule-list { margin: 0; padding: 0; list-style: none; font-size: var(--fs-sm); }
+.rule-list li {
+  padding-block: var(--s-3);
+  border-top: 1px solid var(--line);
+}
+.rule-list li:first-child { border-top: 0; padding-top: 0; }
+.section--dark .rule-list li { border-top-color: var(--on-dark-line); }
+
+/* Accordion */
+.accordion { border-top: 1px solid var(--line); }
+.accordion details { border-bottom: 1px solid var(--line); }
+.accordion summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-block: var(--s-5);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+.accordion summary::-webkit-details-marker { display: none; }
+.accordion summary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 12px; height: 12px;
+  margin-top: 6px;
+  border-right: 1.5px solid var(--ink-3);
+  border-bottom: 1.5px solid var(--ink-3);
+  transform: rotate(45deg);
+  transition: transform var(--dur) var(--ease);
+}
+.accordion details[open] summary::after { transform: rotate(-135deg); margin-top: 10px; }
+.accordion summary:hover { color: var(--accent); }
+.accordion details > p,
+.accordion details > div {
+  max-width: var(--max-text);
+  padding-bottom: var(--s-5);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.section--dark .accordion,
+.section--dark .accordion details { border-color: var(--on-dark-line); }
+.section--dark .accordion details > p { color: var(--on-dark-2); }
+
+/* Callout */
+.callout {
+  padding: var(--s-5);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--accent-soft);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.section--dark .callout {
+  border-left-color: var(--accent-on-dark);
+  background: var(--ink-surface-2);
+  color: var(--on-dark-2);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  padding-block: var(--s-5) 0;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.breadcrumb ol { display: flex; flex-wrap: wrap; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+.breadcrumb li + li::before { content: "/"; margin-right: var(--s-2); color: var(--line-2); }
+.breadcrumb a { color: var(--ink-3); text-decoration: none; }
+.breadcrumb a:hover { color: var(--accent); text-decoration: underline; }
+
+/* Prose — long-form legal and guide copy. */
+.prose { max-width: var(--max-text); }
+.prose h2 { margin-top: var(--s-8); }
+.prose h3 { margin-top: var(--s-6); }
+.prose > :first-child { margin-top: 0; }
+.prose p, .prose li { color: var(--ink-2); }
+.prose ul, .prose ol { margin-bottom: var(--s-4); padding-left: var(--s-5); }
+.prose li { margin-bottom: var(--s-2); }
+.prose table { width: 100%; border-collapse: collapse; margin-bottom: var(--s-5); font-size: var(--fs-sm); }
+.prose th, .prose td { padding: var(--s-3); border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.prose th { color: var(--ink); font-weight: 600; }
+
+/* --------------------------------------------------------------------------
+   Overlays — drawer, modal, toast, cookie banner
+   -------------------------------------------------------------------------- */
+.drawer-backdrop, .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  background: rgba(20, 22, 26, .55);
+  backdrop-filter: blur(3px);
+}
+.modal-backdrop { z-index: 1800; padding: var(--s-4); overflow-y: auto; }
+
+.cart-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 1500;
+  width: min(100%, 440px);
+  display: flex;
+  flex-direction: column;
+  padding: var(--s-5);
+  overflow-y: auto;
+  background: var(--paper);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(105%);
+  transition: transform 260ms var(--ease);
+}
+.cart-drawer.is-open { transform: translateX(0); }
+
+.drawer-header, .modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--line);
+}
+.drawer-header h2, .modal-header h2 { margin-bottom: 0; font-size: 1.5rem; }
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.icon-button:hover { background: var(--paper-3); }
+
+.checkout-modal {
+  width: min(100%, 880px);
+  margin: var(--s-6) auto;
+  padding: var(--s-6);
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Bottom-centre: the right corner is the floating CTA, the left is the
+   cookie banner, and a toast can fire while either is on screen. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--s-5);
+  z-index: 2200;
+  transform: translateX(-50%);
+  max-width: 360px;
+  padding: var(--s-4) var(--s-5);
+  border-radius: var(--r-md);
+  background: var(--ink-surface);
+  color: var(--on-dark);
+  font-size: var(--fs-sm);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Anchored bottom-left and kept narrow. Centred and 720px wide, it sat
+   across the middle of the page and covered the pricing rail and the
+   showcase CTA on first load. */
+.cookie-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  padding: var(--s-3) var(--gutter);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-2);
+}
+.cookie-banner a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.cookie-banner p { margin: 0; color: var(--ink-2); font-size: var(--fs-xs); line-height: 1.5; }
+.cookie-banner strong { color: var(--ink); }
+.cookie-actions { display: flex; gap: var(--s-2); flex: 0 0 auto; margin-left: auto; }
+
+@media (max-width: 720px) {
+  .cookie-banner { align-items: stretch; flex-direction: column; gap: var(--s-3); }
+  .cookie-actions { margin-left: 0; }
+  .cookie-actions .button { flex: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .section-head { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-brand { grid-column: 1 / -1; }
+}
+
+@media (max-width: 768px) {
+  :root { --header-h: 64px; }
+
+  .nav-shell { gap: var(--s-3); }
+  .brand img { height: 28px; }
+  .nav-toggle { display: inline-flex; order: 2; }
+  .nav-actions { order: 3; }
+
+  .main-nav {
+    position: absolute;
+    left: 0; right: 0;
+    top: var(--header-h);
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: var(--s-2) var(--gutter) var(--s-5);
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-md);
+  }
+  .main-nav.is-open { display: flex; }
+  .main-nav a { padding-block: var(--s-4); border-bottom: 1px solid var(--line); }
+  .main-nav a:last-child { border-bottom: 0; }
+  .main-nav a.is-current::after { display: none; }
+
+  .cart-button { padding-inline: var(--s-3); }
+  .cart-button .cart-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+  .cookie-banner { left: var(--s-4); right: var(--s-4); bottom: var(--s-4); width: auto; }
+}
+
+@media (max-width: 560px) {
+  .nav-cta { display: none; }
+  .main-nav-cta {
+    display: block;
+    margin-top: var(--s-3);
+    padding-block: var(--s-3);
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .footer-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+  .checkout-modal { margin: 0 auto; padding: var(--s-4); border-radius: var(--r-md); }
+  .modal-backdrop { padding: var(--s-2); }
+  .cart-drawer { padding: var(--s-4); }
+  /* Full-width toast: the centring transform has to go with the offsets. */
+  .toast { left: var(--s-4); right: var(--s-4); max-width: none; transform: none; }
+  .cookie-actions { flex-direction: column; }
+  .spec-list li { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
+  .spec-list li > :last-child { text-align: left; }
+  .hero-actions .button,
+  .final-cta .button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Required marker. An asterisk alone is not an accessible label, so it carries
+   a title and the input keeps its own `required`. Red here is only a marker,
+   never the sole carrier of meaning. */
+.req {
+  color: var(--danger);
+  font-size: 1em;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: help;
+}
+.form-note {
+  margin-bottom: var(--s-4);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}

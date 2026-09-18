@@ -1,20 +1,153 @@
-:root { --ink:#07111f; --surface:#0c192b; --text:#d9e3f0; --muted:#93a5bb; --line:rgba(255,255,255,.12); --cyan:#37e2c2; --white:#fff; }
-* { box-sizing:border-box; }
-body { margin:0; padding:0 1.25rem 4rem; color:var(--text); background:var(--ink); font:16px/1.7 ui-sans-serif,system-ui,sans-serif; }
-.legal-shell { width:min(100%,860px); margin:auto; }
-.legal-nav { min-height:76px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); }
-.legal-nav img { height:40px; width:auto; }
-.legal-nav a { color:var(--cyan); text-decoration:none; }
-.legal-header { padding:5rem 0 2.5rem; }
-.legal-header p { color:var(--cyan); font-weight:700; text-transform:uppercase; letter-spacing:.12em; font-size:.78rem; }
-h1,h2,h3 { color:var(--white); font-family:ui-sans-serif,system-ui,sans-serif; line-height:1.2; overflow-wrap:anywhere; }
-h1 { font-size:clamp(2.5rem,7vw,4.5rem); letter-spacing:-.04em; }
-h2 { margin-top:2.5rem; font-size:1.5rem; }
-a { color:var(--cyan); }
-.notice { padding:1rem 1.2rem; border:1px solid rgba(55,226,194,.3); border-radius:12px; background:rgba(55,226,194,.07); }
-.meta { color:var(--muted); }
-table { width:100%; border-collapse:collapse; margin:1.2rem 0; }
-th,td { padding:.8rem; border:1px solid var(--line); text-align:left; vertical-align:top; }
-th { color:var(--white); }
-li { margin-bottom:.4rem; }
-@media(max-width:620px){body{padding-inline:.85rem;font-size:15px}.legal-nav{gap:1rem}.legal-nav img{height:34px}.legal-header{padding:3.25rem 0 1.75rem}h1{font-size:clamp(2.2rem,12vw,3.2rem)}table{display:block;overflow-x:auto;overscroll-behavior-inline:contain}th,td{min-width:150px;padding:.65rem}.notice{padding:.85rem 1rem}ol,ul{padding-left:1.35rem}}
+/* ==========================================================================
+   OVEXI — legal documents (adatkezelés, ÁSZF, cookie tájékoztató)
+   Loads after tokens.css. Long-form reading: one narrow measure, generous
+   leading, real tables. No cards, no accents beyond links and callouts.
+   ========================================================================== */
+
+.legal-shell {
+  width: 100%;
+  max-width: calc(72ch + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  padding-bottom: var(--section-y-lg);
+}
+
+.legal-header {
+  margin-bottom: var(--s-7);
+  padding-block: var(--s-8) var(--s-6);
+  border-bottom: 1px solid var(--line);
+}
+.legal-header > p:first-child {
+  margin-bottom: var(--s-3);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.legal-header h1 {
+  margin-bottom: var(--s-4);
+  font-size: clamp(2rem, 4.4vw, 3rem);
+}
+.legal-header .meta { color: var(--ink-3); font-size: var(--fs-sm); }
+
+.legal-shell h2 {
+  margin-top: var(--s-8);
+  margin-bottom: var(--s-3);
+  font-size: 1.3125rem;
+}
+.legal-shell h3 { margin-top: var(--s-6); font-size: 1.0625rem; }
+.legal-shell p,
+.legal-shell li { color: var(--ink-2); }
+.legal-shell ul,
+.legal-shell ol { margin-bottom: var(--s-4); padding-left: var(--s-5); }
+.legal-shell li { margin-bottom: var(--s-2); }
+/* Prose links only — :not(.button) keeps this from repainting the CTAs green
+   on green, since this selector outranks .button-primary. */
+.legal-shell a:not(.button) {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.legal-shell a:not(.button):hover { text-decoration-thickness: 2px; }
+
+.notice {
+  margin-bottom: var(--s-6);
+  padding: var(--s-5);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--accent-soft);
+  font-size: var(--fs-sm);
+}
+.notice strong { color: var(--ink); }
+
+.legal-shell table {
+  width: 100%;
+  margin-block: var(--s-5);
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+.legal-shell th,
+.legal-shell td {
+  padding: var(--s-3);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.legal-shell thead th {
+  border-bottom-color: var(--line-2);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Cookie policy — same shell, but its content is a set of numbered sections
+   -------------------------------------------------------------------------- */
+.legal-shell .actions,
+.legal-shell .footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: var(--s-6);
+}
+.legal-shell .footer-actions {
+  margin-top: var(--s-8);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line);
+}
+.legal-shell .hero-text { font-size: var(--fs-lead); color: var(--ink-2); }
+
+.legal-shell .grid { display: grid; gap: var(--s-6); }
+.legal-shell .card { min-width: 0; }
+.legal-shell .card h2 { margin-top: 0; }
+.legal-shell .grid > .card + .card {
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 620px) {
+  /* A four-column prose table needed 659px to lay out in a 320px column. It
+     did scroll sideways, but with no affordance and no keyboard access, and
+     side-scrolling long legal prose is miserable regardless. Below 620px each
+     row becomes a card and each cell carries its column name. */
+  .legal-shell table,
+  .legal-shell thead,
+  .legal-shell tbody,
+  .legal-shell tr,
+  .legal-shell td { display: block; }
+  .legal-shell thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .legal-shell tbody tr {
+    margin-block: var(--s-4);
+    padding: var(--s-4);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--card);
+  }
+  .legal-shell tbody td { padding: 0; border: 0; }
+  .legal-shell tbody td + td { margin-top: var(--s-3); }
+  .legal-shell tbody td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: var(--s-1);
+    color: var(--ink-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  /* Tables without data-label fall back to horizontal scroll. */
+  .legal-shell table:not(:has(td[data-label])) { overflow-x: auto; overscroll-behavior-inline: contain; }
+  .legal-shell table:not(:has(td[data-label])) thead { position: static; width: auto; height: auto; clip: auto; }
+  .legal-shell table:not(:has(td[data-label])),
+  .legal-shell table:not(:has(td[data-label])) thead,
+  .legal-shell table:not(:has(td[data-label])) tbody,
+  .legal-shell table:not(:has(td[data-label])) tr { display: revert; }
+  .legal-shell table:not(:has(td[data-label])) td { display: table-cell; min-width: 150px; }
+  .legal-shell table:not(:has(td[data-label])) th { min-width: 150px; }
+
+  .legal-shell .actions .button,
+  .legal-shell .footer-actions .button { width: 100%; }
+}
