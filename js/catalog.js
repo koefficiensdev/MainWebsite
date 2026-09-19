@@ -7,8 +7,8 @@ export const PRODUCT_CATALOG = Object.freeze([
     price: 39990,
     billing: "once",
     badge: "Gyors indulás",
-    description: "Konverzióra épített bemutatkozó oldal induló vállalkozásoknak.",
-    features: ["Egyedi, mobilbarát megjelenés", "Kapcsolati űrlap", "Alap SEO és analitika", "1 kör módosítás"]
+    description: "Egylapos weboldal egy egyszerű, hozzád illő üzleti modullal.",
+    features: ["Egyedi, mobilbarát megjelenés", "1 egyszerű modul, pl. időpontfoglalás", "Alap SEO és analitika", "1 kör módosítás"]
   },
   {
     id: "website-business",
@@ -18,9 +18,9 @@ export const PRODUCT_CATALOG = Object.freeze([
     price: 69990,
     billing: "once",
     featured: true,
-    badge: "Üzleti funkcióval",
-    description: "Többoldalas céges weboldal egy, a vállalkozás működéséhez illő alap üzleti modullal.",
-    features: ["Legfeljebb 6 aloldal, egyedi szöveg és dizájn", "1 alap üzleti modul a brief alapján", "Például időpontkérés, ajánlatkérés vagy igényfelvétel", "A modulhoz illő adatok és státuszok kezelése", "Szükség esetén e-mailes visszaigazolás", "Technikai SEO és 2 kör módosítás"]
+    badge: "Rendezett ügyfélkezelés",
+    description: "Többoldalas céges weboldal összetettebb háttérmodullal.",
+    features: ["Legfeljebb 6 egyedi aloldal", "1 üzleti háttérmodul státuszkezeléssel", "Jóváhagyási folyamat és visszaigazolás", "Technikai SEO és 2 kör módosítás"]
   },
   {
     id: "website-pro",

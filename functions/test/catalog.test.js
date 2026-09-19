@@ -21,10 +21,20 @@ test("business website includes one tailored business module at the agreed one-t
   const product = frontend.getProduct("website-business");
   assert.equal(product.price, 69990);
   assert.equal(product.billing, "once");
-  assert.ok(product.features.some((feature) => feature.includes("1 alap üzleti modul")));
-  assert.ok(product.features.some((feature) => feature.includes("időpontkérés")));
-  assert.ok(product.description.includes("vállalkozás működéséhez illő"));
+  assert.ok(product.features.some((feature) => feature.includes("háttérmodul")));
+  assert.ok(product.features.some((feature) => feature.includes("státuszkezeléssel")));
+  assert.equal(product.features.length, 4);
   assert.deepEqual(calculateTotals(resolveProducts(["website-business"])), { once: 69990, monthly: 0 });
+});
+
+test("one-page website includes one simple business module at the agreed price", async () => {
+  const frontend = await import("../../js/catalog.js");
+  const product = frontend.getProduct("website-onepage");
+  assert.equal(product.price, 39990);
+  assert.ok(product.features.some((feature) => feature.includes("1 egyszerű modul")));
+  assert.ok(product.features.some((feature) => feature.includes("időpontfoglalás")));
+  assert.equal(product.features.length, 4);
+  assert.deepEqual(calculateTotals(resolveProducts(["website-onepage"])), { once: 39990, monthly: 0 });
 });
 
 test("every offered product is directly payable", async () => {

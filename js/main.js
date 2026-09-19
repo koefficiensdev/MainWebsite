@@ -1,12 +1,12 @@
 import { STOREFRONT_CONFIG } from "./storefront-config.js?v=20260830-1";
-import {safeStorage,cleanCart,normalizeWebUrl,normalizePromoCode,submissionManager} from "./checkout-model.js?v=20260903-8";
+import {safeStorage,cleanCart,normalizeWebUrl,normalizePromoCode,submissionManager} from "./checkout-model.js?v=20260919-1";
 import {
   PRODUCT_CATALOG,
   CATEGORY_LABELS,
   billingLabel,
   formatPrice,
   getProduct
-} from "./catalog.js?v=20260903-8";
+} from "./catalog.js?v=20260919-1";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBakBKouiEi2KaMUD1a_lB0SHPzUqNiMsw",
